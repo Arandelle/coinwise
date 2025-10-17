@@ -1,6 +1,6 @@
 // app/page.tsx
 export default async function Home() {
-  const res = await fetch("http://localhost:3000/api/transactions", {
+  const res = await fetch("https://coinwise-backend.onrender.com/transactions", {
     cache: "no-store"
   });
   const transactions = await res.json();
@@ -9,8 +9,8 @@ export default async function Home() {
     <main className="p-10">
       <h1 className="text-2xl font-bold">Transactions</h1>
       <ul>
-        {transactions.map((tx: any) => (
-          <li key={tx._id}>
+        {transactions.map((tx: any, index: number) => (
+          <li key={index}>
             {tx.category} - ₱{tx.amount} ({tx.type})
           </li>
         ))}
