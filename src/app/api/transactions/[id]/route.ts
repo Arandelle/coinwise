@@ -1,14 +1,14 @@
-import {NextResponse} from "next/server"; // used to send response
-import {MongoClient, ObjectId} from "mongodb"; // used to interact with MongoDB
+import {NextResponse} from "next/server";
+import {MongoClient, ObjectId} from "mongodb";
 
-const uri = process.env.MONGO_URI;
-if (!uri){
-    throw new Error("MONGO_URI is not defined in environment variables")
-}
+const uri = process.env.MONGO_URI as string;
 const client = new MongoClient(uri); 
 
 // GET method to fetch a specific data by ID
-export async function GET(request: Request, {params} : {params : {id: string}}){ // params contains the dynamic route parameters
+export async function GET(
+    request: Request, 
+    { params }: { params: { id: string } }
+) {
     try{
         await client.connect(); 
         const db = client.db("coinwise");
@@ -19,14 +19,17 @@ export async function GET(request: Request, {params} : {params : {id: string}}){
         }
 
         return NextResponse.json(transaction);
-    } catch(error: string | any){
-        return NextResponse.json({error: error.message}, {status: 500});
+    } catch(error){
+        return NextResponse.json({error: (error as Error).message}, {status: 500});
     } finally{
-        await client.close(); // ensure the client is closed after operation
+        await client.close();
     }
 }
 
-export async function PUT(request : Request, {params} : {params : {id: string}}){
+export async function PUT(
+    request: Request, 
+    { params }: { params: { id: string } }
+) {
     try{
        const data = await request.json();
        await client.connect();
@@ -42,14 +45,17 @@ export async function PUT(request : Request, {params} : {params : {id: string}})
 
        return NextResponse.json({message: "Transaction updated successfully"});
        
-    }catch(error: string | any){
-        return NextResponse.json({error: error.message}, {status: 500});
+    }catch(error){
+        return NextResponse.json({error: (error as Error).message}, {status: 500});
     } finally{
-        await client.close(); // ensure the client is closed after operation
+        await client.close();
     }
 }
 
-export async function DELETE(request: Request, {params} : {params : {id: string}}){
+export async function DELETE(
+    request: Request, 
+    { params }: { params: { id: string } }
+) {
     try{
         await client.connect();
         const db = client.db("coinwise");
@@ -60,8 +66,8 @@ export async function DELETE(request: Request, {params} : {params : {id: string}
         }
 
         return NextResponse.json({message: "Transaction deleted successfully"});
-    }catch(error : string | any){
-        return NextResponse.json({error: error.message}, {status: 500});
+    }catch(error){
+        return NextResponse.json({error: (error as Error).message}, {status: 500});
     } finally{
         await client.close()
     }
