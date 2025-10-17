@@ -1,5 +1,13 @@
 import React from 'react'
 
+interface Transactions {
+  user_id: number;
+  category: string;
+  amount: number;
+  type: string;
+  name: string;
+}
+
 const TransactionsPage = async () => {
 
     const req = await fetch(`${process.env.TRANSACTION_API_URL}/api/transactions`, {
@@ -9,9 +17,9 @@ const TransactionsPage = async () => {
 
   return (
     <div>
-      {transactions.map((tx: any, index: number) => (
+      {transactions.map((tx: Transactions, index: number) => (
         <li key={index}>
-            {tx.category} - ₱{tx.amount} ({tx.type})
+            {tx.category} - ₱{tx.amount} ({tx.type}) - {tx.name}
         </li>
       ))}
     </div>
