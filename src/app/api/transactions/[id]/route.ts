@@ -7,12 +7,13 @@ const client = new MongoClient(uri);
 // GET method to fetch a specific data by ID
 export async function GET(
     request: Request, 
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try{
+        const { id } = await params; // ✅ Await params
         await client.connect(); 
         const db = client.db("coinwise");
-        const transaction = await db.collection("transactions").findOne({_id: new ObjectId(params.id)});
+        const transaction = await db.collection("transactions").findOne({_id: new ObjectId(id)});
 
         if(!transaction){
             return NextResponse.json({error: "Transaction not found"}, {status: 404});
@@ -28,14 +29,15 @@ export async function GET(
 
 export async function PUT(
     request: Request, 
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try{
+       const { id } = await params; // ✅ Await params
        const data = await request.json();
        await client.connect();
        const db = client.db("coinwise");
        const result = await db.collection("transactions").updateOne(
-        {_id: new ObjectId(params.id)},
+        {_id: new ObjectId(id)},
         {$set: data}
        );
        
@@ -54,12 +56,13 @@ export async function PUT(
 
 export async function DELETE(
     request: Request, 
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try{
+        const { id } = await params; // ✅ Await params
         await client.connect();
         const db = client.db("coinwise");
-        const result = await db.collection("transactions").deleteOne({_id: new ObjectId(params.id)});
+        const result = await db.collection("transactions").deleteOne({_id: new ObjectId(id)});
 
         if(result.deletedCount === 0){
             return NextResponse.json({error: "Transaction not found"}, {status: 404});
