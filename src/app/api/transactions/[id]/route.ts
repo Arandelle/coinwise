@@ -1,16 +1,22 @@
 import {NextResponse} from "next/server";
 import {MongoClient, ObjectId} from "mongodb";
 
-const uri = process.env.MONGO_URI as string;
-const client = new MongoClient(uri); 
+// Don't create client here - it will fail if MONGO_URI is undefined during build
+const uri = process.env.MONGO_URI;
 
 // GET method to fetch a specific data by ID
 export async function GET(
     request: Request, 
     { params }: { params: Promise<{ id: string }> }
 ) {
+    if (!uri) {
+        return NextResponse.json({error: "Database connection not configured"}, {status: 500});
+    }
+    
+    const client = new MongoClient(uri); // ✅ Create client here
+    
     try{
-        const { id } = await params; // ✅ Await params
+        const { id } = await params;
         await client.connect(); 
         const db = client.db("coinwise");
         const transaction = await db.collection("transactions").findOne({_id: new ObjectId(id)});
@@ -31,8 +37,14 @@ export async function PUT(
     request: Request, 
     { params }: { params: Promise<{ id: string }> }
 ) {
+    if (!uri) {
+        return NextResponse.json({error: "Database connection not configured"}, {status: 500});
+    }
+    
+    const client = new MongoClient(uri); // ✅ Create client here
+    
     try{
-       const { id } = await params; // ✅ Await params
+       const { id } = await params;
        const data = await request.json();
        await client.connect();
        const db = client.db("coinwise");
@@ -58,8 +70,14 @@ export async function DELETE(
     request: Request, 
     { params }: { params: Promise<{ id: string }> }
 ) {
+    if (!uri) {
+        return NextResponse.json({error: "Database connection not configured"}, {status: 500});
+    }
+    
+    const client = new MongoClient(uri); // ✅ Create client here
+    
     try{
-        const { id } = await params; // ✅ Await params
+        const { id } = await params;
         await client.connect();
         const db = client.db("coinwise");
         const result = await db.collection("transactions").deleteOne({_id: new ObjectId(id)});
