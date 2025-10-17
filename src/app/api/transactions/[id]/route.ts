@@ -2,10 +2,13 @@ import {NextResponse} from "next/server"; // used to send response
 import {MongoClient, ObjectId} from "mongodb"; // used to interact with MongoDB
 
 const uri = process.env.MONGO_URI;
+if (!uri){
+    throw new Error("MONGO_URI is not defined in environment variables")
+}
 const client = new MongoClient(uri); 
 
 // GET method to fetch a specific data by ID
-export async function GET(request, {params}){ // params contains the dynamic route parameters
+export async function GET(request: Request, {params} : {params : {id: string}}){ // params contains the dynamic route parameters
     try{
         await client.connect(); 
         const db = client.db("coinwise");
@@ -16,14 +19,14 @@ export async function GET(request, {params}){ // params contains the dynamic rou
         }
 
         return NextResponse.json(transaction);
-    } catch(error){
+    } catch(error: string | any){
         return NextResponse.json({error: error.message}, {status: 500});
     } finally{
         await client.close(); // ensure the client is closed after operation
     }
 }
 
-export async function PUT(request, {params}){
+export async function PUT(request : Request, {params} : {params : {id: string}}){
     try{
        const data = await request.json();
        await client.connect();
@@ -39,14 +42,14 @@ export async function PUT(request, {params}){
 
        return NextResponse.json({message: "Transaction updated successfully"});
        
-    }catch(error){
+    }catch(error: string | any){
         return NextResponse.json({error: error.message}, {status: 500});
     } finally{
         await client.close(); // ensure the client is closed after operation
     }
 }
 
-export async function DELETE(request, {params}){
+export async function DELETE(request: Request, {params} : {params : {id: string}}){
     try{
         await client.connect();
         const db = client.db("coinwise");
@@ -57,7 +60,7 @@ export async function DELETE(request, {params}){
         }
 
         return NextResponse.json({message: "Transaction deleted successfully"});
-    }catch(error){
+    }catch(error : string | any){
         return NextResponse.json({error: error.message}, {status: 500});
     } finally{
         await client.close()
