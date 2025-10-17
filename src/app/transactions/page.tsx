@@ -3,7 +3,7 @@ import { Transaction } from '../types/Transaction';
 
 const TransactionsPage = async () => {
 
-    const req = await fetch(`${process.env.TRANSACTION_API_URL}/api/transactions`, {
+    const req = await fetch(`${process.env.TRANSACTION_API_URL}/transactions`, {
         cache: "no-store"
     });
     const transactions = await req.json();
