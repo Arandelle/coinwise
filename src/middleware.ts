@@ -3,8 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(req: NextRequest){
     const token = req.cookies.get("access_token")?.value;
 
-    const isProtectedRoute = req.nextUrl.pathname.startsWith("/dashboard")
-    const isAuthRoute = req.nextUrl.pathname.startsWith("/login")
+    const authRoutes = ["/login", "/signup"]
+    const protectedRoutes = ["/dashboard", "/logout"];
+
+    const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))
+    const isAuthRoute = authRoutes.some((route) => req.nextUrl.pathname.startsWith(route))
 
     if (isProtectedRoute && !token){
         return NextResponse.redirect(new URL("/login", req.url))
@@ -18,5 +21,5 @@ export function middleware(req: NextRequest){
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/login", "/register"]
+    matcher: ["/dashboard/:path*","/logout/:path*", "/login", "/signup"]
 }
