@@ -3,7 +3,7 @@ import { Transaction } from '../types/Transaction';
 
 const TransactionsPage = async () => {
 
-    const req = await fetch(`${process.env.NEXT_PUBLIC_TRANSACTION_API_URL}/transactions`, {
+    const req = await fetch(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/api/transactions`, {
         cache: "no-store"
     });
     const transactions = await req.json();

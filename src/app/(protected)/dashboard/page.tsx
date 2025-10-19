@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import MiniCalendar from "../components/MiniCalendar";
+import MiniCalendar from "../../components/MiniCalendar";
 
 const Dashboard = () => {
   const events = [
