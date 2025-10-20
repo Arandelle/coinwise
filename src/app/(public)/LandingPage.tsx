@@ -129,7 +129,7 @@ export default function CoinWiseLanding() {
 
             <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
               Track expenses, set goals, and build wealth with intelligent budgeting. 
-              Join thousands who've transformed their financial lives with CoinWise.
+              Join thousands who have transformed their financial lives with CoinWise.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -220,7 +220,7 @@ export default function CoinWiseLanding() {
               {
                 step: "02",
                 title: "Set Your Goals",
-                description: "Define what you're saving for. Our AI will create a personalized budget plan to help you reach your goals faster.",
+                description: "Define what you are saving for. Our AI will create a personalized budget plan to help you reach your goals faster.",
                 icon: "🎯"
               },
               {
@@ -264,7 +264,7 @@ export default function CoinWiseLanding() {
                 name: "Michael Rodriguez",
                 role: "Software Engineer",
                 avatar: "👨‍💼",
-                text: "Finally, a budgeting app that doesn't feel like a chore. The community challenges keep me motivated!",
+                text: "Finally, a budgeting app that does not feel like a chore. The community challenges keep me motivated!",
                 saved: "$8,200"
               },
               {
@@ -283,7 +283,7 @@ export default function CoinWiseLanding() {
                     <div className="text-sm text-slate-600">{testimonial.role}</div>
                   </div>
                 </div>
-                <p className="text-slate-700 mb-4 italic">"{testimonial.text}"</p>
+                <p className="text-slate-700 mb-4 italic">{`"${testimonial.text}"`}</p>
                 <div className="inline-block bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold">
                   Saved {testimonial.saved}
                 </div>
