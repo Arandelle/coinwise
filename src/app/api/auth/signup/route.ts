@@ -1,10 +1,10 @@
-import { Users } from "@/app/types/Users";
+import { User } from "@/app/types/Users";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
 
     try{
-        const body : Users = await req.json();
+        const body : User = await req.json();
         const response = await fetch(`${process.env.BACKEND_URL}/auth/signup`, {
             method: "POST",
             headers: {"Content-Type" : "application/json"},
