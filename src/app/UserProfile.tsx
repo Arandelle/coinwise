@@ -1,8 +1,7 @@
 // components/UserProfile.tsx
 'use client';
 
-import LoadingCoin from '@/app/components/Loading';
-import { useUser } from '../../hooks/useUser';
+import { useUser } from './hooks/useUser';
 import { useRouter } from 'next/navigation';
 
 export default function UserProfile() {
@@ -11,14 +10,16 @@ export default function UserProfile() {
 
   const handleLogout = async () => {
     // Call logout API to clear cookie
-    await fetch('/api/logout', { method: 'POST' });
+    await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
     router.refresh();
   };
 
   if (loading) {
     return (
-      <LoadingCoin label='Loading profile...'/>
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
     );
   }
 
