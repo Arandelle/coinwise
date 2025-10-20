@@ -2,9 +2,11 @@
 
 import { MapPin, Mail, TrendingUp, Target, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/app/hooks/useUser';
+import LoadingCoin from '@/app/components/Loading';
 
 export default function CoinWiseProfile() {
-
+  const {user, loading, error } = useUser();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -16,7 +18,35 @@ export default function CoinWiseProfile() {
   router.refresh();    
   }
 
-  
+  if (loading) {
+    return (
+      <LoadingCoin label='Loading profile...'/>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-gray-600 mb-4">Please log in to view your profile</p>
+        <button
+          onClick={() => router.push('/login')}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Go to Login
+        </button>
+
+        <button onClick={handleLogout}>logout</button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 flex items-center justify-center p-4">

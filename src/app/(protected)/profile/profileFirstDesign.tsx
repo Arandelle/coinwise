@@ -1,4 +1,4 @@
-import { MapPin, Mail, MapPinned } from "lucide-react";
+import { MapPin, Mail } from "lucide-react";
 
 export default function ProfileCard() {
   return (
