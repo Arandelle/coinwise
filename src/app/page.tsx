@@ -1,12 +1,12 @@
 // app/page.tsx
-
-import Header from "./components/Header";
+import CoinWiseLanding from "./(public)/LandingPage";
+import PublicHeader from "./components/PublicHeader";
 
 export default async function Home() {
   
   return (
     <main className="">
-     <Header />
+      <CoinWiseLanding />
     </main>
   );
 }
