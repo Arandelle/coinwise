@@ -1,9 +1,10 @@
 // app/signup/page.tsx
 "use client";
 import { useState } from "react";
+import { UserCreate } from "../types/Users";
 
 export default function SignupPage() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<UserCreate>({
     email: "",
     username: "",
     password: "",
@@ -13,7 +14,7 @@ export default function SignupPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/signup", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

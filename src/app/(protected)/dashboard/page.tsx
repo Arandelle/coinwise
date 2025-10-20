@@ -11,7 +11,7 @@ export default function UserProfile() {
 
   const handleLogout = async () => {
     // Call logout API to clear cookie
-    await fetch('/api/logout', { method: 'POST' });
+    await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
     router.refresh();
   };
@@ -40,6 +40,8 @@ export default function UserProfile() {
         >
           Go to Login
         </button>
+
+        <button onClick={handleLogout}>logout</button>
       </div>
     );
   }

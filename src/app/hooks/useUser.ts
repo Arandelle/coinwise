@@ -1,14 +1,6 @@
 // hooks/useUser.ts
 import { useState, useEffect } from 'react';
-
-export interface User {
-  _id: string;
-  email: string;
-  username: string;
-  full_name: string;
-  created_at: string;
-  is_active: boolean;
-}
+import { User } from '../types/Users';
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -18,10 +10,17 @@ export function useUser() {
   const fetchUser = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/me');
+      const response = await fetch('/api/auth/me');
       
       if (!response.ok) {
         if (response.status === 401) {
+
+          const response = await fetch("/api/auth/logout", {
+            method: "POST"
+          });
+
+          window.location.href = "/login"
+
           setUser(null);
           return;
         }
