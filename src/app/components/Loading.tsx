@@ -17,9 +17,10 @@ const LoadingCoin = ({
       ></div>
 
       {/* Label */}
-      <p className="mt-4 text-gray-700 font-semibold text-lg animate-pulse">
-        {label}
-      </p>
+      <div className="flex flex-col items-center mt-4 text-gray-300 font-semibold text-lg animate-pulse">
+        <p>{label}</p>
+        <p>This may take some time</p>
+      </div>     
     </div>
   );
 };

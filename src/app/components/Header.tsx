@@ -9,9 +9,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { label: "Main", href: "/" },
     { label: "Dashboard", href: "/dashboard"},
-    { label: "Transactions", href: "/transactions" }
+    { label: "Transactions", href: "/transactions" },
   ];
 
   return (

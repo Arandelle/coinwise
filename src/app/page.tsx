@@ -6,7 +6,7 @@ export default async function Home() {
   
   return (
     <main className="">
-      This is the main section
+     <Header />
     </main>
   );
 }

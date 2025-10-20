@@ -8,6 +8,12 @@ export function middleware(req: NextRequest){
 
     const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))
     const isAuthRoute = authRoutes.some((route) => req.nextUrl.pathname.startsWith(route))
+    const isRootRoute = req.nextUrl.pathname === "/"
+
+    // Redirect authenticated users from root to dashboard
+    if (isRootRoute && token){
+        return NextResponse.redirect(new URL("/dashboard", req.url))
+    }
 
     if (isProtectedRoute && !token){
         return NextResponse.redirect(new URL("/login", req.url))
@@ -21,5 +27,5 @@ export function middleware(req: NextRequest){
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*","/transactions/:path*", "/login", "/signup"]
+    matcher: ["/", "/dashboard/:path*","/transactions/:path*", "/login", "/signup"]
 }

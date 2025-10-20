@@ -1,5 +1,6 @@
 import React from 'react'
 import { Transaction } from '../../types/Transaction';
+import TransactionList from './TransactionList';
 
 const TransactionsPage = async () => {
 
@@ -10,11 +11,7 @@ const TransactionsPage = async () => {
 
   return (
     <div>
-      {transactions.map((tx: Transaction, index: number) => (
-        <li key={index}>
-            {tx.category} - ₱{tx.amount} ({tx.type}) - {tx.name}
-        </li>
-      ))}
+      <TransactionList transactions={transactions}/>
     </div>
   )
 }
