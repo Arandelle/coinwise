@@ -4,13 +4,16 @@ import React, { useState } from "react";
 import { Menu, X, Search } from "lucide-react";
 import Link from "next/link"; // used for navigation between pages
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const activePathname = usePathname();
+  
   const navItems = [
     { label: "Dashboard", href: "/dashboard"},
     { label: "Transactions", href: "/transactions" },
+    { label: "Profile", href: "/profile"}
   ];
 
   return (
@@ -55,7 +58,7 @@ const Header = () => {
             <Link
               key={item.label}
               href={item.href}
-              className="px-3 py-2 text-gray-700 hover:text-amber-600 hover:bg-gray-100 rounded-md text-sm font-medium"
+              className={`${activePathname === item.href ? "text-amber-500 font-semibold border-b-2 hover:rounded-md" : "text-gray-700 font-medium rounded-md"} px-3 py-2 hover:text-amber-600 hover:bg-gray-100 text-sm`}
               onClick={() => setIsMenuOpen(false)} // close the drawer when clicked
             >
               {item.label}
