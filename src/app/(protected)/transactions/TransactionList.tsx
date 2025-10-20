@@ -31,7 +31,7 @@ const TransactionList = ({ transactions }: Props) => {
     
             <div className="flex flex-row justify-between w-full">
                 <div className="flex flex-col">
-                    <p className="font-medium text-sm">McDonald's</p>
+                    <p className="font-medium text-sm">McDonalds</p>
                     <p className="text-xs text-gray-500">Dining out</p>
                 </div>
     

@@ -1,5 +1,4 @@
 import React from 'react'
-import { Transaction } from '../../types/Transaction';
 import TransactionList from './TransactionList';
 
 const TransactionsPage = async () => {

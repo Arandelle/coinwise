@@ -15,12 +15,13 @@ export function useUser() {
       if (!response.ok) {
         if (response.status === 401) {
 
-          const response = await fetch("/api/auth/logout", {
+          const logoutResponse = await fetch("/api/auth/logout", {
             method: "POST"
           });
-
-          window.location.href = "/login"
-
+          if(logoutResponse.ok){
+            window.location.href = "/login"
+          }
+          
           setUser(null);
           return;
         }

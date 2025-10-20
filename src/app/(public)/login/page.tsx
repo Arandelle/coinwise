@@ -31,7 +31,7 @@ const Login = () => {
       setMessage("Successfully logged in");
       router.push("/dashboard");
     } catch (err) {
-      setMessage("Server error");
+      setMessage(`Server error: ${err}`);
     } finally {
       setLoading(false);
     }
