@@ -5,13 +5,15 @@ import { Menu, X, Search } from "lucide-react";
 import Link from "next/link"; // used for navigation between pages
 import Image from "next/image";
 
-const Header = () => {
+const PublicHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
     { label: "Main", href: "/" },
-    { label: "Dashboard", href: "/dashboard"},
-    { label: "Transactions", href: "/transactions" }
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+    { label: "Login", href: "/login" },
+    { label: "Signup", href: "/signup" },
   ];
 
   return (
@@ -75,4 +77,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default PublicHeader;

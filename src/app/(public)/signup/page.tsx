@@ -1,7 +1,7 @@
 // app/signup/page.tsx
 "use client";
 import { useState } from "react";
-import { UserCreate } from "../types/Users";
+import { UserCreate } from "../../types/Users";
 
 export default function SignupPage() {
   const [form, setForm] = useState<UserCreate>({

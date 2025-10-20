@@ -1,5 +1,5 @@
 import React from 'react'
-import { Transaction } from '../types/Transaction';
+import { Transaction } from '../../types/Transaction';
 
 const TransactionsPage = async () => {
 

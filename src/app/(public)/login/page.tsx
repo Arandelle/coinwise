@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import LoadingCoin from "../components/Loading";
+import LoadingCoin from "../../components/Loading";
 
 const Login = () => {
   const router = useRouter();
