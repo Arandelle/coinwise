@@ -42,7 +42,7 @@ export default function SignupForm({
     message: "",
   });
 
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
     if (status.type === "success") {
@@ -53,13 +53,13 @@ export default function SignupForm({
         return () => clearTimeout(timer);
       } else {
         // Auto redirect when countdown reaches 0
-        router.push("/login");
+        router.push(`/login?email=${encodeURIComponent(formData.email)}`);
       }
     }
-  }, [status.type, countdown, router]);
+  }, [status.type, countdown, router, formData.email]);
 
   const handleRedirectNow = () => {
-    router.push("/login");
+    router.push(`/login?email=${encodeURIComponent(formData.email)}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,12 +91,12 @@ export default function SignupForm({
           message: "Account created successfully!",
         });
         setFormData({
-          email: "",
+          ...formData,
           username: "",
           password: "",
           confirmPassword: "",
         });
-        setCountdown(5); // Reset countdown
+        setCountdown(10); // Reset countdown
       } else {
         setStatus({
           type: "error",

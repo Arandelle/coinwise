@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, Eye, EyeClosed, Loader2, Lock, Mail, TriangleAlert } from "lucide-react";
 
 interface FormProps {
@@ -11,8 +11,17 @@ interface FormProps {
 
 export default function LoginModal({loading = false, setLoading = () => {}} : FormProps) {
   const router = useRouter();
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const searchParams = useSearchParams();
+  
+  // get email from URL params
+  const emailFromURL = searchParams.get('email') || "";
+
+  const [loginData, setLoginData] = useState({ 
+    email: emailFromURL, // pre-fill email from url
+    password: "" 
+  });
   const [viewPass, setViewPass] = useState(false);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(!!emailFromURL);
 
   const [status, setStatus] = useState<{
     type: "idle" | "success" | "error",
@@ -21,6 +30,17 @@ export default function LoginModal({loading = false, setLoading = () => {}} : Fo
     type: "idle",
     message: ""
   });
+
+  useEffect(() => {
+    if(emailFromURL){
+      setLoginData(prev => ({
+        ...prev, 
+        email: emailFromURL
+      }));
+      setShowWelcomeMessage(true);
+    }
+  }, [emailFromURL]);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +74,23 @@ export default function LoginModal({loading = false, setLoading = () => {}} : Fo
 
   return (
     <form action="" onSubmit={handleLogin} className="space-y-5">
+
+       {/* Welcome Message for New Users */}
+      {showWelcomeMessage && (
+        <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 flex items-start gap-3 animate-fade-in">
+          <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-emerald-900 text-sm">
+              Account created successfully!
+            </p>
+            <p className="text-emerald-700 text-xs mt-1">
+              Please enter your password to log in.
+            </p>
+          </div>
+        </div>
+      )}
+
+
       {status.type !== "idle" && (
         <p
           className={`flex items-center gap-2 text-sm font-medium border px-4 py-3 rounded-xl shadow-sm transition-all duration-200 ${
