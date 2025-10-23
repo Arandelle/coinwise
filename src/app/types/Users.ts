@@ -9,7 +9,8 @@ export interface User {
 export interface UserCreate {
     email: string,
     username: string,
-    password: string
+    password: string,
+    confirmPassword: string
 }
 
 export interface UserLogin{

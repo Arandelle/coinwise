@@ -120,7 +120,7 @@ export default function CoinWiseLanding() {
                 Pricing
               </a>
               <Link href={"/login"} className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200">
-                Get Started
+                Login
               </Link>
             </div>
 
@@ -160,7 +160,7 @@ export default function CoinWiseLanding() {
                 Pricing
               </a>
               <button className="w-full px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg">
-                Get Started
+                Login
               </button>
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function CoinWiseLanding() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 relative overflow-hidden">
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-100 via-teal-100 to-blue-100 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 text-8xl">💰</div>
           <div className="absolute top-40 right-20 text-6xl">📊</div>
@@ -199,11 +199,13 @@ export default function CoinWiseLanding() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                Start Free Trial
-              </button>
+              <Link 
+              href={"/signup"}
+              className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                Start CoinWise Free!
+              </Link>
               <button className="px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold text-lg border-2 border-slate-200 hover:border-emerald-500 transition-all duration-200">
-                Watch Demo
+                Explore Guest Mode
               </button>
             </div>
 
@@ -393,7 +395,7 @@ export default function CoinWiseLanding() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 via-teal-600 to-blue-600 relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 to-teal-600 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-10 text-9xl">💰</div>
           <div className="absolute bottom-10 left-10 text-8xl">🎯</div>

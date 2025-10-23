@@ -11,14 +11,15 @@ export async function POST(req: Request) {
             body: JSON.stringify(body)
         });
 
+        const data = await response.json();
+
         if (!response.ok){
             const errorData = await response.text();
-            return NextResponse.json({error: "Failed to sign-up", details: errorData},
+            return NextResponse.json({error: data.error || "Failed to sign-up", details: errorData},
                 {status: response.status}
             )
         }
-
-        const data = await response.json();
+       
         return NextResponse.json(data, {status: 201});
 
     }catch(error){
