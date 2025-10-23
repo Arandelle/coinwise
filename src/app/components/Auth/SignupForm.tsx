@@ -1,6 +1,6 @@
 // app/signup/page.tsx
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserCreate } from "../../types/Users";
 import {
   ArrowRight,
@@ -17,11 +17,14 @@ import {
 import { useRouter } from "next/navigation";
 
 interface SignupFormProps {
-    loading?: boolean,
-    setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+  loading?: boolean;
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function SignupForm({loading = false, setLoading = () => {}}: SignupFormProps) {
+export default function SignupForm({
+  loading = false,
+  setLoading = () => {},
+}: SignupFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<UserCreate>({
     email: "",
@@ -39,10 +42,39 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
     message: "",
   });
 
+  const [countdown, setCountdown] = useState(5);
+
+  useEffect(() => {
+    if (status.type === "success") {
+      if (countdown > 0) {
+        const timer = setTimeout(() => {
+          setCountdown((prev) => prev - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        // Auto redirect when countdown reaches 0
+        router.push("/login");
+      }
+    }
+  }, [status.type, countdown, router]);
+
+  const handleRedirectNow = () => {
+    router.push("/login");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus({ type: "idle", message: "" });
     setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      setStatus({
+        type: "error",
+        message: "Passwords do not match.",
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -56,16 +88,15 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
       if (res.ok) {
         setStatus({
           type: "success",
-          message: "Successfully created an account! You can now log in.",
+          message: "Account created successfully!",
         });
         setFormData({
-            email: "",
-            username: "",
-            password: "",
-            confirmPassword: "",
-        })
-
-        router.push("/login");
+          email: "",
+          username: "",
+          password: "",
+          confirmPassword: "",
+        });
+        setCountdown(5); // Reset countdown
       } else {
         setStatus({
           type: "error",
@@ -77,10 +108,9 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
         type: "error",
         message: "Server error. Please check your connection.",
       });
-
-      console.log("Error: ", err)
-    } finally{
-        setLoading(false);
+      console.log("Error: ", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,38 +123,65 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
 
   return (
     <form onSubmit={handleSubmit}>
-      {status.type !== "idle" && (
-        <p
-          className={`flex items-center gap-2 text-sm font-medium border px-4 py-3 rounded-xl shadow-sm transition-all duration-200 ${
-            status.type === "success"
-              ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-              : "bg-rose-50 text-rose-600 border-rose-200"
-          }`}
-        >
-          {status.type === "success" ? (
-            <CheckCircle className="w-5 h-5 text-emerald-500" />
-          ) : (
-            <TriangleAlert className="w-5 h-5 text-rose-500" />
-          )}
+      {/* Success Message with Redirect */}
+      {status.type === "success" && (
+        <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6 mb-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-emerald-900 text-lg mb-1">
+                Welcome to CoinWise!
+              </h3>
+              <p className="text-emerald-700 text-sm">
+                Your account has been created successfully. You can now log in
+                and start your financial journey.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 pt-2">
+            <p className="text-sm text-emerald-600">
+              Redirecting in <span className="font-bold text-lg">{countdown}</span>s
+            </p>
+            <button
+              type="button"
+              onClick={handleRedirectNow}
+              className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2 group"
+            >
+              Go to Login
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {status.type === "error" && (
+        <div className="flex items-center gap-2 text-sm font-medium border-2 px-4 py-3 rounded-xl shadow-sm transition-all duration-200 bg-rose-50 text-rose-600 border-rose-200 mb-6">
+          <TriangleAlert className="w-5 h-5 text-rose-500 flex-shrink-0" />
           <span>{status.message}</span>
-        </p>
+        </div>
       )}
 
       <div className="space-y-5">
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Username
-        </label>
-        <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="JohnDoe07"
-            className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
-            required
-          />
+        {/* Username */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Username
+          </label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="JohnDoe07"
+              className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
+              required
+              disabled={loading}
+            />
+          </div>
         </div>
 
         {/* Email */}
@@ -142,6 +199,7 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
               placeholder="you@example.com"
               className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
               required
+              disabled={loading}
             />
           </div>
         </div>
@@ -161,11 +219,13 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
               placeholder="Enter your password"
               className="w-full pl-11 pr-12 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
               required
+              disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              disabled={loading}
             >
               {showPassword ? (
                 <Eye className="w-5 h-5" />
@@ -175,6 +235,8 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
             </button>
           </div>
         </div>
+
+        {/* Confirm Password */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
             Confirm Password
@@ -189,25 +251,28 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
               placeholder="Enter your password again"
               className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
               required
+              disabled={loading}
             />
           </div>
         </div>
 
+        {/* Terms & Conditions */}
         <label className="flex items-start gap-2 cursor-pointer">
           <input
             type="checkbox"
             className="w-4 h-4 mt-0.5 accent-emerald-500 cursor-pointer"
             required
+            disabled={loading}
           />
           <span className="text-sm text-slate-600">
-            I agree to the
+            I agree to the{" "}
             <a
               href="#"
               className="text-emerald-600 hover:text-emerald-700 font-medium"
             >
               Terms of Service
-            </a>
-            and
+            </a>{" "}
+            and{" "}
             <a
               href="#"
               className="text-emerald-600 hover:text-emerald-700 font-medium"
@@ -217,16 +282,23 @@ export default function SignupForm({loading = false, setLoading = () => {}}: Sig
           </span>
         </label>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer"
+          disabled={loading}
+          className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {loading ? (
-             <><Loader2 className="text-slate-600 w-5 h-5 animate-spin"/> Creating an account...</>
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Creating account...
+            </>
           ) : (
-            "Submit"
+            <>
+              Create Account
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </>
           )}
-          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
     </form>
