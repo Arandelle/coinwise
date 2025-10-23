@@ -6,12 +6,9 @@ import {
   Target,
   Zap,
   Brain,
-  Users,
-  Shield,
   ChevronDown,
   Menu,
   X,
-  Wallet,
   PieChart,
   Trophy,
 } from "lucide-react";

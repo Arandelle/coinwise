@@ -22,12 +22,12 @@ export default function CoinWiseAuth() {
     confirmPassword: "",
   });
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -63,7 +63,7 @@ export default function CoinWiseAuth() {
               Your Journey to Financial Freedom Starts Here
             </h1>
             <p className="text-lg text-emerald-50 mb-12">
-              Join thousands who've transformed their finances with AI-powered
+              Join thousands who have transformed their finances with AI-powered
               insights and smart budgeting.
             </p>
 
@@ -342,7 +342,7 @@ export default function CoinWiseAuth() {
 
           {/* Footer Text */}
           <p className="text-center text-sm text-slate-600 mt-8">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            {isLogin ? `Don't have an account?` : "Already have an account? "}
             <button
               onClick={() => setIsLogin(!isLogin)}
               className="text-emerald-600 hover:text-emerald-700 font-semibold"
