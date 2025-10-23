@@ -1,14 +1,21 @@
 "use client";
 
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import { usePathname } from "next/navigation";
+
+type WithLoadingProps = {
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 
 const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   const pathName = usePathname();
   const isLogin = pathName === "/login";
+  const [loading, setLoading] = useState(false);
 
   const handleNavigate = () => {
     alert(
@@ -82,7 +89,7 @@ const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         </div>
 
         {/** Right Side */}
-        <div className="p-8 md:p-12 flex flex-col justify-center">
+        <div className={`p-8 md:p-12 flex flex-col justify-center ${loading && "opacity-50 pointer-events-none"}`}>
           {/* Mobile Logo */}
           <div className="flex md:hidden items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
@@ -126,7 +133,14 @@ const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
           </div>
 
           {/** Form  */}
-          {children}
+          {React.isValidElement(children) &&
+            React.cloneElement(
+              children as React.ReactElement<WithLoadingProps>,
+              {
+                loading,
+                setLoading,
+              }
+            )}
 
           {/* Divider */}
           <div className="relative my-8">

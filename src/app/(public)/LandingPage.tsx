@@ -25,51 +25,51 @@ export default function CoinWiseLanding() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
- const features = [
-  {
-    icon: <Brain className="w-8 h-8" />,
-    title: "AI-Powered Insights",
-    description:
-      "Get personalized recommendations and smart alerts about your spending patterns. Our AI learns your habits and helps you save more.",
-    color: "from-purple-500 to-indigo-500",
-  },
-  {
-    icon: <TrendingUp className="w-8 h-8" />,
-    title: "Real-Time Tracking",
-    description:
-      "Track every expense effortlessly. See where your money goes with beautiful visualizations and instant categorization.",
-    color: "from-emerald-500 to-teal-500",
-  },
-  {
-    icon: <Target className="w-8 h-8" />,
-    title: "Smart Goal Setting",
-    description:
-      "Set financial goals and watch your progress. Emergency fund, vacation, or dream home - we'll help you get there faster.",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-  icon: <Trophy className="w-8 h-8" />,
-  title: "Savings Challenges",
-  description:
-    "Take on personal finance challenges to stay motivated. Hit your weekly or monthly savings targets and track your streaks with ease.",
-  color: "from-pink-500 to-rose-500",
-},
+  const features = [
+    {
+      icon: <Brain className="w-8 h-8" />,
+      title: "AI-Powered Insights",
+      description:
+        "Get personalized recommendations and smart alerts about your spending patterns. Our AI learns your habits and helps you save more.",
+      color: "from-purple-500 to-indigo-500",
+    },
+    {
+      icon: <TrendingUp className="w-8 h-8" />,
+      title: "Real-Time Tracking",
+      description:
+        "Track every expense effortlessly. See where your money goes with beautiful visualizations and instant categorization.",
+      color: "from-emerald-500 to-teal-500",
+    },
+    {
+      icon: <Target className="w-8 h-8" />,
+      title: "Smart Goal Setting",
+      description:
+        "Set financial goals and watch your progress. Emergency fund, vacation, or dream home - we'll help you get there faster.",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: <Trophy className="w-8 h-8" />,
+      title: "Savings Challenges",
+      description:
+        "Take on personal finance challenges to stay motivated. Hit your weekly or monthly savings targets and track your streaks with ease.",
+      color: "from-pink-500 to-rose-500",
+    },
 
-  {
-    icon: <Zap className="w-8 h-8" />,
-    title: "Budget Optimizer",
-    description:
-      "Automatically optimize your budget allocation. Get suggestions to cut costs and maximize your savings potential.",
-    color: "from-amber-500 to-orange-500",
-  },
-  {
-    icon: <PieChart className="w-8 h-8" />,
-    title: "Expense Visualization",
-    description:
-      "Understand your finances at a glance with intuitive charts and analytics that show where your money really goes.",
-    color: "from-sky-500 to-blue-500",
-  },
-];
+    {
+      icon: <Zap className="w-8 h-8" />,
+      title: "Budget Optimizer",
+      description:
+        "Automatically optimize your budget allocation. Get suggestions to cut costs and maximize your savings potential.",
+      color: "from-amber-500 to-orange-500",
+    },
+    {
+      icon: <PieChart className="w-8 h-8" />,
+      title: "Expense Visualization",
+      description:
+        "Understand your finances at a glance with intuitive charts and analytics that show where your money really goes.",
+      color: "from-sky-500 to-blue-500",
+    },
+  ];
 
   const stats = [
     { value: "$2.5M+", label: "Total Saved by Users" },
@@ -89,13 +89,13 @@ export default function CoinWiseLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <Image 
-              src="/CoinwiseLogo_v7.png"
-              alt="coinwise-logo"
-              width={50}
-              height={50}
+              <Image
+                src="/CoinwiseLogo_v7.png"
+                alt="coinwise-logo"
+                width={50}
+                height={50}
               />
-              <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              <span className={`text-2xl font-bold text-emerald-600`}>
                 CoinWise
               </span>
             </div>
@@ -119,7 +119,10 @@ export default function CoinWiseLanding() {
               >
                 Pricing
               </a>
-              <Link href={"/login"} className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200">
+              <Link
+                href={"/login"}
+                className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+              >
                 Login
               </Link>
             </div>
@@ -199,9 +202,10 @@ export default function CoinWiseLanding() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-              href={"/signup"}
-              className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <Link
+                href={"/signup"}
+                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
                 Start CoinWise Free!
               </Link>
               <button className="px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold text-lg border-2 border-slate-200 hover:border-emerald-500 transition-all duration-200">
@@ -216,13 +220,19 @@ export default function CoinWiseLanding() {
         </div>
 
         {/* Scroll Indicator */}
-        <button className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+        <button
+          onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer"
+        >
           <ChevronDown className="w-8 h-8 text-emerald-500" />
         </button>
       </section>
 
       {/* Stats Section */}
-      <section id="stats" className="py-16 bg-gradient-to-r from-emerald-600 to-teal-600">
+      <section
+        id="stats"
+        className="py-16 bg-gradient-to-r from-emerald-600 to-teal-600"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -292,30 +302,29 @@ export default function CoinWiseLanding() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-12">
-{[
-  {
-    step: "01",
-    title: "Create or Continue Without an Account",
-    description:
-      "You can start using Coinwise right away — no signup required. But if you connect your email, your data will be securely saved for future access.",
-    icon: "🔗",
-  },
-  {
-    step: "02",
-    title: "Set Your Financial Goals",
-    description:
-      "Define what you’re saving for — like an emergency fund, travel, or new gadget. Coinwise helps you plan your budget around what matters most.",
-    icon: "🎯",
-  },
-  {
-    step: "03",
-    title: "Track and Improve Your Spending",
-    description:
-      "View your transactions, analyze spending habits, and gain insights powered by smart AI suggestions — all designed to help you save more.",
-    icon: "📊",
-  },
-]
-.map((item, index) => (
+            {[
+              {
+                step: "01",
+                title: "Create or Continue Without an Account",
+                description:
+                  "You can start using Coinwise right away — no signup required. But if you connect your email, your data will be securely saved for future access.",
+                icon: "🔗",
+              },
+              {
+                step: "02",
+                title: "Set Your Financial Goals",
+                description:
+                  "Define what you’re saving for — like an emergency fund, travel, or new gadget. Coinwise helps you plan your budget around what matters most.",
+                icon: "🎯",
+              },
+              {
+                step: "03",
+                title: "Track and Improve Your Spending",
+                description:
+                  "View your transactions, analyze spending habits, and gain insights powered by smart AI suggestions — all designed to help you save more.",
+                icon: "📊",
+              },
+            ].map((item, index) => (
               <div key={index} className="text-center">
                 <div className="text-6xl mb-6">{item.icon}</div>
                 <div className="text-emerald-600 font-bold text-lg mb-3">

@@ -2,20 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import LoadingCoin from "@/app/components/Loading";
-import { Eye, EyeClosed, Lock, Mail, TriangleAlert } from "lucide-react";
+import { CheckCircle, Eye, EyeClosed, Loader2, Lock, Mail, TriangleAlert } from "lucide-react";
 
-export default function LoginModal() {
+interface FormProps {
+  loading?: boolean,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function LoginModal({loading = false, setLoading = () => {}} : FormProps) {
   const router = useRouter();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [viewPass, setViewPass] = useState(false);
+
+  const [status, setStatus] = useState<{
+    type: "idle" | "success" | "error",
+    message: string
+  }>({
+    type: "idle",
+    message: ""
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatus({ type: "idle", message: "" });
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -27,25 +37,40 @@ export default function LoginModal() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      setMessage("Successfully logged in");
+      setStatus({
+        type: "success",
+        message: "Successfully logged in",
+      });
       router.push("/dashboard");
     } catch (err) {
-      setMessage(`Error logging in: ${err}`);
+      setStatus({
+        type: "error",
+        message: err instanceof Error ? err.message : "Login failed",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <LoadingCoin label="Logging in..." />;
-
   return (
     <form action="" onSubmit={handleLogin} className="space-y-5">
-      {message && (
-        <p className="flex items-center gap-2 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-200 px-4 py-3 rounded-xl shadow-sm transition-all duration-200">
-          <TriangleAlert className="w-5 h-5 text-rose-500" />
-          <span>{message}</span>
+      {status.type !== "idle" && (
+        <p
+          className={`flex items-center gap-2 text-sm font-medium border px-4 py-3 rounded-xl shadow-sm transition-all duration-200 ${
+            status.type === "success"
+              ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+              : "bg-rose-50 text-rose-600 border-rose-200"
+          }`}
+        >
+          {status.type === "success" ? (
+            <CheckCircle className="w-5 h-5 text-emerald-500" />
+          ) : (
+            <TriangleAlert className="w-5 h-5 text-rose-500" />
+          )}
+          <span>{status.message}</span>
         </p>
       )}
+
       <div className="space-y-4">
         <label
           htmlFor="email"
@@ -75,10 +100,10 @@ export default function LoginModal() {
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
-            type={`${viewPass ? "password" : "text"}`}
+            type={`${viewPass ? "text" : "password"}`}
             name="password"
             value={loginData.password}
-            placeholder={`${viewPass ? "••••••••" : "Enter your password"}`}
+            placeholder={`${viewPass ? "Enter your password" : "••••••••"}`}
             className="w-full px-11 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
             onChange={(e) =>
               setLoginData({ ...loginData, password: e.target.value })
@@ -90,9 +115,9 @@ export default function LoginModal() {
             className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 mb-2"
           >
             {viewPass ? (
-              <EyeClosed className="w-5 h-5" />
-            ) : (
               <Eye className="w-5 h-5" />
+            ) : (
+              <EyeClosed className="w-5 h-5" />
             )}
           </button>
         </div>
@@ -119,9 +144,14 @@ export default function LoginModal() {
 
         <button
           type="submit"
+          disabled={loading}
           className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer"
         >
-          Submit
+          {loading ? (
+             <><Loader2 className="text-slate-600 w-5 h-5 animate-spin"/> Logging in...</>
+          ) : (
+            "Submit"
+          )}
         </button>
       </div>
     </form>

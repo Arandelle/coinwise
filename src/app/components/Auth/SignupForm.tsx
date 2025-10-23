@@ -7,14 +7,22 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  Loader2,
   Lock,
   Mail,
   TriangleAlert,
   User,
 } from "lucide-react";
-import LoadingCoin from "../Loading";
 
-export default function SignupForm() {
+import { useRouter } from "next/navigation";
+
+interface SignupFormProps {
+    loading?: boolean,
+    setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function SignupForm({loading = false, setLoading = () => {}}: SignupFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState<UserCreate>({
     email: "",
     username: "",
@@ -24,18 +32,17 @@ export default function SignupForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<{
-    loading: boolean;
     type: "idle" | "success" | "error";
     message: string;
   }>({
-    loading: false,
     type: "idle",
     message: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus({ loading: true, type: "idle", message: "" });
+    setStatus({ type: "idle", message: "" });
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -48,25 +55,32 @@ export default function SignupForm() {
 
       if (res.ok) {
         setStatus({
-          loading: false,
           type: "success",
           message: "Successfully created an account! You can now log in.",
         });
+        setFormData({
+            email: "",
+            username: "",
+            password: "",
+            confirmPassword: "",
+        })
+
+        router.push("/login");
       } else {
         setStatus({
-          loading: false,
           type: "error",
           message: data.error || "Signup failed. Please try again.",
         });
       }
     } catch (err) {
       setStatus({
-        loading: false,
         type: "error",
         message: "Server error. Please check your connection.",
       });
 
       console.log("Error: ", err)
+    } finally{
+        setLoading(false);
     }
   };
 
@@ -76,8 +90,6 @@ export default function SignupForm() {
       [e.target.name]: e.target.value,
     });
   };
-
-  if (status.loading) return <LoadingCoin label="Logging in..." />;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -109,7 +121,7 @@ export default function SignupForm() {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder="John Doe"
+            placeholder="JohnDoe07"
             className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
             required
           />
@@ -146,7 +158,7 @@ export default function SignupForm() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               className="w-full pl-11 pr-12 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
               required
             />
@@ -156,9 +168,9 @@ export default function SignupForm() {
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
             >
               {showPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
                 <Eye className="w-5 h-5" />
+              ) : (
+                <EyeOff className="w-5 h-5" />
               )}
             </button>
           </div>
@@ -174,7 +186,7 @@ export default function SignupForm() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="Enter your password again"
               className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
               required
             />
@@ -209,7 +221,11 @@ export default function SignupForm() {
           type="submit"
           className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer"
         >
-          Create Account
+          {loading ? (
+             <><Loader2 className="text-slate-600 w-5 h-5 animate-spin"/> Creating an account...</>
+          ) : (
+            "Submit"
+          )}
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
