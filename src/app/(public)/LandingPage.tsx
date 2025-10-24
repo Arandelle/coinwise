@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import Footer from "../components/Footer";
+import AIChatWidget from "../components/AIChat";
 
 export default function CoinWiseLanding() {
   const [scrollY, setScrollY] = useState(0);
@@ -81,6 +83,7 @@ export default function CoinWiseLanding() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
+      <AIChatWidget />
       <nav
         className={`fixed w-full z-50 transition-all duration-300 ${
           scrollY > 50 ? "bg-white shadow-md" : "bg-transparent"
@@ -418,96 +421,19 @@ export default function CoinWiseLanding() {
             Join 50,000+ users who are already building their financial future
             with CoinWise
           </p>
-          <button className="px-10 py-5 bg-white text-emerald-600 rounded-xl font-bold text-lg hover:shadow-2xl transition-all duration-200 transform hover:scale-105">
-            Start Your Free Trial
-          </button>
+          <Link 
+          href={"/login"}
+          className="cursor-pointer px-10 py-5 bg-white text-emerald-600 rounded-xl font-bold text-lg hover:shadow-2xl transition-all duration-200 transform hover:scale-105">
+            Start Your Savings Journey
+          </Link>
           <p className="text-emerald-100 mt-6">
-            14-day free trial • No credit card required
+            Free as you go • No credit card required
           </p>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">C</span>
-                </div>
-                <span className="text-xl font-bold text-white">CoinWise</span>
-              </div>
-              <p className="text-sm">
-                Making financial wellness accessible to everyone.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-3">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Security
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-3">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Careers
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-3">Support</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-emerald-400">
-                    Privacy
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-800 pt-8 text-center text-sm">
-            <p>© 2025 CoinWise. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      {/** Footer */}
+      <Footer />
 
       <style jsx>{`
         @keyframes fadeInUp {
