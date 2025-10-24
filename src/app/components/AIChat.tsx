@@ -3,24 +3,43 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
+// Simple markdown parser for bold, italic, and line breaks
+const parseMarkdown = (text: string) => {
+  // Replace **bold** with <strong>
+  let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Replace *italic* with <em>
+  parsed = parsed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  
+  // Replace bullet points • with proper formatting
+  parsed = parsed.replace(/^• /gm, '• ');
+  
+  return parsed;
+};
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  time: string;
+}
+
 const AIChatWidget = () => {
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
-      role: "system",
+      role: "assistant",
       content:
         "Hi! I'm CoinWise AI, your personal finance assistant. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
-      time: new Date().toLocaleDateString([], {
+      time: new Date().toLocaleString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     },
   ]);
-
   const [userInput, setUserInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messageRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -59,73 +78,87 @@ const AIChatWidget = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const getAIResponse = (userMessage: string) => {
-    const lowerMessage = userMessage.toLowerCase();
+  const callAIAPI = async (prompt: string): Promise<string> => {
+    try {
+      const response = await fetch("/api/chat-ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
 
-    if (lowerMessage.includes("save") || lowerMessage.includes("saving")) {
-      return "Great question! Here are some key saving strategies:\n\n• Start with the 50/30/20 rule: 50% needs, 30% wants, 20% savings\n• Automate your savings to make it effortless\n• Build an emergency fund of 3-6 months expenses\n• Set specific savings goals with deadlines\n\nWith CoinWise, our AI analyzes your spending patterns and suggests personalized saving opportunities. Want to see how it works? Sign up to get started!";
-    } else if (lowerMessage.includes("budget")) {
-      return "Budgeting is the foundation of financial success! 💰\n\nA budget helps you:\n• Track where your money goes\n• Identify unnecessary expenses\n• Allocate funds to your priorities\n• Stay on track with financial goals\n\nCoinWise makes budgeting easy with:\n✨ AI-powered expense categorization\n✨ Real-time spending insights\n✨ Smart alerts when you're overspending\n✨ Visual dashboards to see your progress\n\nReady to take control of your finances?";
-    } else if (lowerMessage.includes("goal")) {
-      return "Setting financial goals is crucial for success! 🎯\n\nHere's how to set effective goals:\n1. Make them SMART (Specific, Measurable, Achievable, Relevant, Time-bound)\n2. Break big goals into smaller milestones\n3. Track progress regularly\n4. Adjust as needed\n\nCoinWise helps you:\n• Set and track multiple financial goals\n• Get AI recommendations on how to reach them faster\n• Visualize your progress with intuitive charts\n• Receive motivational reminders\n\nWhat financial goal would you like to achieve?";
-    } else if (
-      lowerMessage.includes("coinwise") ||
-      lowerMessage.includes("work") ||
-      lowerMessage.includes("features")
-    ) {
-      return "CoinWise is your AI-powered financial companion! 🚀\n\nKey Features:\n• 🤖 Smart AI that learns your spending habits\n• 📊 Automated expense tracking & categorization\n• 💡 Personalized saving recommendations\n• 🎯 Goal setting and progress tracking\n• 📈 Financial insights and trends\n• 🔔 Smart alerts for bills and overspending\n• 🔒 Bank-level security\n\nOur AI analyzes your finances and provides actionable advice to help you save more and spend smarter.\n\nCreate a free account to experience the full power of AI-driven finance management!";
-    } else if (
-      lowerMessage.includes("price") ||
-      lowerMessage.includes("cost") ||
-      lowerMessage.includes("free")
-    ) {
-      return "We offer flexible pricing options! 💳\n\n• **Free Plan**: Basic budgeting and tracking\n• **Pro Plan**: Advanced AI insights and unlimited goals\n• **Premium**: Priority support and custom reports\n\nSign up now to start with our free plan - no credit card required! You can upgrade anytime as your needs grow.";
-    } else if (
-      lowerMessage.includes("sign up") ||
-      lowerMessage.includes("register") ||
-      lowerMessage.includes("account")
-    ) {
-      return "Awesome! Ready to transform your finances? 🎉\n\nTo create your account:\n1. Click the 'Get Started' button at the top of the page\n2. Enter your email and create a password\n3. Complete the quick onboarding\n4. Start tracking your finances immediately!\n\nIt takes less than 2 minutes to get started. Your financial freedom journey begins now!";
-    } else {
-      return "I'd be happy to help you with that! Here are some things I can assist you with:\n\n• Budgeting tips and strategies\n• Saving and investment basics\n• Understanding CoinWise features\n• Setting financial goals\n• Getting started with the app\n\nFeel free to ask me anything about personal finance or CoinWise. You can also click on the quick questions below for instant answers!";
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to get AI response");
+      }
+
+      const data = await response.json();
+      
+      // Backend returns { "reply": "..." }
+      return data.reply || data.response || data.message || data;
+    } catch (error) {
+      console.error("AI API Error:", error);
+      throw error;
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!userInput.trim()) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       role: "user",
       content: userInput,
-      time: new Date().toLocaleDateString([], {
+      time: new Date().toLocaleString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = userInput;
     setUserInput("");
     setIsTyping(true);
+    setError(null);
 
-    // Simulate AI thinking
-    setTimeout(() => {
-      const aiResponse = {
-        role: "system",
-        content: getAIResponse(userInput),
-        time: new Date().toLocaleDateString([], {
+    try {
+      const aiResponseText = await callAIAPI(currentInput);
+
+      const aiMessage: Message = {
+        role: "assistant",
+        content: aiResponseText,
+        time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
       };
 
-      setMessages((prev) => [...prev, aiResponse]);
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      setError("Sorry, I'm having trouble connecting right now. Please try again.");
+      
+      // Optional: Add error message to chat
+      const errorMessage: Message = {
+        role: "assistant",
+        content: "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
+        time: new Date().toLocaleString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    }
   };
 
   const handleQuickQuestion = (question: string) => {
     setUserInput(question);
-    setTimeout(() => handleSendMessage(), 1000);
+    // Small delay for UX
+    setTimeout(() => {
+      const event = new KeyboardEvent("keypress", { key: "Enter" });
+      handleSendMessage();
+    }, 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -137,7 +170,7 @@ const AIChatWidget = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/** Chat button */}
+      {/* Chat button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -147,7 +180,6 @@ const AIChatWidget = () => {
              transition-all duration-300 group cursor-pointer"
           aria-label="Coinwise AI chat"
         >
-          {/* Circular inner container for the logo */}
           <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center">
             <Image
               src="/CoinwiseLogo_v8.png"
@@ -158,10 +190,8 @@ const AIChatWidget = () => {
             />
           </div>
 
-          {/* Notification dot */}
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse" />
 
-          {/* Tooltip */}
           <div
             className={`absolute bottom-full right-0 mb-2 px-3 py-2 bg-slate-800 
                   text-white text-sm rounded-lg shadow-lg opacity-0 
@@ -178,10 +208,10 @@ const AIChatWidget = () => {
         </button>
       )}
 
-      {/** Chat window with AI */}
+      {/* Chat window */}
       {isOpen && (
         <div className="bg-white rounded-2xl shadow-2xl w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
-          {/** Chat Header */}
+          {/* Chat Header */}
           <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -206,7 +236,14 @@ const AIChatWidget = () => {
             </button>
           </div>
 
-          {/** Chat Body - Messages */}
+          {/* Error banner */}
+          {error && (
+            <div className="bg-red-50 border-b border-red-200 px-4 py-2">
+              <p className="text-xs text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Chat Body - Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
             {messages.map((msg, index) => (
               <div
@@ -222,7 +259,9 @@ const AIChatWidget = () => {
                       : "bg-white text-slate-800 rounded-bl-none shadow-md"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                  <p className="text-sm whitespace-pre-line"
+                  dangerouslySetInnerHTML={{__html: parseMarkdown(msg.content)}}
+                  />
                   <p
                     className={`text-xs mt-1 ${
                       msg.role === "user"
@@ -287,11 +326,12 @@ const AIChatWidget = () => {
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything..."
-                className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                disabled={isTyping}
+                className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm disabled:bg-slate-50 disabled:cursor-not-allowed"
               />
               <button
                 onClick={handleSendMessage}
-                disabled={!userInput.trim()}
+                disabled={!userInput.trim() || isTyping}
                 className="bg-emerald-500 text-white p-3 rounded-xl hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >
@@ -300,9 +340,10 @@ const AIChatWidget = () => {
             </div>
             <p className="text-xs text-slate-400 mt-2 text-center">
               Not authenticated •{" "}
-              <Link 
-              href={"/signup"}
-              className="text-emerald-500 hover:underline font-medium">
+              <Link
+                href={"/signup"}
+                className="text-emerald-500 hover:underline font-medium"
+              >
                 Sign up for full features
               </Link>
             </p>
