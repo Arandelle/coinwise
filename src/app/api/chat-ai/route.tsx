@@ -5,7 +5,7 @@ export async function POST(req: Request){
 
         const body : AIPrompt = await req.json();
 
-        const response = await fetch(`http://127.0.0.1:8000/ai/coinwise-ai`, {
+        const response = await fetch(`${process.env.BACKEND_URL}/ai/coinwise-ai`, {
             method: "POST",
             headers: {"Content-Type" : "application/json"},
             body: JSON.stringify(body)
