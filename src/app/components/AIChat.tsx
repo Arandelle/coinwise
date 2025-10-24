@@ -24,10 +24,38 @@ interface Message {
 }
 
 const AIChatWidget = () => {
+  const GUEST_MESSAGE_LIMIT = 10;
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [userInput, setUserInput] = useState("");
+
+  const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const messageRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messageRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+// Load messages once when component mounts
+useEffect(() => {
+  const storedMessages = localStorage.getItem("guest_chat");
+  if (storedMessages) {
+    const parsed = JSON.parse(storedMessages);
+    setMessages(parsed);
+
+    // check if limit already reached
+    const userCount = parsed.filter((msg: Message) => msg.role === "user").length;
+    if(userCount >= GUEST_MESSAGE_LIMIT){
+      setIsGuestLimitReached(true);
+    }
+  } else {
+    setMessages([
+      {
       role: "assistant",
       content:
         "Hi! I'm CoinWise AI, your personal finance assistant. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
@@ -36,15 +64,24 @@ const AIChatWidget = () => {
         minute: "2-digit",
       }),
     },
-  ]);
-  const [userInput, setUserInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const messageRef = useRef<HTMLDivElement>(null);
+    ])
+  }
+  setIsInitialized(true);
+}, []);
 
-  const scrollToBottom = () => {
-    messageRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+// Scroll to bottom when chat opens
+useEffect(() => {
+  if (isOpen) {
+    setTimeout(() => scrollToBottom(), 100);
+  }
+}, [isOpen]);
+
+// Save messages to localStorage whenever they change (after initial load)
+useEffect(() => {
+  if (isInitialized) {
+    localStorage.setItem("guest_chat", JSON.stringify(messages));
+  }
+}, [messages, isInitialized]);
 
   useEffect(() => {
     scrollToBottom();
@@ -104,7 +141,22 @@ const AIChatWidget = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!userInput.trim()) return;
+    if (!userInput.trim() || isTyping || isGuestLimitReached) return;
+
+    // Count user messages to enforce guest limit
+    const userMessageCount = messages.filter(msg => msg.role === "user").length;
+    if (userMessageCount >= GUEST_MESSAGE_LIMIT) {
+      setIsGuestLimitReached(true);
+      const limitMessage: Message = {
+        role: "assistant",
+        content: `You've reached the free guest limit. 💡 Signup to continue chatting and unlock all features`,
+        time: new Date().toLocaleDateString([], {month: '2-digit', minute: "2-digit"})
+      }
+
+      setMessages((prev) => [...prev, limitMessage])
+      return;
+    };
+
 
     const userMessage: Message = {
       role: "user",
@@ -255,7 +307,7 @@ const AIChatWidget = () => {
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                     msg.role === "user"
-                      ? "bg-emerald-500 text-white rounded-br-none"
+                      ? "bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white rounded-br-none"
                       : "bg-white text-slate-800 rounded-bl-none shadow-md"
                   }`}
                 >
@@ -317,6 +369,15 @@ const AIChatWidget = () => {
             </div>
           )}
 
+          {isGuestLimitReached && (
+            <Link
+          href={"/signup"}
+          className="bg-slate-50 text-center text-sm text-slate-400"
+          >
+             Continue chatting by <span className="font-bold text-sm text-red-500">creating an account</span>
+          </Link>
+          )}
+           
           {/* Input */}
           <div className="p-4 bg-white border-t border-slate-200">
             <div className="flex gap-2">
@@ -325,8 +386,9 @@ const AIChatWidget = () => {
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
-                disabled={isTyping}
+                autoFocus
+                placeholder={isGuestLimitReached ? "Sign up or login to continue chatting..." : "Ask me anything..."}
+                disabled={isTyping || isGuestLimitReached}
                 className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm disabled:bg-slate-50 disabled:cursor-not-allowed"
               />
               <button
