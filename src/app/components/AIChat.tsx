@@ -1,21 +1,30 @@
-import { PiggyBank, Send, Slice, Sparkles, Target, TrendingUp, X } from "lucide-react";
+import {
+  PiggyBank,
+  Send,
+  Sparkles,
+  Target,
+  TrendingUp,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Simple markdown parser for bold, italic, and line breaks
-const parseMarkdown = (text: string) => {
-  // Replace **bold** with <strong>
-  let parsed = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+// const parseMarkdown = (text: string) => {
+//   // Replace **bold** with <strong>
+//   let parsed = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
-  // Replace *italic* with <em>
-  parsed = parsed.replace(/\*(.*?)\*/g, "<em>$1</em>");
+//   // Replace *italic* with <em>
+//   parsed = parsed.replace(/\*(.*?)\*/g, "<em>$1</em>");
 
-  // Replace bullet points • with proper formatting
-  parsed = parsed.replace(/^• /gm, "• ");
+//   // Replace bullet points • with proper formatting
+//   parsed = parsed.replace(/^• /gm, "• ");
 
-  return parsed;
-};
+//   return parsed;
+// };
 
 interface Message {
   role: "user" | "assistant";
@@ -71,9 +80,9 @@ const AIChatWidget = () => {
     }
   };
 
- const loadMoreMessages = () => {
+  const loadMoreMessages = () => {
     if (isLoadingMore || !hasMoreMessages) return;
-    
+
     setIsLoadingMore(true);
 
     // Get current scroll position before loading
@@ -81,14 +90,16 @@ const AIChatWidget = () => {
     const currentScrollHeight = scrollRef.current?.scrollHeight || 0;
 
     setTimeout(() => {
-      setVisibleCount(prev => Math.min(prev + MESSAGES_PER_PAGE, messages.length));
+      setVisibleCount((prev) =>
+        Math.min(prev + MESSAGES_PER_PAGE, messages.length)
+      );
 
       // Wait for DOM to update, then maintain scroll position
       setTimeout(() => {
         if (scrollRef.current) {
           const newScrollHeight = scrollRef.current.scrollHeight;
           const heightDifference = newScrollHeight - currentScrollHeight;
-          
+
           // Keep user at the same visual position
           scrollRef.current.scrollTop = currentScrollTop + heightDifference;
         }
@@ -96,7 +107,6 @@ const AIChatWidget = () => {
       }, 0);
     }, 300);
   };
-
 
   const getUsageData = (): UsageData => {
     const stored = localStorage.getItem("guest_usage");
@@ -157,10 +167,9 @@ const AIChatWidget = () => {
     }
   };
 
-  const scrollToBottom = (behavior : ScrollBehavior = "smooth") => {
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     messageRef.current?.scrollIntoView({ behavior });
   };
-
 
   // Load messages once when component mounts
   useEffect(() => {
@@ -197,7 +206,7 @@ const AIChatWidget = () => {
   // Scroll to bottom when chat opens
   useEffect(() => {
     if (isOpen) {
-     scrollToBottom('auto');
+      scrollToBottom("auto");
     }
   }, [isOpen]);
 
@@ -208,10 +217,10 @@ const AIChatWidget = () => {
     }
   }, [messages, isInitialized]);
 
-   // Scroll to bottom when new message is added (not when loading more)
+  // Scroll to bottom when new message is added (not when loading more)
   useEffect(() => {
     if (messages.length > lastMessageCountRef.current && !isLoadingMore) {
-      scrollToBottom('smooth');
+      scrollToBottom("smooth");
     }
     lastMessageCountRef.current = messages.length;
   }, [messages.length, isLoadingMore]);
@@ -298,12 +307,12 @@ const AIChatWidget = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    
+
     // Expand visible count if needed to show new message
     if (visibleCount < messages.length + 1) {
       setVisibleCount(messages.length + 1);
     }
-    
+
     const currentInput = userInput;
     setUserInput("");
     setIsTyping(true);
@@ -324,14 +333,16 @@ const AIChatWidget = () => {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-      
+
       // Expand visible count for AI response too
       if (visibleCount < messages.length + 2) {
         setVisibleCount(messages.length + 2);
       }
     } catch (error) {
-      setError("Sorry, I'm having trouble connecting right now. Please try again.");
-      
+      setError(
+        "Sorry, I'm having trouble connecting right now. Please try again."
+      );
+
       const errorMessage: Message = {
         role: "assistant",
         content: "I apologize, but I'm experiencing technical difficulties...",
@@ -363,7 +374,7 @@ const AIChatWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-0 md:right-6 z-50">
       {/* Chat button */}
       {!isOpen && (
         <button
@@ -371,7 +382,7 @@ const AIChatWidget = () => {
           className="relative bg-gradient-to-br from-amber-500 to-amber-500 
              text-white rounded-full p-4 shadow-2xl 
              hover:shadow-amber-500/50 hover:scale-110 
-             transition-all duration-300 group cursor-pointer"
+             transition-all duration-300 group cursor-pointer right-6"
           aria-label="Coinwise AI chat"
         >
           <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center">
@@ -404,7 +415,7 @@ const AIChatWidget = () => {
 
       {/* Chat window */}
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
+        <div className="bg-white rounded-2xl shadow-2xl w-[90%] md:w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 place-self-center">
           {/* Chat Header */}
           <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -490,29 +501,30 @@ const AIChatWidget = () => {
           )}
 
           {/* Chat Body - Messages */}
-          <div ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
-            
-              {/* Loading indicator */}
-        {isLoadingMore && (
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
-              <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-              Loading messages...
-            </div>
-          </div>
-        )}
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
+          >
+            {/* Loading indicator */}
+            {isLoadingMore && (
+              <div className="flex justify-center mb-4">
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
+                  <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  Loading messages...
+                </div>
+              </div>
+            )}
 
-
-        {/* Show message count */}
-        {hasMoreMessages && !isLoadingMore && (
-          <div className="flex justify-center mb-4">
-            <div className="px-4 py-2 bg-slate-100 rounded-lg text-xs text-slate-600">
-              Showing {visibleCount} of {messages.length} messages • Scroll up to load more
-            </div>
-          </div>
-        )}
+            {/* Show message count */}
+            {hasMoreMessages && !isLoadingMore && (
+              <div className="flex justify-center mb-4">
+                <div className="px-4 py-2 bg-slate-100 rounded-lg text-xs text-slate-600">
+                  Showing {visibleCount} of {messages.length} messages • Scroll
+                  up to load more
+                </div>
+              </div>
+            )}
 
             {visibleMessages.map((msg, index) => (
               <div
@@ -522,18 +534,47 @@ const AIChatWidget = () => {
                 }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 overflow-x-auto ${
                     msg.role === "user"
                       ? "bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white rounded-br-none"
                       : "bg-white text-slate-800 rounded-bl-none shadow-md"
                   }`}
                 >
-                  <p
-                    className="text-sm whitespace-pre-line"
-                    dangerouslySetInnerHTML={{
-                      __html: parseMarkdown(msg.content),
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => (
+                        <p className="leading-tight mb-1">
+                          {children}
+                        </p>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-semibold text-gray-900">
+                          {children}
+                        </strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic text-gray-700">{children}</em>
+                      ),
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline hover:text-blue-800"
+                        >
+                          {children}
+                        </a>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc list-inside pl-2 space-y-1 text-gray-700">
+                          {children}
+                        </ul>
+                      ),
                     }}
-                  />
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                   <p
                     className={`text-xs mt-1 ${
                       msg.role === "user"
