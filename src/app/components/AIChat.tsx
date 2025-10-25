@@ -32,7 +32,7 @@ interface UsageData {
 
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
-  const RESET_INTERVAL = 30 * 60 * 1000; // 30 minutes in ms
+  const RESET_INTERVAL = 60 * 60 * 1000; // 60 minutes in ms
   const MESSAGES_PER_PAGE = 10;
   const MAX_MESSAGE_LENGTH = 300;
 
@@ -360,7 +360,7 @@ const AIChatWidget = () => {
       icon: "📝",
       category: "tracking",
     },
-    { text: "Tips for saving money", icon: "🪙", category: "saving" },
+    { text: "Tips for saving money", icon: "🤑", category: "saving" },
 
     // Savings
     {
@@ -389,10 +389,10 @@ const AIChatWidget = () => {
     { text: "Debt payment strategies", icon: "💳", category: "planning" },
 
     // Filipino-specific
-    { text: "Paano mag-ipon ng pera?", icon: "🇵🇭", category: "filipino" },
-    { text: "Budget tips for Pinoys", icon: "🇵🇭", category: "filipino" },
-    { text: "Save money habang may utang", icon: "🇵🇭", category: "filipino" },
-    { text: "Emergency fund sa Pilipinas", icon: "🇵🇭", category: "filipino" },
+    { text: "Paano mag-ipon ng pera?", icon: "🛒", category: "filipino" },
+    { text: "Budget tips for Pinoys", icon: "🔗", category: "filipino" },
+    { text: "Save money habang may utang", icon: "💡", category: "filipino" },
+    { text: "Emergency fund sa Pilipinas", icon: "✍", category: "filipino" },
   ];
 
   // Get random 4 questions based on current hour
