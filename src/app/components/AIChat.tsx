@@ -1,4 +1,4 @@
-import { PiggyBank, Send, Sparkles, Target, TrendingUp, X } from "lucide-react";
+import { PiggyBank, Send, Slice, Sparkles, Target, TrendingUp, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
@@ -31,11 +31,14 @@ interface UsageData {
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
   const RESET_INTERVAL = 30 * 60 * 1000; // 30 minutes in ms
+  const MESSAGES_PER_PAGE = 10;
 
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [visibleCount, setVisibleCount] = useState(MESSAGES_PER_PAGE);
   const [userInput, setUserInput] = useState("");
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [usageCount, setUsageCount] = useState(0);
   const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
@@ -44,7 +47,56 @@ const AIChatWidget = () => {
 
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
+  const isUserScrollingRef = useRef(false);
+  const lastMessageCountRef = useRef(0);
+
+  const visibleMessages = messages.slice(-visibleCount);
+  const hasMoreMessages = messages.length > visibleCount;
+
+  const handleScroll = () => {
+    if (!scrollRef.current || isLoadingMore || !hasMoreMessages) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+
+    // Track if user is manually scrolling
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    isUserScrollingRef.current = !isNearBottom;
+
+    // If scrolled near top (within 100px), load more
+    if (scrollTop < 100) {
+      loadMoreMessages();
+    }
+  };
+
+ const loadMoreMessages = () => {
+    if (isLoadingMore || !hasMoreMessages) return;
+    
+    setIsLoadingMore(true);
+
+    // Get current scroll position before loading
+    const currentScrollTop = scrollRef.current?.scrollTop || 0;
+    const currentScrollHeight = scrollRef.current?.scrollHeight || 0;
+
+    setTimeout(() => {
+      setVisibleCount(prev => Math.min(prev + MESSAGES_PER_PAGE, messages.length));
+
+      // Wait for DOM to update, then maintain scroll position
+      setTimeout(() => {
+        if (scrollRef.current) {
+          const newScrollHeight = scrollRef.current.scrollHeight;
+          const heightDifference = newScrollHeight - currentScrollHeight;
+          
+          // Keep user at the same visual position
+          scrollRef.current.scrollTop = currentScrollTop + heightDifference;
+        }
+        setIsLoadingMore(false);
+      }, 0);
+    }, 300);
+  };
+
 
   const getUsageData = (): UsageData => {
     const stored = localStorage.getItem("guest_usage");
@@ -105,9 +157,10 @@ const AIChatWidget = () => {
     }
   };
 
-  const scrollToBottom = () => {
-    messageRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior : ScrollBehavior = "smooth") => {
+    messageRef.current?.scrollIntoView({ behavior });
   };
+
 
   // Load messages once when component mounts
   useEffect(() => {
@@ -144,7 +197,7 @@ const AIChatWidget = () => {
   // Scroll to bottom when chat opens
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => scrollToBottom(), 100);
+     scrollToBottom('auto');
     }
   }, [isOpen]);
 
@@ -155,9 +208,13 @@ const AIChatWidget = () => {
     }
   }, [messages, isInitialized]);
 
+   // Scroll to bottom when new message is added (not when loading more)
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
+    if (messages.length > lastMessageCountRef.current && !isLoadingMore) {
+      scrollToBottom('smooth');
+    }
+    lastMessageCountRef.current = messages.length;
+  }, [messages.length, isLoadingMore]);
 
   const quickQuestions = [
     {
@@ -215,20 +272,18 @@ const AIChatWidget = () => {
   const handleSendMessage = async () => {
     if (!userInput.trim() || isTyping || isGuestLimitReached) return;
 
-    // get the usage count
+    // Check current usage
     const usageData = getUsageData();
-
     if (usageData.count >= GUEST_MESSAGE_LIMIT) {
       setIsGuestLimitReached(true);
       const limitMessage: Message = {
         role: "assistant",
-        content: `You've reached the free guest limit. 💡 Signup to continue chatting and unlock all features`,
-        time: new Date().toLocaleDateString([], {
-          month: "2-digit",
+        content: `You've reached the free guest limit...`,
+        time: new Date().toLocaleString([], {
+          hour: "2-digit",
           minute: "2-digit",
         }),
       };
-
       setMessages((prev) => [...prev, limitMessage]);
       return;
     }
@@ -243,12 +298,17 @@ const AIChatWidget = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    
+    // Expand visible count if needed to show new message
+    if (visibleCount < messages.length + 1) {
+      setVisibleCount(messages.length + 1);
+    }
+    
     const currentInput = userInput;
     setUserInput("");
     setIsTyping(true);
     setError(null);
 
-    // increment usage data
     incrementData();
 
     try {
@@ -264,16 +324,17 @@ const AIChatWidget = () => {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+      
+      // Expand visible count for AI response too
+      if (visibleCount < messages.length + 2) {
+        setVisibleCount(messages.length + 2);
+      }
     } catch (error) {
-      setError(
-        "Sorry, I'm having trouble connecting right now. Please try again."
-      );
-
-      // Optional: Add error message to chat
+      setError("Sorry, I'm having trouble connecting right now. Please try again.");
+      
       const errorMessage: Message = {
         role: "assistant",
-        content:
-          "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
+        content: "I apologize, but I'm experiencing technical difficulties...",
         time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -429,8 +490,31 @@ const AIChatWidget = () => {
           )}
 
           {/* Chat Body - Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
-            {messages.map((msg, index) => (
+          <div ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+            
+              {/* Loading indicator */}
+        {isLoadingMore && (
+          <div className="flex justify-center mb-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
+              <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+              Loading messages...
+            </div>
+          </div>
+        )}
+
+
+        {/* Show message count */}
+        {hasMoreMessages && !isLoadingMore && (
+          <div className="flex justify-center mb-4">
+            <div className="px-4 py-2 bg-slate-100 rounded-lg text-xs text-slate-600">
+              Showing {visibleCount} of {messages.length} messages • Scroll up to load more
+            </div>
+          </div>
+        )}
+
+            {visibleMessages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex ${
