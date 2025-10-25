@@ -6,14 +6,14 @@ import React, { useEffect, useRef, useState } from "react";
 // Simple markdown parser for bold, italic, and line breaks
 const parseMarkdown = (text: string) => {
   // Replace **bold** with <strong>
-  let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  
+  let parsed = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
   // Replace *italic* with <em>
-  parsed = parsed.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  
+  parsed = parsed.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
   // Replace bullet points • with proper formatting
-  parsed = parsed.replace(/^• /gm, '• ');
-  
+  parsed = parsed.replace(/^• /gm, "• ");
+
   return parsed;
 };
 
@@ -23,65 +23,137 @@ interface Message {
   time: string;
 }
 
+interface UsageData {
+  count: number;
+  resetTime: number;
+}
+
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
+  const RESET_INTERVAL = 30 * 60 * 1000; // 30 minutes in ms
+
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState("");
 
+  const [usageCount, setUsageCount] = useState(0);
   const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [resetTime, setResetTime] = useState<number>(0);
 
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messageRef = useRef<HTMLDivElement>(null);
 
+  const getUsageData = (): UsageData => {
+    const stored = localStorage.getItem("guest_usage");
+    const now = Date.now();
+
+    if (stored) {
+      const data: UsageData = JSON.parse(stored);
+
+      if (now >= data.resetTime) {
+        // reset usage
+        const newData: UsageData = {
+          count: 0,
+          resetTime: now + RESET_INTERVAL,
+        };
+
+        localStorage.setItem("guest_usage", JSON.stringify(newData));
+        return newData;
+      }
+      return data;
+    } else {
+      // initialize new data
+      const newData: UsageData = {
+        count: 0,
+        resetTime: now + RESET_INTERVAL,
+      };
+      localStorage.setItem("guest_usage", JSON.stringify(newData));
+      return newData;
+    }
+  };
+
+  const getTimeRemaining = () => {
+    const now = Date.now();
+    const remaining = resetTime - now;
+
+    if (remaining <= 0) return "0m";
+
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  // update usage count
+  const incrementData = () => {
+    const currentData = getUsageData();
+    const newData: UsageData = {
+      count: currentData.count + 1,
+      resetTime: currentData.resetTime,
+    };
+
+    localStorage.setItem("guest_usage", JSON.stringify(newData));
+    setUsageCount(newData.count);
+    setResetTime(newData.resetTime);
+
+    if (newData.count >= GUEST_MESSAGE_LIMIT) {
+      setIsGuestLimitReached(true);
+    }
+  };
+
   const scrollToBottom = () => {
     messageRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-// Load messages once when component mounts
-useEffect(() => {
-  const storedMessages = localStorage.getItem("guest_chat");
-  if (storedMessages) {
-    const parsed = JSON.parse(storedMessages);
-    setMessages(parsed);
+  // Load messages once when component mounts
+  useEffect(() => {
+    const storedMessages = localStorage.getItem("guest_chat");
+    if (storedMessages) {
+      const parsed = JSON.parse(storedMessages);
+      setMessages(parsed);
+    } else {
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            "Hi! I'm CoinWise AI, your personal finance assistant. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
+          time: new Date().toLocaleString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    }
 
-    // check if limit already reached
-    const userCount = parsed.filter((msg: Message) => msg.role === "user").length;
-    if(userCount >= GUEST_MESSAGE_LIMIT){
+    // Load and check usage
+    const usageData = getUsageData();
+    setUsageCount(usageData.count);
+    setResetTime(usageData.resetTime);
+
+    if (usageData.count >= GUEST_MESSAGE_LIMIT) {
       setIsGuestLimitReached(true);
     }
-  } else {
-    setMessages([
-      {
-      role: "assistant",
-      content:
-        "Hi! I'm CoinWise AI, your personal finance assistant. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
-      time: new Date().toLocaleString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-    ])
-  }
-  setIsInitialized(true);
-}, []);
 
-// Scroll to bottom when chat opens
-useEffect(() => {
-  if (isOpen) {
-    setTimeout(() => scrollToBottom(), 100);
-  }
-}, [isOpen]);
+    setIsInitialized(true);
+  }, []);
 
-// Save messages to localStorage whenever they change (after initial load)
-useEffect(() => {
-  if (isInitialized) {
-    localStorage.setItem("guest_chat", JSON.stringify(messages));
-  }
-}, [messages, isInitialized]);
+  // Scroll to bottom when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => scrollToBottom(), 100);
+    }
+  }, [isOpen]);
+
+  // Save messages to localStorage whenever they change (after initial load)
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem("guest_chat", JSON.stringify(messages));
+    }
+  }, [messages, isInitialized]);
 
   useEffect(() => {
     scrollToBottom();
@@ -131,7 +203,7 @@ useEffect(() => {
       }
 
       const data = await response.json();
-      
+
       // Backend returns { "reply": "..." }
       return data.reply || data.response || data.message || data;
     } catch (error) {
@@ -143,20 +215,23 @@ useEffect(() => {
   const handleSendMessage = async () => {
     if (!userInput.trim() || isTyping || isGuestLimitReached) return;
 
-    // Count user messages to enforce guest limit
-    const userMessageCount = messages.filter(msg => msg.role === "user").length;
-    if (userMessageCount >= GUEST_MESSAGE_LIMIT) {
+    // get the usage count
+    const usageData = getUsageData();
+
+    if (usageData.count >= GUEST_MESSAGE_LIMIT) {
       setIsGuestLimitReached(true);
       const limitMessage: Message = {
         role: "assistant",
         content: `You've reached the free guest limit. 💡 Signup to continue chatting and unlock all features`,
-        time: new Date().toLocaleDateString([], {month: '2-digit', minute: "2-digit"})
-      }
+        time: new Date().toLocaleDateString([], {
+          month: "2-digit",
+          minute: "2-digit",
+        }),
+      };
 
-      setMessages((prev) => [...prev, limitMessage])
+      setMessages((prev) => [...prev, limitMessage]);
       return;
-    };
-
+    }
 
     const userMessage: Message = {
       role: "user",
@@ -173,6 +248,9 @@ useEffect(() => {
     setIsTyping(true);
     setError(null);
 
+    // increment usage data
+    incrementData();
+
     try {
       const aiResponseText = await callAIAPI(currentInput);
 
@@ -187,12 +265,15 @@ useEffect(() => {
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
-      setError("Sorry, I'm having trouble connecting right now. Please try again.");
-      
+      setError(
+        "Sorry, I'm having trouble connecting right now. Please try again."
+      );
+
       // Optional: Add error message to chat
       const errorMessage: Message = {
         role: "assistant",
-        content: "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
+        content:
+          "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
         time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -295,6 +376,58 @@ useEffect(() => {
             </div>
           )}
 
+          {isGuestLimitReached && (
+            <div className="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 shadow-sm">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 mb-2">
+                  <svg
+                    className="w-5 h-5 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <p className="text-base font-bold text-red-600">
+                    Guest Limit Reached
+                  </p>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Resets in:{" "}
+                  <span className="font-mono font-medium text-slate-700">
+                    {getTimeRemaining()}
+                  </span>
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/signup"
+                  className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm"
+                >
+                  Sign Up Free
+                </Link>
+                <span className="text-slate-400">or</span>
+                <Link
+                  href="/login"
+                  className="px-6 py-2 bg-white text-slate-700 font-semibold border-2 border-slate-300 rounded-lg hover:border-slate-400 hover:bg-slate-50 transition-colors"
+                >
+                  Log In
+                </Link>
+              </div>
+
+              <p className="text-xs text-slate-500 text-center max-w-md">
+                Create a free account to get unlimited messages and access
+                premium features
+              </p>
+            </div>
+          )}
+
           {/* Chat Body - Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
             {messages.map((msg, index) => (
@@ -311,8 +444,11 @@ useEffect(() => {
                       : "bg-white text-slate-800 rounded-bl-none shadow-md"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-line"
-                  dangerouslySetInnerHTML={{__html: parseMarkdown(msg.content)}}
+                  <p
+                    className="text-sm whitespace-pre-line"
+                    dangerouslySetInnerHTML={{
+                      __html: parseMarkdown(msg.content),
+                    }}
                   />
                   <p
                     className={`text-xs mt-1 ${
@@ -369,15 +505,6 @@ useEffect(() => {
             </div>
           )}
 
-          {isGuestLimitReached && (
-            <Link
-          href={"/signup"}
-          className="bg-slate-50 text-center text-sm text-slate-400"
-          >
-             Continue chatting by <span className="font-bold text-sm text-red-500">creating an account</span>
-          </Link>
-          )}
-           
           {/* Input */}
           <div className="p-4 bg-white border-t border-slate-200">
             <div className="flex gap-2">
@@ -387,7 +514,11 @@ useEffect(() => {
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 autoFocus
-                placeholder={isGuestLimitReached ? "Sign up or login to continue chatting..." : "Ask me anything..."}
+                placeholder={
+                  isGuestLimitReached
+                    ? "Sign up or login to continue chatting..."
+                    : "Ask me anything..."
+                }
                 disabled={isTyping || isGuestLimitReached}
                 className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm disabled:bg-slate-50 disabled:cursor-not-allowed"
               />
@@ -403,10 +534,10 @@ useEffect(() => {
             <p className="text-xs text-slate-400 mt-2 text-center">
               Not authenticated •{" "}
               <Link
-                href={"/signup"}
+                href={"/login"}
                 className="text-emerald-500 hover:underline font-medium"
               >
-                Sign up for full features
+                Login for full features
               </Link>
             </p>
           </div>
