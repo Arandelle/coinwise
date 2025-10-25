@@ -37,6 +37,7 @@ interface UsageData {
   resetTime: number;
 }
 
+
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
   const RESET_INTERVAL = 30 * 60 * 1000; // 30 minutes in ms
@@ -373,8 +374,72 @@ const AIChatWidget = () => {
     }
   };
 
+  const [currentQuestions, setCurrentQuestions] = useState<Array<{text: string, icon: React.ReactNode}>>([]);
+  
+  // All available quick questions
+  const allQuickQuestions = [
+    // Budgeting
+    { text: "How do I create a budget?", icon: "💰", category: "budgeting" },
+    { text: "What's the 50/30/20 rule?", icon: "📊", category: "budgeting" },
+    { text: "How to track monthly expenses?", icon: "📝", category: "tracking" },
+    { text: "Tips for saving money", icon: "🪙", category: "saving" },
+    
+    // Savings
+    { text: "Best way to save for emergencies?", icon: "🚨", category: "saving" },
+    { text: "How much should I save monthly?", icon: "💵", category: "saving" },
+    { text: "Where to keep emergency funds?", icon: "🏦", category: "saving" },
+    { text: "How to build a savings habit?", icon: "🎯", category: "saving" },
+    
+    // Expenses
+    { text: "How to reduce daily expenses?", icon: "✂️", category: "expenses" },
+    { text: "What are needs vs wants?", icon: "🤔", category: "expenses" },
+    { text: "Track grocery spending tips", icon: "🛒", category: "expenses" },
+    { text: "How to cut subscription costs?", icon: "📱", category: "expenses" },
+    
+    // Planning
+    { text: "How to set financial goals?", icon: "🎯", category: "planning" },
+    { text: "Plan for big purchases", icon: "🏠", category: "planning" },
+    { text: "Retirement savings tips", icon: "👴", category: "planning" },
+    { text: "Debt payment strategies", icon: "💳", category: "planning" },
+    
+    // Filipino-specific
+    { text: "Paano mag-ipon ng pera?", icon: "🇵🇭", category: "filipino" },
+    { text: "Budget tips for Pinoys", icon: "🇵🇭", category: "filipino" },
+    { text: "Save money habang may utang", icon: "🇵🇭", category: "filipino" },
+    { text: "Emergency fund sa Pilipinas", icon: "🇵🇭", category: "filipino" },
+  ];
+
+  // Get random 4 questions based on current hour
+  const getRotatedQuestions = () => {
+    const now = new Date();
+    const currentHour = now.getMilliseconds();
+    
+    // Use hour as seed for consistent questions within the hour
+    const seed = currentHour;
+    
+    // Shuffle array based on seed
+    const shuffled = [...allQuickQuestions].sort((a, b) => {
+      const hashA = (seed * 31 + a.text.length) % allQuickQuestions.length;
+      const hashB = (seed * 31 + b.text.length) % allQuickQuestions.length;
+      return hashA - hashB;
+    });
+    
+    return shuffled.slice(0, 4);
+  };
+
+  // Initialize and update questions every hour
+  useEffect(() => {
+    const updateQuestions = () => {
+      setCurrentQuestions(getRotatedQuestions());
+    };
+
+    // Set initial questions
+    updateQuestions();
+  }, []);
+
+
   return (
-    <div className="fixed bottom-6 right-0 md:right-6 z-50">
+    <div className="fixed w-full md:w-auto bottom-6 right-0 md:right-6 z-50">
       {/* Chat button */}
       {!isOpen && (
         <button
@@ -629,6 +694,29 @@ const AIChatWidget = () => {
               </div>
             </div>
           )}
+
+          { showTooltip && currentQuestions.length > 0 && (
+        <div className="px-4 py-3 bg-white border-t border-slate-200">
+          <p className="text-xs text-slate-500 mb-2 font-medium">
+            💡 Quick questions:
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {currentQuestions.map((q, index) => (
+              <button
+                key={index}
+                onClick={() => {handleQuickQuestion(q.text); setShowTooltip(false);}}
+                className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-700 px-3 py-2 rounded-lg transition-all hover:shadow-md"
+              >
+                <span>{q.icon}</span>
+                <span className="truncate text-left">{q.text}</span>
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-slate-400 mt-2 text-center">
+            ⏰ Questions refresh every hour
+          </p>
+        </div>
+      )}
 
           {/* Input */}
           <div className="p-4 bg-white border-t border-slate-200">

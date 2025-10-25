@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/lib/mongodb.js", "src/app/api/transactions/route.js", "src/app/api/transactions/[id]/route.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/lib/mongodb.js", "src/app/api/transactions/route.js", "src/app/api/transactions/[id]/route.ts", "src/app/components/QuickQuestions.jsx"],
   "exclude": ["node_modules"]
 }
