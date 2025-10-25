@@ -1,11 +1,4 @@
-import {
-  PiggyBank,
-  Send,
-  Sparkles,
-  Target,
-  TrendingUp,
-  X,
-} from "lucide-react";
+import { PiggyBank, Send, Sparkles, Target, TrendingUp, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
@@ -37,11 +30,11 @@ interface UsageData {
   resetTime: number;
 }
 
-
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
   const RESET_INTERVAL = 30 * 60 * 1000; // 30 minutes in ms
   const MESSAGES_PER_PAGE = 10;
+  const MAX_MESSAGE_LENGTH = 300;
 
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +50,8 @@ const AIChatWidget = () => {
 
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [showQuickQuestions, setShowQuickQuestions] = useState(true);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
@@ -183,7 +178,7 @@ const AIChatWidget = () => {
         {
           role: "assistant",
           content:
-            "Hi! I'm CoinWise AI, your personal finance assistant. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
+            "Hi! I'm CoinWise AI, your personal finance agent. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
           time: new Date().toLocaleString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -225,29 +220,6 @@ const AIChatWidget = () => {
     }
     lastMessageCountRef.current = messages.length;
   }, [messages.length, isLoadingMore]);
-
-  const quickQuestions = [
-    {
-      icon: <PiggyBank size={16} />,
-      text: "How do I start saving?",
-      category: "savings",
-    },
-    {
-      icon: <TrendingUp size={16} />,
-      text: "What is budgeting?",
-      category: "budget",
-    },
-    {
-      icon: <Target size={16} />,
-      text: "Setting financial goals",
-      category: "goals",
-    },
-    {
-      icon: <Sparkles size={16} />,
-      text: "How does CoinWise work?",
-      category: "product",
-    },
-  ];
 
   useEffect(() => {
     const timer = setTimeout(() => setShowTooltip(false), 10000);
@@ -374,34 +346,48 @@ const AIChatWidget = () => {
     }
   };
 
-  const [currentQuestions, setCurrentQuestions] = useState<Array<{text: string, icon: React.ReactNode}>>([]);
-  
+  const [currentQuestions, setCurrentQuestions] = useState<
+    Array<{ text: string; icon: React.ReactNode }>
+  >([]);
+
   // All available quick questions
   const allQuickQuestions = [
     // Budgeting
     { text: "How do I create a budget?", icon: "💰", category: "budgeting" },
     { text: "What's the 50/30/20 rule?", icon: "📊", category: "budgeting" },
-    { text: "How to track monthly expenses?", icon: "📝", category: "tracking" },
+    {
+      text: "How to track monthly expenses?",
+      icon: "📝",
+      category: "tracking",
+    },
     { text: "Tips for saving money", icon: "🪙", category: "saving" },
-    
+
     // Savings
-    { text: "Best way to save for emergencies?", icon: "🚨", category: "saving" },
+    {
+      text: "Best way to save for emergencies?",
+      icon: "🚨",
+      category: "saving",
+    },
     { text: "How much should I save monthly?", icon: "💵", category: "saving" },
     { text: "Where to keep emergency funds?", icon: "🏦", category: "saving" },
     { text: "How to build a savings habit?", icon: "🎯", category: "saving" },
-    
+
     // Expenses
     { text: "How to reduce daily expenses?", icon: "✂️", category: "expenses" },
     { text: "What are needs vs wants?", icon: "🤔", category: "expenses" },
     { text: "Track grocery spending tips", icon: "🛒", category: "expenses" },
-    { text: "How to cut subscription costs?", icon: "📱", category: "expenses" },
-    
+    {
+      text: "How to cut subscription costs?",
+      icon: "📱",
+      category: "expenses",
+    },
+
     // Planning
     { text: "How to set financial goals?", icon: "🎯", category: "planning" },
     { text: "Plan for big purchases", icon: "🏠", category: "planning" },
     { text: "Retirement savings tips", icon: "👴", category: "planning" },
     { text: "Debt payment strategies", icon: "💳", category: "planning" },
-    
+
     // Filipino-specific
     { text: "Paano mag-ipon ng pera?", icon: "🇵🇭", category: "filipino" },
     { text: "Budget tips for Pinoys", icon: "🇵🇭", category: "filipino" },
@@ -413,17 +399,17 @@ const AIChatWidget = () => {
   const getRotatedQuestions = () => {
     const now = new Date();
     const currentHour = now.getMilliseconds();
-    
+
     // Use hour as seed for consistent questions within the hour
     const seed = currentHour;
-    
+
     // Shuffle array based on seed
     const shuffled = [...allQuickQuestions].sort((a, b) => {
       const hashA = (seed * 31 + a.text.length) % allQuickQuestions.length;
       const hashB = (seed * 31 + b.text.length) % allQuickQuestions.length;
       return hashA - hashB;
     });
-    
+
     return shuffled.slice(0, 4);
   };
 
@@ -437,13 +423,15 @@ const AIChatWidget = () => {
     updateQuestions();
   }, []);
 
-
   return (
-    <div className="fixed w-full md:w-auto bottom-6 right-0 md:right-6 z-50">
+    <div className="fixed bottom-6 right-0 md:right-6 z-50">
       {/* Chat button */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setIsOpen(true);
+            setShowQuickQuestions(true);
+          }}
           className="relative bg-gradient-to-br from-amber-500 to-amber-500 
              text-white rounded-full p-4 shadow-2xl 
              hover:shadow-amber-500/50 hover:scale-110 
@@ -480,7 +468,7 @@ const AIChatWidget = () => {
 
       {/* Chat window */}
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl w-[90%] md:w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 place-self-center">
+        <div className="bg-white rounded-2xl shadow-2xl md:w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 place-self-center mx-4">
           {/* Chat Header */}
           <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -609,9 +597,7 @@ const AIChatWidget = () => {
                     remarkPlugins={[remarkGfm]}
                     components={{
                       p: ({ children }) => (
-                        <p className="leading-tight mb-1">
-                          {children}
-                        </p>
+                        <p className="leading-tight mb-1">{children}</p>
                       ),
                       strong: ({ children }) => (
                         <strong className="font-semibold text-gray-900">
@@ -674,70 +660,73 @@ const AIChatWidget = () => {
             <div ref={messageRef} />
           </div>
 
-          {/* Quick Questions */}
-          {messages.length === 1 && (
-            <div className="px-4 py-3 bg-white border-t border-slate-200">
+          {showQuickQuestions && currentQuestions.length > 0 && (
+            <div className="px-4 py-3 bg-white border-t border-slate-200 relative">
               <p className="text-xs text-slate-500 mb-2 font-medium">
-                Quick questions:
+                💡 Quick questions:
               </p>
+              <X
+                onClick={() => setShowQuickQuestions(false)}
+                className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
+              />
               <div className="grid grid-cols-2 gap-2">
-                {quickQuestions.map((q, index) => (
+                {currentQuestions.map((q, index) => (
                   <button
                     key={index}
-                    onClick={() => handleQuickQuestion(q.text)}
+                    onClick={() => {
+                      handleQuickQuestion(q.text);
+                    }}
                     className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-700 px-3 py-2 rounded-lg transition-all hover:shadow-md"
                   >
-                    {q.icon}
-                    <span className="truncate">{q.text}</span>
+                    <span>{q.icon}</span>
+                    <span className="truncate text-left">{q.text}</span>
                   </button>
                 ))}
               </div>
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                ⏰ Questions refresh every hour
+              </p>
             </div>
           )}
 
-          { showTooltip && currentQuestions.length > 0 && (
-        <div className="px-4 py-3 bg-white border-t border-slate-200">
-          <p className="text-xs text-slate-500 mb-2 font-medium">
-            💡 Quick questions:
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {currentQuestions.map((q, index) => (
-              <button
-                key={index}
-                onClick={() => {handleQuickQuestion(q.text); setShowTooltip(false);}}
-                className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-700 px-3 py-2 rounded-lg transition-all hover:shadow-md"
-              >
-                <span>{q.icon}</span>
-                <span className="truncate text-left">{q.text}</span>
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-slate-400 mt-2 text-center">
-            ⏰ Questions refresh every hour
-          </p>
-        </div>
-      )}
-
           {/* Input */}
-          <div className="p-4 bg-white border-t border-slate-200">
-            <div className="flex gap-2">
-              <input
-                type="text"
+          <div className="p-4 space-y-2 bg-white border-t border-slate-200">
+                          {/* Character counter */}
+              {userInput.length > 0 && (
+                <div className={`text-xs ${userInput.length >= MAX_MESSAGE_LENGTH ? "text-red-500" : "text-slate-400"}`}>
+                  {userInput.length} / {MAX_MESSAGE_LENGTH} characters
+                  {userInput.length >= MAX_MESSAGE_LENGTH && (<span> - Maximum limit reached</span>)}
+                </div>
+              )}
+            <div className="flex gap-2 items-center">
+              <textarea
                 value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                autoFocus
-                placeholder={
-                  isGuestLimitReached
-                    ? "Sign up or login to continue chatting..."
-                    : "Ask me anything..."
-                }
-                disabled={isTyping || isGuestLimitReached}
-                className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm disabled:bg-slate-50 disabled:cursor-not-allowed"
+                onChange={(e) => {
+                  setUserInput(e.target.value);
+                  // Auto-resize
+                  e.target.style.height = "auto";
+                  e.target.style.height =
+                    Math.min(e.target.scrollHeight, 150) + "px";
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                placeholder="Ask CoinWise AI."
+                className="w-full px-4 py-3 pr-24 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto"
+                style={{ minHeight: "52px", maxHeight: "200px" }}
+                rows={1}
+                maxLength={MAX_MESSAGE_LENGTH}
               />
+
               <button
-                onClick={handleSendMessage}
-                disabled={!userInput.trim() || isTyping}
+                onClick={() => {
+                  handleSendMessage();
+                  setShowQuickQuestions(false);
+                }}
+                disabled={!userInput.trim() || isTyping || userInput.length === 0 || userInput.length >= MAX_MESSAGE_LENGTH || isGuestLimitReached}
                 className="bg-emerald-500 text-white p-3 rounded-xl hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >
