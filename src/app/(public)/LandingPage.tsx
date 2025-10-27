@@ -211,9 +211,11 @@ export default function CoinWiseLanding() {
               >
                 Start CoinWise Free!
               </Link>
-              <button className="px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold text-lg border-2 border-slate-200 hover:border-emerald-500 transition-all duration-200">
+              <Link 
+              href={"/guest"}
+              className="px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold text-lg border-2 border-slate-200 hover:border-emerald-500 transition-all duration-200">
                 Explore Guest Mode
-              </button>
+              </Link>
             </div>
 
             <p className="text-sm text-slate-500 mt-6">
