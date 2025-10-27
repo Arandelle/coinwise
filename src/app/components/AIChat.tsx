@@ -1,7 +1,7 @@
-import { PiggyBank, Send, Sparkles, Target, TrendingUp, X } from "lucide-react";
+import { Send, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -43,7 +43,7 @@ const AIChatWidget = () => {
   const [userInput, setUserInput] = useState("");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const [usageCount, setUsageCount] = useState(0);
+  const [, setUsageCount] = useState<number>(0);
   const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [resetTime, setResetTime] = useState<number>(0);
@@ -104,7 +104,7 @@ const AIChatWidget = () => {
     }, 300);
   };
 
-  const getUsageData = (): UsageData => {
+  const getUsageData = useCallback((): UsageData => {
     const stored = localStorage.getItem("guest_usage");
     const now = Date.now();
 
@@ -131,7 +131,7 @@ const AIChatWidget = () => {
       localStorage.setItem("guest_usage", JSON.stringify(newData));
       return newData;
     }
-  };
+  }, []);
 
   const getTimeRemaining = () => {
     const now = Date.now();
@@ -197,7 +197,7 @@ const AIChatWidget = () => {
     }
 
     setIsInitialized(true);
-  }, []);
+  }, [getUsageData]);
 
   // Scroll to bottom when chat opens
   useEffect(() => {
@@ -313,7 +313,7 @@ const AIChatWidget = () => {
       }
     } catch (error) {
       setError(
-        "Sorry, I'm having trouble connecting right now. Please try again."
+        `Sorry, I'm having trouble connecting right now. Please try again.${error}`
       );
 
       const errorMessage: Message = {
@@ -332,19 +332,14 @@ const AIChatWidget = () => {
 
   const handleQuickQuestion = (question: string) => {
     setUserInput(question);
-    // Small delay for UX
-    setTimeout(() => {
-      const event = new KeyboardEvent("keypress", { key: "Enter" });
-      handleSendMessage();
-    }, 100);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+  // const handleKeyPress = (e: React.KeyboardEvent) => {
+  //   if (e.key === "Enter" && !e.shiftKey) {
+  //     e.preventDefault();
+  //     handleSendMessage();
+  //   }
+  // };
 
   const [currentQuestions, setCurrentQuestions] = useState<
     Array<{ text: string; icon: React.ReactNode }>
@@ -396,7 +391,7 @@ const AIChatWidget = () => {
   ];
 
   // Get random 4 questions based on current hour
-  const getRotatedQuestions = () => {
+  const getRotatedQuestions = useCallback(() => {
     const now = new Date();
     const currentHour = now.getMilliseconds();
 
@@ -411,7 +406,7 @@ const AIChatWidget = () => {
     });
 
     return shuffled.slice(0, 4);
-  };
+  }, []);
 
   // Initialize and update questions every hour
   useEffect(() => {
@@ -691,13 +686,21 @@ const AIChatWidget = () => {
 
           {/* Input */}
           <div className="p-4 space-y-2 bg-white border-t border-slate-200">
-                          {/* Character counter */}
-              {userInput.length > 0 && (
-                <div className={`text-xs ${userInput.length >= MAX_MESSAGE_LENGTH ? "text-red-500" : "text-slate-400"}`}>
-                  {userInput.length} / {MAX_MESSAGE_LENGTH} characters
-                  {userInput.length >= MAX_MESSAGE_LENGTH && (<span> - Maximum limit reached</span>)}
-                </div>
-              )}
+            {/* Character counter */}
+            {userInput.length > 0 && (
+              <div
+                className={`text-xs ${
+                  userInput.length >= MAX_MESSAGE_LENGTH
+                    ? "text-red-500"
+                    : "text-slate-400"
+                }`}
+              >
+                {userInput.length} / {MAX_MESSAGE_LENGTH} characters
+                {userInput.length >= MAX_MESSAGE_LENGTH && (
+                  <span> - Maximum limit reached</span>
+                )}
+              </div>
+            )}
             <div className="flex gap-2 items-center">
               <textarea
                 value={userInput}
@@ -726,7 +729,13 @@ const AIChatWidget = () => {
                   handleSendMessage();
                   setShowQuickQuestions(false);
                 }}
-                disabled={!userInput.trim() || isTyping || userInput.length === 0 || userInput.length >= MAX_MESSAGE_LENGTH || isGuestLimitReached}
+                disabled={
+                  !userInput.trim() ||
+                  isTyping ||
+                  userInput.length === 0 ||
+                  userInput.length >= MAX_MESSAGE_LENGTH ||
+                  isGuestLimitReached
+                }
                 className="bg-emerald-500 text-white p-3 rounded-xl hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >

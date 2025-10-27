@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Utensils, ShoppingBag, Car, Home, Zap, TrendingUp, Target, Brain, User, Wallet, ChevronRight, Plus, Edit2, Trash2, X, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { Utensils, ShoppingBag, Car, Home, Zap, TrendingUp, Target, Brain, User, Wallet, ChevronRight, Plus, Edit2, Trash2, X} from 'lucide-react';
 
   const iconMap = {
     Utensils, ShoppingBag, Car, Home, Zap
@@ -13,7 +13,7 @@ interface Transaction {
   name: string;
   category: string;
   amount: number;
-  date: string | number | any;
+  date: string;
   icon: IconKey;
   color: string;
 }
@@ -196,7 +196,7 @@ const TransactionList = () => {
                 <h3 className="font-semibold text-lg text-gray-900">Forecast</h3>
               </div>
               <p className="text-sm text-gray-600 mb-2">
-                At your current rate, you'll spend:
+                {`At your current rate, you'll spend:`}
               </p>
               <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">₱{Math.round(totalSpent * 1.5).toLocaleString()}</p>
               <p className="text-xs text-gray-500 mt-1">by end of month</p>

@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp, Database, Brain, Users, Trophy, TrendingUp, Bel
 
 interface FlowchartSection {
     title: string,
-    icon: ComponentType<{size?: number, style: CSSProperties}> | ComponentType<any>,
+    icon: ComponentType<{size?: number, style: CSSProperties}>,
     color: string,
     children: ReactNode,
     defaultOpen?: boolean
@@ -257,8 +257,8 @@ export default function CoinwiseFlowchart() {
                 <div>5. Save to chat history</div>
                 <div className="mt-2 text-xs text-purple-700">
                   Examples:<br/>
-                  "How much on dining?"<br/>
-                  "Create savings plan"
+                  {`"How much on dining?"`}<br/>
+                  {`"Create savings plan"`}
                 </div>
               </div>
             </FlowBox>
@@ -273,8 +273,8 @@ export default function CoinwiseFlowchart() {
                 <div>5. Store in AI_Insights</div>
                 <div>6. Notify user</div>
                 <div className="mt-2 text-xs text-purple-700">
-                  "You spent ₱500 more<br/>
-                  on food than last week"
+                  {`"You spent ₱500 more`}<br/>
+                  {`on food than last week"`}
                 </div>
               </div>
             </FlowBox>
@@ -288,8 +288,8 @@ export default function CoinwiseFlowchart() {
                 <div>4. Generate suggestions</div>
                 <div>5. Optimize budget allocation</div>
                 <div className="mt-2 text-xs text-purple-700">
-                  "Reduce dining by 10%<br/>
-                  to reach goal faster"
+                  {`"Reduce dining by 10%`}<br/>
+                  {`to reach goal faster"`}
                 </div>
               </div>
             </FlowBox>
@@ -332,9 +332,9 @@ export default function CoinwiseFlowchart() {
                 <div>3. Track completion</div>
                 <div>4. Award XP on success</div>
                 <div className="mt-2 text-xs text-amber-700">
-                  "Spend ₱0 on takeout"<br/>
-                  "Save ₱200 this week"<br/>
-                  "Log 7 days in a row"
+                  {`"Spend ₱0 on takeout"`}<br/>
+                  {`"Save ₱200 this week"`}<br/>
+                  {`"Log 7 days in a row"`}
                 </div>
               </div>
             </FlowBox>
