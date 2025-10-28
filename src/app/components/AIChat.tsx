@@ -413,10 +413,9 @@ const AIChatWidget = () => {
     const updateQuestions = () => {
       setCurrentQuestions(getRotatedQuestions());
     };
-
     // Set initial questions
     updateQuestions();
-  });
+  }, []);
 
   return (
     <div className="fixed bottom-6 right-0 md:right-6 z-50">
