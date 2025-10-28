@@ -11,16 +11,15 @@ import {
   Target,
   Brain,
   User,
-  Wallet,
   ChevronRight,
   Plus,
   Edit2,
   Trash2,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/app/context/AuthContext";
+import LoadingCoin from "@/app/components/Loading";
 
 const iconMap = {
   Utensils,
@@ -49,11 +48,6 @@ interface Category {
 
 const TransactionList = () => {
   const {user, loading, refreshUser} = useAuth();
-
-  useEffect(() => {
-    refreshUser()
-  }, []);
-
   const [activeTab, setActiveTab] = useState("all");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -67,6 +61,17 @@ const TransactionList = () => {
     icon: "Utensils",
     color: "bg-rose-500",
   });
+
+  
+  useEffect(() => {
+    refreshUser();
+  }, [loading]);
+
+  if (loading) {
+    return (
+      <LoadingCoin label='Loading transaction...'/>
+    );
+  };
 
   const categories: Category[] = [
     { name: "Dining out", icon: "Utensils", color: "bg-rose-500" },

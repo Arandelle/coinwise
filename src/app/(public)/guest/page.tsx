@@ -11,7 +11,6 @@ import {
   Target,
   Brain,
   User,
-  Wallet,
   ChevronRight,
   Plus,
   Edit2,
@@ -48,7 +47,7 @@ interface Category {
 }
 
 const TransactionList = () => {
-  const {user, loading, refreshUser} = useAuth();
+  const {user, refreshUser} = useAuth();
   const [activeTab, setActiveTab] = useState("all");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -65,7 +64,7 @@ const TransactionList = () => {
 
   useEffect(() => {
     refreshUser()
-  }, [])
+  }, [user])
 
   const categories: Category[] = [
     { name: "Dining out", icon: "Utensils", color: "bg-rose-500" },
@@ -77,7 +76,7 @@ const TransactionList = () => {
 
   useEffect(() => {
     loadTransactions();
-  }, []);
+  }, [user]);
 
   const loadTransactions = () => {
     const stored: Record<string, Transaction> = {};

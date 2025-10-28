@@ -2,9 +2,9 @@
 
 import { MapPin, Mail, TrendingUp, Target, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/app/hooks/useUser';
 import LoadingCoin from '@/app/components/Loading';
 import { useAuth } from '@/app/context/AuthContext';
+import { useEffect } from 'react';
 
 export default function CoinWiseProfile() {
   const {user, loading, refreshUser} = useAuth();
@@ -19,11 +19,15 @@ export default function CoinWiseProfile() {
   router.refresh();    
   }
 
+  useEffect(() => {
+    refreshUser();
+  }, [user])
+
   if (loading) {
     return (
       <LoadingCoin label='Loading profile...'/>
     );
-  }
+  };
 
   if (!user) {
     return (
