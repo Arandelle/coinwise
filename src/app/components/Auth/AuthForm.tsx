@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CheckCircle, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ type WithLoadingProps = {
 
 const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   const pathName = usePathname();
+  const route = useRouter();
   const isLogin = pathName === "/login";
   const [loading, setLoading] = useState(false);
 
@@ -22,13 +23,21 @@ const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     );
   };
 
+  const handleBack = () => {
+    if (window.history.length > 1){
+      route.back();
+    } else {
+      route.push("/")
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-300 via-teal-300 to-blue-300 flex items-center justify-center p-0 md:p-4">
       {/** Wrapper with relative positioning for the X button */}
       <div className="relative w-full max-w-6xl">
-        <Link href={"/"}>
+        <button onClick={handleBack}>
           <X className="absolute top-2 right-2 md:-top-4 md:-right-4 w-8 h-8 md:w-10 md:h-10 p-2 text-emerald-500 border border-emerald-300 hover:text-emerald-700 hover:border-emerald-400 cursor-pointer bg-white rounded-full transition-all duration-200 z-50" />
-        </Link>
+        </button>
 
         <div className="grid md:grid-cols-2 gap-0 bg-white md:rounded-3xl shadow-2xl md:overflow-hidden relative">
           {/**Left side - branding and features */}

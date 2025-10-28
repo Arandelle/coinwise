@@ -6,7 +6,7 @@ import React from 'react'
 const page = () => {
   return (
     <>
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 sticky top-0 z-10 p-2">
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 sticky top-0 z-10 p-2 shadow-lg">
           <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-4">
             <Link href={"/"} className="flex items-center gap-2">
               <Image
@@ -22,7 +22,7 @@ const page = () => {
   
             <div className="flex items-center gap-3">
               <Link href="/login">
-                <button className="px-5 py-2 text-white font-medium hover:text-white transition-colors">
+                <button className="px-5 py-2 text-white font-medium hover:text-white transition-colors cursor-pointer hover:scale-110">
                   Log in
                 </button>
                 <span className="text-white">|</span>
