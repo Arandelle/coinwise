@@ -17,8 +17,16 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 }) => {
   const Icon = iconMap[transaction.icon];
 
+  const handleClick = () => {
+    if (window.innerWidth < 768){
+      onEdit(transaction);
+    }
+  }
+
   return (
-    <div className="flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all group">
+    <div 
+    onClick={handleClick}
+    className="flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all group">
       <div className={`p-2.5 ${transaction.color} rounded-full`}>
         <Icon size={18} className="text-white" />
       </div>
@@ -40,7 +48,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
               Balance: ₱{balance.toLocaleString()}
             </p>
           </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="hidden md:flex gap-1 transition-opacity">
             <button
               onClick={() => onEdit(transaction)}
               className="p-1.5 hover:bg-teal-100 rounded-lg transition-colors"
