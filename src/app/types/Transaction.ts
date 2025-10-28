@@ -5,4 +5,5 @@ category: string;
 amount: number;
 type: string;
 name: string;
+date: string
 }
