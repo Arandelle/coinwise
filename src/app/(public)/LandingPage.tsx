@@ -85,7 +85,7 @@ export default function CoinWiseLanding() {
       {/* Navigation */}
       <AIChatWidget />
       <nav
-        className={`fixed w-full z-50 transition-all duration-300 ${
+        className={`fixed w-full p-4 z-50 transition-all duration-300 ${
           scrollY > 50 ? "bg-white shadow-md" : "bg-transparent"
         }`}
       >
@@ -99,7 +99,7 @@ export default function CoinWiseLanding() {
                 height={50}
               />
               <span className={`text-2xl font-bold text-emerald-600`}>
-                CoinWise
+                Coinwise
               </span>
             </div>
 

@@ -17,7 +17,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="w-full bg-white shadow-md">
+    <header className="w-full bg-white sticky top-0 z-50">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between px-4 py-3 md:py-4 max-w-7xl mx-auto">
         {/** ======== Group 1 ========= */}
         <div className="flex items-center justify-between">
@@ -35,12 +35,12 @@ const Header = () => {
           {/** Desktop logo or title */}
           <div className="md:flex flex-row space-x-3 items-center justify-center hidden">
             <Image
-              src={"/CoinwiseLogo_v1.png"}
+              src={"/CoinwiseLogo_v7.png"}
               alt="Coinwise Logo"
               width={50}
               height={50}
             />
-            <h1 className="text-3xl text-amber-500 font-semibold">
+            <h1 className="text-3xl text-emerald-600 font-semibold">
               Coinwise
             </h1>
           </div>
@@ -58,7 +58,7 @@ const Header = () => {
             <Link
               key={item.label}
               href={item.href}
-              className={`${activePathname === item.href ? "text-amber-500 font-semibold border-b-2 hover:rounded-md" : "text-gray-700 font-medium rounded-md"} px-3 py-2 hover:text-amber-600 hover:bg-gray-100 text-sm`}
+              className={`${activePathname === item.href ? "text-emerald-600 font-semibold border-b-2" : "text-gray-700 font-medium"} px-3 py-2 hover:text-emerald-700 text-sm`}
               onClick={() => setIsMenuOpen(false)} // close the drawer when clicked
             >
               {item.label}
@@ -68,7 +68,7 @@ const Header = () => {
         {/** ===== Mobile Drawer overlay ====== */}
         {isMenuOpen && (
           <div
-            className="fixed inset-0 bg-amber-500 opacity-30 z-40 md:hidden"
+            className="fixed inset-0 bg-emerald-600 opacity-30 z-40 md:hidden"
             onClick={() => setIsMenuOpen(false)}
           ></div>
         )}
