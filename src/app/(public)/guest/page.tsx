@@ -64,7 +64,7 @@ const TransactionList = () => {
 
   useEffect(() => {
     refreshUser()
-  }, [user])
+  })
 
   const categories: Category[] = [
     { name: "Dining out", icon: "Utensils", color: "bg-rose-500" },

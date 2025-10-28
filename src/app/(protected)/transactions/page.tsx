@@ -47,7 +47,7 @@ interface Category {
 }
 
 const TransactionList = () => {
-  const {user, loading, refreshUser} = useAuth();
+  const { user, loading, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -62,16 +62,17 @@ const TransactionList = () => {
     color: "bg-rose-500",
   });
 
-  
   useEffect(() => {
     refreshUser();
-  }, [loading]);
+  });
+
+  useEffect(() => {
+    loadTransactions();
+  });
 
   if (loading) {
-    return (
-      <LoadingCoin label='Loading transaction...'/>
-    );
-  };
+    return <LoadingCoin label="Loading transaction..." />;
+  }
 
   const categories: Category[] = [
     { name: "Dining out", icon: "Utensils", color: "bg-rose-500" },
@@ -80,10 +81,6 @@ const TransactionList = () => {
     { name: "Utilities", icon: "Home", color: "bg-blue-500" },
     { name: "Entertainment", icon: "Zap", color: "bg-pink-500" },
   ];
-
-  useEffect(() => {
-    loadTransactions();
-  }, []);
 
   const loadTransactions = () => {
     const stored: Record<string, Transaction> = {};
@@ -195,16 +192,16 @@ const TransactionList = () => {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 relative overflow-hidden">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-20 left-10 text-8xl">📊</div>
-       <div className="absolute top-32 right-14 text-6xl">💰</div>
-       <div className="absolute bottom-44 right-20 text-7xl">✍</div>
-       <div className="absolute bottom-32 left-12 text-5xl">✨</div>
-       <Image 
-       src={"/CoinwiseLogo_v7.png"}
-       alt="coinwise_logo"
-       width={300}
-       height={300}
-       className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-       />
+        <div className="absolute top-32 right-14 text-6xl">💰</div>
+        <div className="absolute bottom-44 right-20 text-7xl">✍</div>
+        <div className="absolute bottom-32 left-12 text-5xl">✨</div>
+        <Image
+          src={"/CoinwiseLogo_v7.png"}
+          alt="coinwise_logo"
+          width={300}
+          height={300}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">

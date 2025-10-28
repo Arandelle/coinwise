@@ -30,6 +30,51 @@ interface UsageData {
   resetTime: number;
 }
 
+  // All available quick questions
+  const allQuickQuestions = [
+    // Budgeting
+    { text: "How do I create a budget?", icon: "💰", category: "budgeting" },
+    { text: "What's the 50/30/20 rule?", icon: "📊", category: "budgeting" },
+    {
+      text: "How to track monthly expenses?",
+      icon: "📝",
+      category: "tracking",
+    },
+    { text: "Tips for saving money", icon: "🤑", category: "saving" },
+
+    // Savings
+    {
+      text: "Best way to save for emergencies?",
+      icon: "🚨",
+      category: "saving",
+    },
+    { text: "How much should I save monthly?", icon: "💵", category: "saving" },
+    { text: "Where to keep emergency funds?", icon: "🏦", category: "saving" },
+    { text: "How to build a savings habit?", icon: "🎯", category: "saving" },
+
+    // Expenses
+    { text: "How to reduce daily expenses?", icon: "✂️", category: "expenses" },
+    { text: "What are needs vs wants?", icon: "🤔", category: "expenses" },
+    { text: "Track grocery spending tips", icon: "🛒", category: "expenses" },
+    {
+      text: "How to cut subscription costs?",
+      icon: "📱",
+      category: "expenses",
+    },
+
+    // Planning
+    { text: "How to set financial goals?", icon: "🎯", category: "planning" },
+    { text: "Plan for big purchases", icon: "🏠", category: "planning" },
+    { text: "Retirement savings tips", icon: "👴", category: "planning" },
+    { text: "Debt payment strategies", icon: "💳", category: "planning" },
+
+    // Filipino-specific
+    { text: "Paano mag-ipon ng pera?", icon: "🛒", category: "filipino" },
+    { text: "Budget tips for Pinoys", icon: "🔗", category: "filipino" },
+    { text: "Save money habang may utang", icon: "💡", category: "filipino" },
+    { text: "Emergency fund sa Pilipinas", icon: "✍", category: "filipino" },
+  ];
+
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
   const RESET_INTERVAL = 60 * 60 * 1000; // 60 minutes in ms
@@ -131,7 +176,7 @@ const AIChatWidget = () => {
       localStorage.setItem("guest_usage", JSON.stringify(newData));
       return newData;
     }
-  }, []);
+  }, [RESET_INTERVAL]);
 
   const getTimeRemaining = () => {
     const now = Date.now();
@@ -345,51 +390,6 @@ const AIChatWidget = () => {
     Array<{ text: string; icon: React.ReactNode }>
   >([]);
 
-  // All available quick questions
-  const allQuickQuestions = [
-    // Budgeting
-    { text: "How do I create a budget?", icon: "💰", category: "budgeting" },
-    { text: "What's the 50/30/20 rule?", icon: "📊", category: "budgeting" },
-    {
-      text: "How to track monthly expenses?",
-      icon: "📝",
-      category: "tracking",
-    },
-    { text: "Tips for saving money", icon: "🤑", category: "saving" },
-
-    // Savings
-    {
-      text: "Best way to save for emergencies?",
-      icon: "🚨",
-      category: "saving",
-    },
-    { text: "How much should I save monthly?", icon: "💵", category: "saving" },
-    { text: "Where to keep emergency funds?", icon: "🏦", category: "saving" },
-    { text: "How to build a savings habit?", icon: "🎯", category: "saving" },
-
-    // Expenses
-    { text: "How to reduce daily expenses?", icon: "✂️", category: "expenses" },
-    { text: "What are needs vs wants?", icon: "🤔", category: "expenses" },
-    { text: "Track grocery spending tips", icon: "🛒", category: "expenses" },
-    {
-      text: "How to cut subscription costs?",
-      icon: "📱",
-      category: "expenses",
-    },
-
-    // Planning
-    { text: "How to set financial goals?", icon: "🎯", category: "planning" },
-    { text: "Plan for big purchases", icon: "🏠", category: "planning" },
-    { text: "Retirement savings tips", icon: "👴", category: "planning" },
-    { text: "Debt payment strategies", icon: "💳", category: "planning" },
-
-    // Filipino-specific
-    { text: "Paano mag-ipon ng pera?", icon: "🛒", category: "filipino" },
-    { text: "Budget tips for Pinoys", icon: "🔗", category: "filipino" },
-    { text: "Save money habang may utang", icon: "💡", category: "filipino" },
-    { text: "Emergency fund sa Pilipinas", icon: "✍", category: "filipino" },
-  ];
-
   // Get random 4 questions based on current hour
   const getRotatedQuestions = useCallback(() => {
     const now = new Date();
@@ -416,7 +416,7 @@ const AIChatWidget = () => {
 
     // Set initial questions
     updateQuestions();
-  }, []);
+  });
 
   return (
     <div className="fixed bottom-6 right-0 md:right-6 z-50">

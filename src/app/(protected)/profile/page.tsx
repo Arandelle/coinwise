@@ -21,7 +21,7 @@ export default function CoinWiseProfile() {
 
   useEffect(() => {
     refreshUser();
-  }, [user])
+  })
 
   if (loading) {
     return (
