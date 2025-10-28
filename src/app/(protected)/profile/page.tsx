@@ -4,9 +4,10 @@ import { MapPin, Mail, TrendingUp, Target, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/hooks/useUser';
 import LoadingCoin from '@/app/components/Loading';
+import { useAuth } from '@/app/context/AuthContext';
 
 export default function CoinWiseProfile() {
-  const {user, loading, error } = useUser();
+  const {user, loading, refreshUser} = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -21,14 +22,6 @@ export default function CoinWiseProfile() {
   if (loading) {
     return (
       <LoadingCoin label='Loading profile...'/>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-        Error: {error}
-      </div>
     );
   }
 
@@ -82,8 +75,9 @@ export default function CoinWiseProfile() {
         {/* Profile Info */}
         <div className="pt-20 pb-6 px-6 text-center">
           <h1 className="text-2xl font-bold text-slate-800 mb-2">
-            Sarah Johnson
+           <span className='capitalize'> {user ? user.username ?? "Fullaname not yet set" : ""}</span>
           </h1>
+          <p className='pb-2 text-emerald-500 font-bold'>{user.email}</p>
           <p className="text-slate-600 text-sm leading-relaxed mb-4">
             Smart spender | Savings enthusiast 💰<br />
             Building wealth through mindful spending
@@ -139,7 +133,7 @@ export default function CoinWiseProfile() {
           <div className="flex gap-3 mt-6">
             <button 
             onClick={handleLogout}
-            className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer">
               Logout
             </button>
             <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-lg transition-colors duration-200">
