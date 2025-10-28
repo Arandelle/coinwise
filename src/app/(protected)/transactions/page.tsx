@@ -62,17 +62,6 @@ const TransactionList = () => {
     color: "bg-rose-500",
   });
 
-  useEffect(() => {
-    refreshUser();
-  });
-
-  useEffect(() => {
-    loadTransactions();
-  });
-
-  if (loading) {
-    return <LoadingCoin label="Loading transaction..." />;
-  }
 
   const categories: Category[] = [
     { name: "Dining out", icon: "Utensils", color: "bg-rose-500" },
@@ -101,6 +90,15 @@ const TransactionList = () => {
     );
     setTransactions(txList);
   };
+
+    useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
+  
+  useEffect(() => {
+    loadTransactions();
+  }, []);
 
   const groupTransactionsByDate = () => {
     const grouped: Record<string, Transaction[]> = {};
@@ -187,6 +185,10 @@ const TransactionList = () => {
     0
   );
   const remaining = 25000 - totalSpent;
+
+    if (loading) {
+    return <LoadingCoin label="Loading transaction..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 relative overflow-hidden">
