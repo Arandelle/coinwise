@@ -1,6 +1,6 @@
 import React from "react";
 import { Edit2, Trash2 } from "lucide-react";
-import { Transaction, iconMap } from "./types";
+import { Transaction } from "./types";
 
 interface TransactionItemProps {
   transaction: Transaction;

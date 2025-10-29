@@ -85,7 +85,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           return;
         }
       } catch (error) {
-        console.error("Error adding new item");
+        console.error("Error adding new item", error);
       }
     } else {
       try {
@@ -116,7 +116,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           return;
         }
       } catch (error) {
-        console.error("Error adding new item");
+        console.error("Error adding new item", error);
       }
     }
   };

@@ -38,6 +38,7 @@ export async function POST(req: Request){
 
 
   }catch(error){
+    console.error("Server Error: ", error)
     return new Response("Server Error: ", {status: 500})
   }
 }

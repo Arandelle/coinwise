@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 
-export async function PUT(req: Request, {params} : {params : {id: string}}) {
+type RouteContext = {
+  params: Promise<{id: string}>
+}
+
+export async function PUT(req: Request, {params} : RouteContext) {
 
   try{
 
     const body = await req.json();
-    const res = await fetch(`${process.env.BACKEND_URL}/transactions/${params.id}`, {
+    const {id} = await params
+    const res = await fetch(`${process.env.BACKEND_URL}/transactions/${id}`, {
       method: "PUT",
       headers: {"Content-Type" : "application/json"},
       body: JSON.stringify(body)
@@ -25,6 +30,7 @@ export async function PUT(req: Request, {params} : {params : {id: string}}) {
     );
 
   }catch(error){
+    console.error("Server error: ", error)
     return NextResponse.json(
       {error: "Server error"},
       {status: 500}
@@ -35,11 +41,12 @@ export async function PUT(req: Request, {params} : {params : {id: string}}) {
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
+    const {id} = await params
     const res = await fetch(
-      `${process.env.BACKEND_URL}/transactions/${params.id}`,
+      `${process.env.BACKEND_URL}/transactions/${id}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
