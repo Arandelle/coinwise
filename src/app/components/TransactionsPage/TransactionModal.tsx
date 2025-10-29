@@ -1,26 +1,31 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Transaction } from "./types";
 import { categories } from "./constants";
+import { User } from "@/app/types/Users";
 
 interface TransactionModalProps {
   editingTransaction: Transaction | null;
   onClose: () => void;
   onSubmit: () => void;
+  user: User | null;
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({
   editingTransaction,
   onClose,
   onSubmit,
+  user,
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Transaction>({
     name: "",
-    category: "Dining out",
-    amount: "",
-    date: new Date().toISOString().split("T")[0],
-    icon: "Utensils",
-    color: "bg-rose-500",
+    category: "",
+    amount: 0,
+    type: "expense",
+    created_at: "2025-10-29T00:00:00",
+    date: "",
   });
 
   useEffect(() => {
@@ -28,35 +33,100 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       setFormData({
         name: editingTransaction.name,
         category: editingTransaction.category,
-        amount: Math.abs(editingTransaction.amount).toString(),
+        amount: Math.abs(editingTransaction.amount),
+        type: editingTransaction.type,
+        created_at: editingTransaction.created_at,
         date: editingTransaction.date,
-        icon: editingTransaction.icon,
-        color: editingTransaction.color,
       });
     }
   }, [editingTransaction]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const id: string = editingTransaction?.id || `transaction_${Date.now()}`;
-    const txData = {
-      id,
-      ...formData,
-      amount: -Math.abs(parseFloat(formData.amount)),
-    };
+    if (!user) {
+      const id: string = editingTransaction?._id || `transaction_${Date.now()}`;
+      const txData = {
+        id,
+        ...formData,
+        amount: -Math.abs(formData?.amount ? formData.amount : 0),
+      };
 
-    localStorage.setItem(id, JSON.stringify(txData));
-    onSubmit();
+      localStorage.setItem(id, JSON.stringify(txData));
+      onSubmit();
+      alert("Success not authenticated");
+      return;
+    }
+    if (!editingTransaction && user) {
+      try {
+        const payload = {
+          ...formData,
+          user_id: user._id,
+          category_id: "category1010",
+        };
+
+        const res = await fetch("/api/transactions/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          setFormData({
+            name: "",
+            category: "",
+            amount: 0,
+            type: "expense",
+            created_at: "2025-10-29T00:00:00",
+            date: "",
+          });
+          alert(`Successfully added new item ${user._id}`);
+          onSubmit();
+          onClose();
+          return;
+        }
+      } catch (error) {
+        console.error("Error adding new item");
+      }
+    } else {
+      try {
+        const payload = {
+          ...formData,
+          user_id: user._id,
+          category_id: "category1010",
+        };
+
+        const res = await fetch(`/api/transactions/${editingTransaction!._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          setFormData({
+            name: "",
+            category: "",
+            amount: 0,
+            type: "expense",
+            created_at: "2025-10-29T00:00:00",
+            date: "",
+          });
+          alert(`Successfully edited item ${user._id}`);
+          onSubmit();
+          onClose();
+          return;
+        }
+      } catch (error) {
+        console.error("Error adding new item");
+      }
+    }
   };
 
   const handleCategoryChange = (categoryName: string) => {
     const cat = categories.find((c) => c.name === categoryName);
-    if (cat) {
+    if (cat && formData) {
       setFormData({
         ...formData,
         category: categoryName,
-        icon: cat.icon,
-        color: cat.color,
       });
     }
   };
@@ -83,7 +153,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             </label>
             <input
               type="text"
-              value={formData.name}
+              value={formData?.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
@@ -97,7 +167,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               Category
             </label>
             <select
-              value={formData.category}
+              value={formData?.category}
               onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
@@ -116,9 +186,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             <input
               type="number"
               step="0.01"
-              value={formData.amount}
+              value={formData?.amount}
               onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
+                setFormData({ ...formData, amount: parseFloat(e.target.value) })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               required
@@ -131,7 +201,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             </label>
             <input
               type="date"
-              value={formData.date}
+              value={formData?.date}
               onChange={(e) =>
                 setFormData({ ...formData, date: e.target.value })
               }

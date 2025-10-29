@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -8,56 +8,102 @@ import TransactionsSection from "@/app/components/TransactionsPage/TransactionsS
 import TransactionModal from "@/app/components/TransactionsPage/TransactionModal";
 import { Transaction } from "@/app/components/TransactionsPage/types";
 import { categories } from "@/app/components/TransactionsPage/constants";
-import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar"
+import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
 import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
 
 const TransactionList = () => {
   const { user, loading, refreshUser } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
 
   useEffect(() => {
+    if (loading) return;
     loadTransactions();
-  }, []);
+  }, [user, loading]);
 
   if (loading) {
     return <LoadingCoin label="Loading transaction..." />;
   }
 
-  function loadTransactions()  {
-    const stored: Record<string, Transaction> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith("transaction_")) {
-        try {
-          stored[key] = JSON.parse(localStorage.getItem(key) || "");
-        } catch (e) {
-          console.error("Error loading transaction:", e);
+  async function loadTransactions() {
+    if (!user) {
+      const stored: Record<string, Transaction> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("transaction_")) {
+          try {
+            stored[key] = JSON.parse(localStorage.getItem(key) || "");
+          } catch (e) {
+            console.error("Error loading transaction:", e);
+          }
         }
       }
+
+      const txList = Object.values(stored);
+      txList.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setTransactions(txList);
+      return;
     }
 
-    const txList = Object.values(stored);
-    txList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setTransactions(txList);
-  };
+    try {
+      const response = await fetch("/api/transactions");
+      if (!response.ok) {
+        throw new Error("Error fetching transactions");
+      }
+
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error("Error loading user transactions", error);
+    }
+  }
 
   const handleEdit = (tx: Transaction) => {
     setEditingTransaction(tx);
     setShowModal(true);
+    alert(tx._id)
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Delete this transaction?")) {
-      localStorage.removeItem(id);
-      loadTransactions();
+const handleDelete = async (id: string) => {
+  if (!window.confirm(`${id} - Are you sure you want to delete this transaction?`)) {
+    return;
+  }
+
+  // Handle unauthenticated users
+  if (!user) {
+    localStorage.removeItem(id);
+    alert("Transaction deleted (local storage)");
+    loadTransactions(); // Refresh
+    return;
+  }
+
+  // Handle authenticated users
+  try {
+    const res = await fetch(`/api/transactions/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (res.ok) {
+      alert("Transaction deleted successfully!");
+      await loadTransactions();
+    } else {
+      const error = await res.json();
+      alert(`Failed to delete: ${error.error}`);
     }
-  };
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    alert("Error deleting transaction");
+  }
+};
 
   const handleModalClose = () => {
     setShowModal(false);
@@ -69,7 +115,10 @@ const TransactionList = () => {
     handleModalClose();
   };
 
-  const totalSpent = transactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  const totalSpent = transactions.reduce(
+    (sum, tx) => sum + Math.abs(tx.amount),
+    0
+  );
   const remaining = 25000 - totalSpent;
 
   return (
@@ -103,9 +152,7 @@ const TransactionList = () => {
             onAddClick={() => setShowModal(true)}
           />
 
-          <InsightsSidebar
-            categories={categories}
-          />
+          <InsightsSidebar categories={categories} />
         </div>
       </div>
 
@@ -114,6 +161,7 @@ const TransactionList = () => {
           editingTransaction={editingTransaction}
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}
+          user={user}
         />
       )}
     </div>

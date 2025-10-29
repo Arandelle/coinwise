@@ -15,7 +15,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const Icon = iconMap[transaction.icon];
+  // const Icon = iconMap[transaction.icon];
 
   const handleClick = () => {
     if (window.innerWidth < 768){
@@ -27,9 +27,9 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
     <div 
     onClick={handleClick}
     className="flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all group">
-      <div className={`p-2.5 ${transaction.color} rounded-full`}>
+      {/* <div className={`p-2.5 ${transaction.color} rounded-full`}>
         <Icon size={18} className="text-white" />
-      </div>
+      </div> */}
 
       <div className="flex flex-row justify-between w-full items-center">
         <div className="flex flex-col">
@@ -56,7 +56,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
               <Edit2 size={14} className="text-teal-600" />
             </button>
             <button
-              onClick={() => onDelete(transaction.id)}
+              onClick={() => onDelete(transaction._id!)}
               className="p-1.5 hover:bg-rose-100 rounded-lg transition-colors"
             >
               <Trash2 size={14} className="text-rose-600" />

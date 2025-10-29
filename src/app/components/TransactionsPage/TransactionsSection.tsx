@@ -100,7 +100,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
 
                 {txs.map((transaction, tidx) => {
                   const txIndex = transactions.findIndex(
-                    (t) => t.id === transaction.id
+                    (t) => t._id === transaction._id
                   );
                   return (
                     <TransactionItem
