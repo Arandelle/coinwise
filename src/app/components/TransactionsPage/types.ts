@@ -17,11 +17,11 @@ export interface Transaction {
   name: string;
   category: string;
   amount: number;
-  type: "income" | "expense"
+  type: string,
   label?: string,
   note?: string,
   balance_after?: string,
-  date: string;
+  date: Date | null;
   date_only?:string,
   created_at: string,
 }

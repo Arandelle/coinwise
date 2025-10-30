@@ -1,10 +1,12 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { Minus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "./types";
 import { categories } from "./constants";
 import { User } from "@/app/types/Users";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface TransactionModalProps {
   editingTransaction: Transaction | null;
@@ -25,7 +27,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     amount: 0,
     type: "expense",
     created_at: "2025-10-29T00:00:00",
-    date: "",
+    date: new Date(),
   });
 
   useEffect(() => {
@@ -77,7 +79,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             amount: 0,
             type: "expense",
             created_at: "2025-10-29T00:00:00",
-            date: "",
+            date: null,
           });
           alert(`Successfully added new item ${user._id}`);
           onSubmit();
@@ -95,11 +97,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           category_id: "category1010",
         };
 
-        const res = await fetch(`/api/transactions/${editingTransaction!._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const res = await fetch(
+          `/api/transactions/${editingTransaction!._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
 
         if (res.ok) {
           setFormData({
@@ -108,7 +113,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             amount: 0,
             type: "expense",
             created_at: "2025-10-29T00:00:00",
-            date: "",
+            date: null,
           });
           alert(`Successfully edited item ${user._id}`);
           onSubmit();
@@ -131,35 +136,77 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
+  const handleTransType = (type: string) => {
+    setFormData({
+      ...formData,
+      type: type,
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {editingTransaction ? "Edit Transaction" : "Add Transaction"}
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-lg"
-          >
-            <X size={20} />
-          </button>
-        </div>
+      <div className="bg-white p-4 w-full max-w-md shadow-2xl relative">
+        <h3 className="text-center text-sm text-gray-900">
+          {editingTransaction ? "Edit Transaction" : "Add Transaction"}
+        </h3>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
+        <button
+          onClick={onClose}
+          className="absolute right-2 top-2 p-1 hover:bg-gray-100 rounded-lg"
+        >
+          <X size={15} />
+        </button>
+
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 my-4 mx-2 font-mono font-light"
+        >
+          <div className="space-y-2">
             <input
               type="text"
+              placeholder="Name"
               value={formData?.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full text-xl py-2 outline-0 text-slate-800 font-medium"
               required
             />
+            <DatePicker
+              selected={formData?.date}
+              onChange={(date) => setFormData({ ...formData, date: date })}
+              dateFormat="d MMMM yyyy"
+              className="text-slate-500 text-sm outline-0 cursor-pointer "
+              placeholderText="Select date"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Amount (₱)
+            </label>
+            <div className="flex flex-row items-center gap-2">
+              <input
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={formData?.amount}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    amount: parseFloat(e.target.value),
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0"
+                required
+              />
+              <button
+                type="button"
+                className="rounded-full bg-rose-500 text-white p-1"
+              >
+                <Minus size={20} />
+              </button>
+            </div>
           </div>
 
           <div>
@@ -179,50 +226,36 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (₱)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData?.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: parseFloat(e.target.value) })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date
-            </label>
-            <input
-              type="date"
-              value={formData?.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div className="flex gap-2 pt-2">
+          <div className="flex items-center bg-gray-100 border border-gray-300 rounded-md gap-2">
             <button
               type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              onClick={() => handleTransType("income")}
+              className={`${
+                formData.type === "income"
+                  ? "text-white bg-emerald-600"
+                  : "text-emerald-600 bg-tranparent"
+              } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full`}
             >
-              Cancel
+              Income
             </button>
+
+            <button
+              type="button"
+              onClick={() => handleTransType("expense")}
+              className={`${
+                formData.type === "expense"
+                  ? "text-white bg-rose-600"
+                  : "text-rose-600 bg-tranparent"
+              } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full`}
+            >
+              Expense
+            </button>
+
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-500 text-white rounded-lg hover:shadow-lg transition-shadow"
+              className="bg-emerald-600 text-white p-4 rounded-md font-bold cursor-pointer hover:shadow-lg transition-shadow"
             >
-              {editingTransaction ? "Update" : "Add"}
+              <SaveIcon size={20} />
             </button>
           </div>
         </form>

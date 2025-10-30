@@ -47,7 +47,7 @@ const TransactionList = () => {
 
       const txList = Object.values(stored);
       txList.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
       );
       setTransactions(txList);
       return;
