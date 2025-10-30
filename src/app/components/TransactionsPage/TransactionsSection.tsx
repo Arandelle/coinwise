@@ -21,7 +21,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   const groupTransactionsByDate = () => {
     const grouped: Record<string, Transaction[]> = {};
     transactions.forEach((tx) => {
-      const dateKey = new Date(tx.date).toLocaleDateString("en-US", {
+      const dateKey = new Date(tx.date as Date).toLocaleDateString("en-US", {
         weekday: "short",
         day: "numeric",
         month: "long",

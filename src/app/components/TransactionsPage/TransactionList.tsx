@@ -69,7 +69,6 @@ const TransactionList = () => {
   const handleEdit = (tx: Transaction) => {
     setEditingTransaction(tx);
     setShowModal(true);
-    alert(tx._id)
   };
 
 const handleDelete = async (id: string) => {

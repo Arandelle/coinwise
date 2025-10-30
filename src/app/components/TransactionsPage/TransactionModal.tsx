@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Minus, SaveIcon, X } from "lucide-react";
+import { Calculator, Minus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "./types";
 import { categories } from "./constants";
 import { User } from "@/app/types/Users";
@@ -21,6 +21,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   onSubmit,
   user,
 }) => {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Transaction>({
     name: "",
     category: "",
@@ -45,6 +46,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true)
     if (!user) {
       const id: string = editingTransaction?._id || `transaction_${Date.now()}`;
       const txData = {
@@ -56,6 +58,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       localStorage.setItem(id, JSON.stringify(txData));
       onSubmit();
       alert("Success not authenticated");
+      setLoading(false)
       return;
     }
     if (!editingTransaction && user) {
@@ -81,13 +84,15 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             created_at: "2025-10-29T00:00:00",
             date: null,
           });
-          alert(`Successfully added new item ${user._id}`);
+          alert(`Successfully added new item`);
           onSubmit();
           onClose();
           return;
         }
       } catch (error) {
         console.error("Error adding new item", error);
+      } finally{
+        setLoading(false)
       }
     } else {
       try {
@@ -115,13 +120,15 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             created_at: "2025-10-29T00:00:00",
             date: null,
           });
-          alert(`Successfully edited item ${user._id}`);
+          alert(`Successfully edited item`);
           onSubmit();
           onClose();
           return;
         }
       } catch (error) {
         console.error("Error adding new item", error);
+      } finally{
+        setLoading(false)
       }
     }
   };
@@ -144,9 +151,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-4 w-full max-w-md shadow-2xl relative">
-        <h3 className="text-center text-sm text-gray-900">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-mono font-light">
+      <div className="bg-white p-4 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-lg">
+        <h3 className="text-center text-sm text-gray-900 font-medium">
           {editingTransaction ? "Edit Transaction" : "Add Transaction"}
         </h3>
 
@@ -157,14 +164,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           <X size={15} />
         </button>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 my-4 mx-2 font-mono font-light"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4 my-4 mx-2">
           <div className="space-y-2">
             <input
               type="text"
-              placeholder="Name"
+              placeholder="Transaction Name"
               value={formData?.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -186,23 +190,33 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               Amount (₱)
             </label>
             <div className="flex flex-row items-center gap-2">
-              <input
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={formData?.amount}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    amount: parseFloat(e.target.value),
-                  })
-                }
-                className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0"
-                required
-              />
+              <div className="relative w-full">
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={formData?.amount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      amount: parseFloat(e.target.value),
+                    })
+                  }
+                  className="w-full px-3 py-2 pr-10 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0"
+                  required
+                />
+                <button
+                  type="button"
+                  title="Open Calculator"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer p-1.5 hover:bg-gray-200 rounded text-teal-600 transition-colors"
+                >
+                  <Calculator size={18} />
+                </button>
+              </div>
               <button
                 type="button"
-                className="rounded-full bg-rose-500 text-white p-1"
+                className="rounded-full bg-rose-500 hover:bg-rose-600 text-white p-1 transition-colors flex-shrink-0"
+                title="Transaction Type Icon"
               >
                 <Minus size={20} />
               </button>
@@ -216,7 +230,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             <select
               value={formData?.category}
               onChange={(e) => handleCategoryChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0"
             >
               {categories.map((cat) => (
                 <option key={cat.name} value={cat.name}>
@@ -226,7 +240,23 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             </select>
           </div>
 
-          <div className="flex items-center bg-gray-100 border border-gray-300 rounded-md gap-2">
+          <div>
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+              Notes<span className="text-gray-400 text-xs font-normal">(Optional)</span>
+            </label>
+            <textarea 
+            placeholder="Add a note about this transaction..."
+            value={formData.note}
+            onChange={((e) => setFormData({
+              ...formData,
+              note: e.target.value
+            }))}
+            className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0 resize-none text-sm"
+            rows={3}
+            />
+          </div>
+
+          <div className="flex items-center bg-gray-100 border border-gray-300 rounded-md gap-2 p-1">
             <button
               type="button"
               onClick={() => handleTransType("income")}
@@ -234,7 +264,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 formData.type === "income"
                   ? "text-white bg-emerald-600"
                   : "text-emerald-600 bg-tranparent"
-              } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full`}
+              } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full transition-all`}
             >
               Income
             </button>
@@ -246,14 +276,15 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 formData.type === "expense"
                   ? "text-white bg-rose-600"
                   : "text-rose-600 bg-tranparent"
-              } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full`}
+              } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full transition-all`}
             >
               Expense
             </button>
 
             <button
               type="submit"
-              className="bg-emerald-600 text-white p-4 rounded-md font-bold cursor-pointer hover:shadow-lg transition-shadow"
+              disabled={loading}
+              className="bg-emerald-600 text-white p-4 rounded-md font-bold cursor-pointer hover:shadow-lg transition-all"
             >
               <SaveIcon size={20} />
             </button>
