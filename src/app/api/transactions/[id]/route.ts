@@ -1,3 +1,4 @@
+import { getToken } from "@/lib/getToken";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
@@ -7,12 +8,14 @@ type RouteContext = {
 export async function PUT(req: Request, {params} : RouteContext) {
 
   try{
-
+    const token = await getToken();
     const body = await req.json();
     const {id} = await params
-    const res = await fetch(`${process.env.BACKEND_URL}/transactions/${id}`, {
+    const res = await fetch(`${process.env.BACKEND_URL}/transactions/${id}/`, {
       method: "PUT",
-      headers: {"Content-Type" : "application/json"},
+      headers: {
+        "Authorization" : `Bearer ${token}`,
+        "Content-Type" : "application/json"},
       body: JSON.stringify(body)
     });
 
@@ -44,12 +47,15 @@ export async function DELETE(
   { params }: RouteContext
 ) {
   try {
+    const token = await getToken();
     const {id} = await params
     const res = await fetch(
-      `${process.env.BACKEND_URL}/transactions/${id}`,
+      `${process.env.BACKEND_URL}/transactions/${id}/`,
       {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Authorization" : `Bearer ${token}`,
+          "Content-Type": "application/json" },
       }
     );
 

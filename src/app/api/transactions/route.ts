@@ -1,10 +1,16 @@
 import { Transaction } from "@/app/types/Transaction";
+import { getToken } from "@/lib/getToken";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/transactions`, {
-      headers: { "Content-Type": "application/json" },
+    const token = await getToken();
+
+    const res = await fetch(`${process.env.BACKEND_URL}/transactions/`, {
+      method: "GET",
+      headers: { 
+        "Authorization" : `Bearer ${token}`,
+        "Content-Type": "application/json" },
     });
 
     if (!res.ok) {
@@ -21,10 +27,13 @@ export async function GET() {
 
 export async function POST(req: Request){
   try{
+    const token = await getToken()
     const body : Transaction = await req.json()
     const res = await fetch(`${process.env.BACKEND_URL}/transactions/`, {
       method: "POST",
-      headers : {"Content-Type" : "application/json"},
+      headers : {
+        "Authorization" : `Bearer ${token}`,
+        "Content-Type" : "application/json"},
       body: JSON.stringify(body)
     });
 

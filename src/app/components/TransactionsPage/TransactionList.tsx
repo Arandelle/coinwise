@@ -76,19 +76,18 @@ const handleDelete = async (id: string) => {
     return;
   }
 
-  // Handle unauthenticated users
   if (!user) {
     localStorage.removeItem(id);
     alert("Transaction deleted (local storage)");
-    loadTransactions(); // Refresh
+    loadTransactions();
     return;
   }
 
-  // Handle authenticated users
   try {
     const res = await fetch(`/api/transactions/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // ✅ crucial line
     });
 
     if (res.ok) {
@@ -103,6 +102,7 @@ const handleDelete = async (id: string) => {
     alert("Error deleting transaction");
   }
 };
+
 
   const handleModalClose = () => {
     setShowModal(false);
