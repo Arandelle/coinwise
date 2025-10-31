@@ -1,4 +1,5 @@
 import { getToken } from "@/lib/getToken";
+import { error } from "console";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
@@ -11,7 +12,7 @@ export async function PUT(req: Request, {params} : RouteContext) {
     const token = await getToken();
     const body = await req.json();
     const {id} = await params
-    const res = await fetch(`${process.env.BACKEND_URL}/transactions/${id}/`, {
+    const res = await fetch(`${process.env.BACKEND_URL}/transactions/${id}`, {
       method: "PUT",
       headers: {
         "Authorization" : `Bearer ${token}`,
@@ -49,8 +50,14 @@ export async function DELETE(
   try {
     const token = await getToken();
     const {id} = await params
+
+    if(!token) {
+      return NextResponse.json({
+        error : "Token not found!"
+      }, {status: 401})
+    }
     const res = await fetch(
-      `${process.env.BACKEND_URL}/transactions/${id}/`,
+      `${process.env.BACKEND_URL}/transactions/${id}`,
       {
         method: "DELETE",
         headers: { 
@@ -67,6 +74,12 @@ export async function DELETE(
       );
     }
 
+    // handle 204 no content - don't try to parse a json
+    if(res.status === 204){
+      return new NextResponse(null, {status: 204})
+    }
+
+    // only parse json if there's content
     const data = await res.json();
     return NextResponse.json(data, { status: 200 });
   } catch (error) {

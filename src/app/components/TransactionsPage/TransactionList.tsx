@@ -72,7 +72,7 @@ const TransactionList = () => {
   };
 
 const handleDelete = async (id: string) => {
-  if (!window.confirm(`${id} - Are you sure you want to delete this transaction?`)) {
+  if (!window.confirm(`Are you sure you want to delete this transaction?`)) {
     return;
   }
 
