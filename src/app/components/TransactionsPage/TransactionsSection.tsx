@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
-import { Transaction } from "./types";
+import { Transaction } from "@/app/types/Transaction";
 import TransactionItem from "./TransactionsItem";
 
 interface TransactionsSectionProps {

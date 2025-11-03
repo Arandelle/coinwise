@@ -1,32 +1,31 @@
-"use client";
+import { Search } from "lucide-react";
+import React from "react";
 
-import { useState } from "react";
-import { categoryIcons } from "@/app/components/TransactionsPage/constants";
-
-type IconPickerProps = {
-  value?: string;
-  onChange: (iconName: string) => void;
-};
-
-export function CategoryModal({ value, onChange }: IconPickerProps) {
-  const [selected, setSelected] = useState(value);
-
+const CategoryModal = () => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 font-mono font-light">
-      <div className="bg-white grid grid-cols-6 gap-3 p-2 z-50 w-full max-w-md nax-h-[90vh]">
-        {categoryIcons.map(({ name, icon: Icon }) => (
-          <button
-            key={name}
-            type="button"
-            onClick={() => {setSelected(name); onChange(name)}}
-            className={`p-2 flex items-center justify-center rounded-full border transition hover:bg-gray-100 ${
-              selected === name && "bg-blue-500 border-blue-600"
-            }`}
-          >
-            <Icon size={20}/>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-w-md max-h-[90%] p-2">
+        <div className="relative flex itemse-center p-2 border border-slate-600 rounded-2xl">
+          <Search
+            size={18}
+            className="absolute top-1/2 left-2 -translate-y-1/2"
+          />
+          <input
+            type="Search"
+            placeholder="Search"
+            className="outline-0 pl-8 pr-4 w-full text-sm"
+          />
+          <button className="text-xs text-white font-medium bg-gradient-to-br from-emerald-600 to-teal-600 py-2 px-6 rounded-xl">
+            New
           </button>
-        ))}
+        </div>
+
+        <div>
+            
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default CategoryModal;

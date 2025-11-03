@@ -8,7 +8,7 @@ import { User } from "@/app/types/Users";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalculatorModal from "./Calculator";
-import {CategoryModal} from "./CategoryModal";
+import CategoryModal from "./CategoryModal";
 
 interface TransactionModalProps {
   editingTransaction: Transaction | null;
@@ -321,10 +321,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {showCategory && (
-        <CategoryModal onChange={(value) => setFormData({
-          ...formData,
-          category: value
-        }) }/>
+        // <CategoryModal onChange={(value) => setFormData({
+        //   ...formData,
+        //   category: value
+        // }) }/>
+      <CategoryModal />
       )}
     </>
   );
