@@ -1,7 +1,6 @@
 export interface Transaction {
-  id?: string; // mongodb _id
-  user_id?: string, // Reference to user
-  category_id: string,
+  _id?: string, 
+  category_id?: string,
   name: string;
   category: string;
   amount: number;
@@ -9,7 +8,13 @@ export interface Transaction {
   label?: string,
   note?: string,
   balance_after?: string,
-  date: Date | string;
-  date_only?:string,
-  created_at: string,
+  date: Date | null;
+}
+
+export interface Category {
+  name: string;
+  type: string,
+  icon: string;
+  color: string;
+  category_group: string;
 }

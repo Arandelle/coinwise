@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Calculator, Minus, SaveIcon, X } from "lucide-react";
-import { Transaction } from "./types";
+import { Calculator, Fuel, Minus, Plus, SaveIcon, X } from "lucide-react";
+import { Transaction } from "@/app/types/Transaction";
 import { categories } from "./constants";
 import { User } from "@/app/types/Users";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalculatorModal from "./Calculator";
+import {CategoryModal} from "./CategoryModal";
 
 interface TransactionModalProps {
   editingTransaction: Transaction | null;
@@ -24,14 +25,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 }) => {
   const [showCalculator, sestShowCalculator] = useState(false)
   const [loading, setLoading] = useState(false);
+  const [showCategory, setShowCategory] = useState(false);
   const [formData, setFormData] = useState<Transaction>({
     name: "",
     category: "",
     amount: 0,
     type: "expense",
-    created_at: "2025-10-29T00:00:00",
     date: new Date(),
   });
+
+  const isExpenses = formData.type === "expense"
 
   useEffect(() => {
     if (editingTransaction) {
@@ -40,7 +43,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         category: editingTransaction.category,
         amount: Math.abs(editingTransaction.amount),
         type: editingTransaction.type,
-        created_at: editingTransaction.created_at,
         date: editingTransaction.date,
       });
     }
@@ -67,7 +69,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       try {
         const payload = {
           ...formData,
-          user_id: user._id,
           category_id: "category1010",
         };
 
@@ -83,7 +84,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             category: "",
             amount: 0,
             type: "expense",
-            created_at: "2025-10-29T00:00:00",
             date: null,
           });
           alert(`Successfully added new item`);
@@ -100,7 +100,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       try {
         const payload = {
           ...formData,
-          user_id: user._id,
           category_id: "category1010",
         };
 
@@ -119,7 +118,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             category: "",
             amount: 0,
             type: "expense",
-            created_at: "2025-10-29T00:00:00",
             date: null,
           });
           alert(`Successfully edited item`);
@@ -219,15 +217,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
                 <button
                   type="button"
-                  className="rounded-full bg-rose-500 hover:bg-rose-600 text-white p-1 transition-colors flex-shrink-0"
+                  className={`rounded-full ${isExpenses ? "bg-rose-500 hover:bg-rose-600" : "bg-emerald-500 hover:bg-emerald-600"}  text-white p-1 transition-colors flex-shrink-0`}
                   title="Transaction Type Icon"
                 >
-                  <Minus size={20} />
+                 { isExpenses ?
+                    <Minus size={20} /> :  <Plus size={20}/>
+                 } 
                 </button>
               </div>
             </div>
   
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Category
               </label>
@@ -242,8 +242,20 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                   </option>
                 ))}
               </select>
+            </div> */}
+
+            <div 
+            onClick={() => setShowCategory(true)}
+            className="flex flex-row items-center gap-4 cursor-pointer w-full">
+                <div className="text-slate-900">
+                  <Fuel size={22}/>
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-sm">Car</p>
+                  <p className="font-medium">Fuel</p>
+                </div>
             </div>
-  
+
             <div>
               <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
                 Notes<span className="text-gray-400 text-xs font-normal">(Optional)</span>
@@ -277,7 +289,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 type="button"
                 onClick={() => handleTransType("expense")}
                 className={`${
-                  formData.type === "expense"
+                  isExpenses
                     ? "text-white bg-rose-600"
                     : "text-rose-600 bg-tranparent"
                 } text-xs md:text-sm font-light rounded-xl py-2 px-8 uppercase cursor-pointer w-full transition-all`}
@@ -306,6 +318,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           }) }
           initialValue={formData?.amount || 0}
         />
+      )}
+
+      {showCategory && (
+        <CategoryModal onChange={(value) => setFormData({
+          ...formData,
+          category: value
+        }) }/>
       )}
     </>
   );

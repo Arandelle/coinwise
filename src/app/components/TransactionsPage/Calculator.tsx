@@ -9,7 +9,7 @@ interface CalculatorProps {
   initialValue?: number
 }
 
-const CalculatorModal : React.FC<CalculatorProps>= ({onClose, onSelect, initialValue = 0}) => {
+const CalculatorModal = ({onClose, onSelect, initialValue = 0} : CalculatorProps) => {
   const [display, setDisplay] = useState(initialValue > 0 ? initialValue.toString() : "0");
   const [prevValue, setPrevValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<string | null>(null);

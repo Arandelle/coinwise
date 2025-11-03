@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import LoadingCoin from "@/app/components/Loading";
 import TransactionsSection from "@/app/components/TransactionsPage/TransactionsSection";
 import TransactionModal from "@/app/components/TransactionsPage/TransactionModal";
-import { Transaction } from "@/app/components/TransactionsPage/types";
+import { Transaction } from "@/app/types/Transaction";
 import { categories } from "@/app/components/TransactionsPage/constants";
 import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
 import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
@@ -59,8 +59,12 @@ const TransactionList = () => {
         throw new Error("Error fetching transactions");
       }
 
-      const data = await response.json();
-      setTransactions(data);
+      const data: Transaction[] = await response.json();
+
+      //sort by date
+      const sortedData = data.sort((a,b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime() )
+
+      setTransactions(sortedData);
     } catch (error) {
       console.error("Error loading user transactions", error);
     }

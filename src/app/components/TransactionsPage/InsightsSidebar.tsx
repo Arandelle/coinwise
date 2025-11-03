@@ -1,6 +1,7 @@
 import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
-import { Category, iconMap } from "./types";
+import * as LucideIcons from "lucide-react";
+import { Category } from "@/app/types/Transaction";
 
 interface InsightsSidebarProps {
   categories: Category[];
@@ -76,7 +77,7 @@ const InsightsSidebar: React.FC<InsightsSidebarProps> = ({
         </h3>
         <div className="space-y-3">
           {categories.slice(0, 3).map((cat, idx) => {
-            const Icon = iconMap[cat.icon];
+           const Icon = (LucideIcons as any)[cat.icon] || LucideIcons.Circle
             return (
               <div key={idx} className="flex items-center gap-3">
                 <div className={`p-2 ${cat.color} rounded-lg`}>
