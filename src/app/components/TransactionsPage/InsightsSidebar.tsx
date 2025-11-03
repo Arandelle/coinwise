@@ -1,10 +1,19 @@
 import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
 import * as LucideIcons from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { Category } from "@/app/types/Transaction";
 
 interface InsightsSidebarProps {
   categories: Category[];
+}
+
+function getLucideIcon(iconName: string) : LucideIcon {
+  const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
+  if (typeof Icon === "function"){
+    return Icon as LucideIcon;
+  }
+  return LucideIcons.Circle; // fallback icon
 }
 
 const InsightsSidebar: React.FC<InsightsSidebarProps> = ({
@@ -77,7 +86,7 @@ const InsightsSidebar: React.FC<InsightsSidebarProps> = ({
         </h3>
         <div className="space-y-3">
           {categories.slice(0, 3).map((cat, idx) => {
-           const Icon = (LucideIcons as any)[cat.icon] || LucideIcons.Circle
+           const Icon = getLucideIcon(cat.icon)
             return (
               <div key={idx} className="flex items-center gap-3">
                 <div className={`p-2 ${cat.color} rounded-lg`}>

@@ -15,6 +15,6 @@ export interface Category {
   name: string;
   type: string,
   icon: string;
-  color: string;
+  color?: string;
   category_group: string;
 }

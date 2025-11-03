@@ -133,15 +133,15 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
-  const handleCategoryChange = (categoryName: string) => {
-    const cat = categories.find((c) => c.name === categoryName);
-    if (cat && formData) {
-      setFormData({
-        ...formData,
-        category: categoryName,
-      });
-    }
-  };
+  // const handleCategoryChange = (categoryName: string) => {
+  //   const cat = categories.find((c) => c.name === categoryName);
+  //   if (cat && formData) {
+  //     setFormData({
+  //       ...formData,
+  //       category: categoryName,
+  //     });
+  //   }
+  // };
 
   const handleTransType = (type: string) => {
     setFormData({

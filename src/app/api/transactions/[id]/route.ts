@@ -1,5 +1,4 @@
 import { getToken } from "@/lib/getToken";
-import { error } from "console";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
