@@ -1,16 +1,16 @@
 import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { Category } from "@/app/types/Transaction";
 
 interface InsightsSidebarProps {
   categories: Category[];
 }
 
-function getLucideIcon(iconName: string) : LucideIcon {
+export function getLucideIcon(iconName: string) : LucideIcon {
   const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
-  if (typeof Icon === "function"){
+  if (Icon){
     return Icon as LucideIcon;
   }
   return LucideIcons.Circle; // fallback icon
@@ -94,7 +94,7 @@ const InsightsSidebar: React.FC<InsightsSidebarProps> = ({
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
-                    {cat.name}
+                    {cat.category_name}
                   </p>
                 </div>
               </div>
