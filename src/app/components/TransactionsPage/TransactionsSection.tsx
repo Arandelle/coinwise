@@ -35,13 +35,13 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
     return grouped;
   };
 
-  const calculateBalance = (index: number) => {
-    const totalSpent = transactions
-      .slice(0, index + 1)
-      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-    return 25000 - totalSpent;
-  };
-
+ const calculateBalance = (transaction: Transaction) => {
+  // Find all transactions up to and including this transaction's date
+  const totalSpent = transactions
+    .filter((tx) => new Date(tx.date as Date) <= new Date(transaction.date as Date))
+    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  return 25000 - totalSpent;
+};
   const groupedTransactions = groupTransactionsByDate();
 
   return (
@@ -99,14 +99,11 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                 </div>
 
                 {txs.map((transaction, tidx) => {
-                  const txIndex = transactions.findIndex(
-                    (t) => t._id === transaction._id
-                  );
                   return (
                     <TransactionItem
                       key={tidx}
                       transaction={transaction}
-                      balance={calculateBalance(txIndex)}
+                      balance={calculateBalance(transaction)}
                       onEdit={onEdit}
                       onDelete={onDelete}
                     />
