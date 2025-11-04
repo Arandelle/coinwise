@@ -11,7 +11,12 @@ interface GroupWithCategories {
   categories: Category[];
 }
 
-const CategoryModal = () => {
+interface CategoryModalProps {
+  onSelect: (value: string) => void,
+  onCancel: () => void
+}
+
+const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
   const [categories, setCategories] = useState<GroupWithCategories[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,6 +127,7 @@ const CategoryModal = () => {
                         return (
                           <button
                             key={catIndex}
+                            onClick={() => onSelect(cat.category_name)}
                             className="flex flex-col space-y-2 items-center justify-center p-4"
                           >
                             <div className="bg-rose-500 p-1 text-white rounded-full">
@@ -142,7 +148,9 @@ const CategoryModal = () => {
         </div>
 
         <div className="p-4 border-t border-gray-100">
-          <button className="w-full py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          <button 
+          onClick={onCancel}
+          className="w-full py-3 text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
             Cancel
           </button>
         </div>

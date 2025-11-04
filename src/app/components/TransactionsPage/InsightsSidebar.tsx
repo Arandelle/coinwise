@@ -8,12 +8,12 @@ interface InsightsSidebarProps {
   categories: Category[];
 }
 
-export function getLucideIcon(iconName: string) : LucideIcon {
+export function getLucideIcon(iconName: string | undefined) : LucideIcon {
   const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
   if (Icon){
     return Icon as LucideIcon;
   }
-  return LucideIcons.Circle; // fallback icon
+  return LucideIcons.Ellipsis; // fallback icon
 }
 
 const InsightsSidebar: React.FC<InsightsSidebarProps> = ({

@@ -8,6 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalculatorModal from "./Calculator";
 import CategoryModal from "./CategoryModal";
+import { getLucideIcon } from "./InsightsSidebar";
 
 interface TransactionModalProps {
   editingTransaction: Transaction | null;
@@ -27,10 +28,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [showCategory, setShowCategory] = useState(false);
   const [formData, setFormData] = useState<Transaction>({
     name: "",
-    category: "",
+    category_id: "",
     amount: 0,
     type: "expense",
     date: new Date(),
+
+    category_details: {
+    name: "Others",
+    icon: "",
+    type: "expense",
+    group_name: "Others"
+  }
   });
 
   const isExpenses = formData.type === "expense"
@@ -39,7 +47,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     if (editingTransaction) {
       setFormData({
         name: editingTransaction.name,
-        category: editingTransaction.category,
+        category_id: editingTransaction.category_id,
         amount: Math.abs(editingTransaction.amount),
         type: editingTransaction.type,
         date: editingTransaction.date,
@@ -66,21 +74,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
     if (!editingTransaction && user) {
       try {
-        const payload = {
-          ...formData,
-          category_id: "category1010",
-        };
-
+        const {category_details, ...cleanData} = formData
         const res = await fetch("/api/transactions/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(cleanData),
         });
 
         if (res.ok) {
           setFormData({
             name: "",
-            category: "",
+            category_id: "",
             amount: 0,
             type: "expense",
             date: null,
@@ -114,7 +118,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         if (res.ok) {
           setFormData({
             name: "",
-            category: "",
+            category_id: "",
             amount: 0,
             type: "expense",
             date: null,
@@ -148,6 +152,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       type: type,
     });
   };
+
+  const Icon = getLucideIcon(formData.category_details?.icon)
 
   return (
     <>
@@ -247,11 +253,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             onClick={() => setShowCategory(true)}
             className="flex flex-row items-center gap-4 cursor-pointer w-full">
                 <div className="text-slate-900">
-                  <Fuel size={22}/>
+                  <Icon size={22}/>
                 </div>
                 <div className="flex flex-col">
-                  <p className="text-sm">Car</p>
-                  <p className="font-medium">Fuel</p>
+                  <p className="text-sm">{formData.category_details?.group_name}</p>
+                  <p className="font-medium">{formData.category_details?.name}</p>
                 </div>
             </div>
 
@@ -324,7 +330,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         //   ...formData,
         //   category: value
         // }) }/>
-      <CategoryModal />
+      <CategoryModal 
+      onSelect={(value) => {setFormData({
+        ...formData,
+        category_id: value,
+      }); setShowCategory(false)}}
+      onCancel={() => setShowCategory(false)}
+      />
       )}
     </>
   );

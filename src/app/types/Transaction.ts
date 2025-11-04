@@ -1,14 +1,21 @@
+// types/Transaction.ts
 export interface Transaction {
-  _id?: string, 
-  category_id?: string,
+  _id?: string;
+  user_id?: string;
+  category_id: string;
   name: string;
-  category: string;
   amount: number;
-  type: string,
-  label?: string,
-  note?: string,
-  balance_after?: string,
+  type: string;
   date: Date | null;
+  note?: string;
+  
+  // Enriched data from backend
+  category_details?: {
+    name: string;
+    icon: string;
+    type: string;
+    group_name: string;
+  };
 }
 
 export interface Category {
@@ -17,4 +24,5 @@ export interface Category {
   icon: string;
   color?: string;
   category_group: string;
+
 }
