@@ -12,7 +12,7 @@ interface GroupWithCategories {
 }
 
 interface CategoryModalProps {
-  onSelect: (value: string) => void,
+  onSelect: (category: Category) => void,
   onCancel: () => void
 }
 
@@ -127,7 +127,10 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
                         return (
                           <button
                             key={catIndex}
-                            onClick={() => onSelect(cat.category_name)}
+                            onClick={() => onSelect({
+                              ...cat,
+                              category_group: group.group_name
+                            })}
                             className="flex flex-col space-y-2 items-center justify-center p-4"
                           >
                             <div className="bg-rose-500 p-1 text-white rounded-full">

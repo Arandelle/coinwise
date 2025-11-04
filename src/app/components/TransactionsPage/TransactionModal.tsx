@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Calculator, Fuel, Minus, Plus, SaveIcon, X } from "lucide-react";
+import { Calculator, Minus, Plus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "@/app/types/Transaction";
 import { User } from "@/app/types/Users";
 import DatePicker from "react-datepicker";
@@ -23,7 +23,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   onSubmit,
   user,
 }) => {
-  const [showCalculator, sestShowCalculator] = useState(false)
+  const [showCalculator, sestShowCalculator] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
   const [formData, setFormData] = useState<Transaction>({
@@ -34,14 +34,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     date: new Date(),
 
     category_details: {
-    name: "Others",
-    icon: "",
-    type: "expense",
-    group_name: "Others"
-  }
+      name: "Others",
+      icon: "",
+      type: "expense",
+      group_name: "Others",
+    },
   });
 
-  const isExpenses = formData.type === "expense"
+  const isExpenses = formData.type === "expense";
 
   useEffect(() => {
     if (editingTransaction) {
@@ -57,7 +57,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     if (!user) {
       const id: string = editingTransaction?._id || `transaction_${Date.now()}`;
       const txData = {
@@ -69,13 +69,13 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       localStorage.setItem(id, JSON.stringify(txData));
       onSubmit();
       alert("Success not authenticated");
-      setLoading(false)
+      setLoading(false);
       return;
     }
     if (!editingTransaction && user) {
       try {
-        const {category_details, ...cleanData} = formData
-        const res = await fetch("/api/transactions/", {
+        const { category_details, ...cleanData } = formData;
+        const res = await fetch("/api/transactions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cleanData),
@@ -96,22 +96,18 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         }
       } catch (error) {
         console.error("Error adding new item", error);
-      } finally{
-        setLoading(false)
+      } finally {
+        setLoading(false);
       }
     } else {
       try {
-        const payload = {
-          ...formData,
-          category_id: "category1010",
-        };
-
+        const { category_details, ...cleanData } = formData;
         const res = await fetch(
           `/api/transactions/${editingTransaction!._id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(cleanData),
           }
         );
 
@@ -130,21 +126,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         }
       } catch (error) {
         console.error("Error adding new item", error);
-      } finally{
-        setLoading(false)
+      } finally {
+        setLoading(false);
       }
     }
   };
-
-  // const handleCategoryChange = (categoryName: string) => {
-  //   const cat = categories.find((c) => c.name === categoryName);
-  //   if (cat && formData) {
-  //     setFormData({
-  //       ...formData,
-  //       category: categoryName,
-  //     });
-  //   }
-  // };
 
   const handleTransType = (type: string) => {
     setFormData({
@@ -153,7 +139,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     });
   };
 
-  const Icon = getLucideIcon(formData.category_details?.icon)
+  const Icon = getLucideIcon(formData.category_details?.icon);
 
   return (
     <>
@@ -162,14 +148,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           <h3 className="text-center text-sm text-gray-900 font-medium">
             {editingTransaction ? "Edit Transaction" : "Add Transaction"}
           </h3>
-  
+
           <button
             onClick={onClose}
             className="absolute right-2 top-2 p-1 hover:bg-gray-100 rounded-lg"
           >
             <X size={15} />
           </button>
-  
+
           <form onSubmit={handleSubmit} className="space-y-4 my-4 mx-2">
             <div className="space-y-2">
               <input
@@ -190,7 +176,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 placeholderText="Select date"
               />
             </div>
-  
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Amount (₱)
@@ -222,61 +208,57 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
                 <button
                   type="button"
-                  className={`rounded-full ${isExpenses ? "bg-rose-500 hover:bg-rose-600" : "bg-emerald-500 hover:bg-emerald-600"}  text-white p-1 transition-colors flex-shrink-0`}
+                  className={`rounded-full ${
+                    isExpenses
+                      ? "bg-rose-500 hover:bg-rose-600"
+                      : "bg-emerald-500 hover:bg-emerald-600"
+                  }  text-white p-1 transition-colors flex-shrink-0`}
                   title="Transaction Type Icon"
                 >
-                 { isExpenses ?
-                    <Minus size={20} /> :  <Plus size={20}/>
-                 } 
+                  {isExpenses ? <Minus size={20} /> : <Plus size={20} />}
                 </button>
               </div>
             </div>
-  
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <select
-                value={formData?.category}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.name} value={cat.name}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div> */}
 
-            <div 
-            onClick={() => setShowCategory(true)}
-            className="flex flex-row items-center gap-4 cursor-pointer w-full">
-                <div className="text-slate-900">
-                  <Icon size={22}/>
-                </div>
-                <div className="flex flex-col">
-                  <p className="text-sm">{formData.category_details?.group_name}</p>
-                  <p className="font-medium">{formData.category_details?.name}</p>
-                </div>
+            <div
+              onClick={() => setShowCategory(true)}
+              className="flex flex-row items-center gap-4 cursor-pointer w-full"
+            >
+              <div className="text-slate-900">
+                <Icon size={22} />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm">
+                  {formData.category_details?.group_name}
+                </p>
+                <p className="font-medium">{formData.category_details?.name}</p>
+              </div>
             </div>
 
             <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                Notes<span className="text-gray-400 text-xs font-normal">(Optional)</span>
+              <label
+                htmlFor="notes"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Notes
+                <span className="text-gray-400 text-xs font-normal">
+                  (Optional)
+                </span>
               </label>
-              <textarea 
-              placeholder="Add a note about this transaction..."
-              value={formData.note}
-              onChange={((e) => setFormData({
-                ...formData,
-                note: e.target.value
-              }))}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0 resize-none text-sm"
-              rows={3}
+              <textarea
+                placeholder="Add a note about this transaction..."
+                value={formData.note}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    note: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-0 resize-none text-sm"
+                rows={3}
               />
             </div>
-  
+
             <div className="flex items-center bg-gray-100 border border-gray-300 rounded-md gap-2 p-1">
               <button
                 type="button"
@@ -289,7 +271,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               >
                 Income
               </button>
-  
+
               <button
                 type="button"
                 onClick={() => handleTransType("expense")}
@@ -301,7 +283,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               >
                 Expense
               </button>
-  
+
               <button
                 type="submit"
                 disabled={loading}
@@ -315,28 +297,35 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       </div>
 
       {showCalculator && (
-        <CalculatorModal 
+        <CalculatorModal
           onClose={() => sestShowCalculator(false)}
-          onSelect={(value) => setFormData({
-            ...formData,
-            amount: value
-          }) }
+          onSelect={(value) =>
+            setFormData({
+              ...formData,
+              amount: value,
+            })
+          }
           initialValue={formData?.amount || 0}
         />
       )}
 
       {showCategory && (
-        // <CategoryModal onChange={(value) => setFormData({
-        //   ...formData,
-        //   category: value
-        // }) }/>
-      <CategoryModal 
-      onSelect={(value) => {setFormData({
-        ...formData,
-        category_id: value,
-      }); setShowCategory(false)}}
-      onCancel={() => setShowCategory(false)}
-      />
+        <CategoryModal
+          onSelect={(category) => {
+            setFormData({
+              ...formData,
+              category_id: category._id,
+              category_details : {
+                name: category.category_name,
+                icon: category.icon,
+                type: category.type,
+                group_name: category.category_group
+              }
+            });
+            setShowCategory(false);
+          }}
+          onCancel={() => setShowCategory(false)}
+        />
       )}
     </>
   );

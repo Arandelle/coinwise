@@ -19,6 +19,7 @@ export interface Transaction {
 }
 
 export interface Category {
+  _id: string,
   category_name: string;
   type: string,
   icon: string;
