@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { Calculator, Fuel, Minus, Plus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "@/app/types/Transaction";
-import { categories } from "./constants";
 import { User } from "@/app/types/Users";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
