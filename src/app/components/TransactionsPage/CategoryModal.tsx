@@ -2,6 +2,7 @@ import { Category } from "@/app/types/Transaction";
 import {Plus, Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { getLucideIcon } from "./InsightsSidebar";
+import { CreateCategoryModal } from "./CreateCategoryModal";
 
 interface GroupWithCategories {
   _id?: string;
@@ -22,8 +23,9 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  useEffect(() => {
-    async function fetchCategories() {
+  const [createCategory, setCreateCategory] = useState(false);
+
+   async function fetchCategories() {
       try {
         const res = await fetch("/api/category");
 
@@ -40,8 +42,15 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
       }
     }
 
+  useEffect(() => {
     fetchCategories();
   }, []);
+
+
+  // call or fetch the category to show the new created category
+  const handleCategoryCreated = () => {
+    fetchCategories();
+  }
 
   // Filter categories based on search
   const filteredCategories = categories.map((group) => ({
@@ -90,7 +99,9 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="outline-none flex-1 text-sm text-slate-900 placeholder:text-gray-400"
             />
-            <button className="flex items-center gap-1.5 text-xs text-white font-medium bg-gradient-to-br from-emerald-600 to-teal-600 py-2 px-4 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all shadow-sm">
+            <button 
+            onClick={() => setCreateCategory(true)}
+            className="flex items-center gap-1.5 text-xs text-white font-medium bg-gradient-to-br from-emerald-600 to-teal-600 py-2 px-4 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all shadow-sm">
               <Plus size={14} />
               New
             </button>
@@ -158,6 +169,14 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
           </button>
         </div>
       </div>
+
+      {createCategory && (
+        <CreateCategoryModal
+          isOpen={createCategory}
+          onClose={() => setCreateCategory(false)}
+          onSuccess={handleCategoryCreated}
+        />
+      )}
     </div>
   );
 };
