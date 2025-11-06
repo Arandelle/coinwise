@@ -12,24 +12,22 @@ import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
 import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
 
 const TransactionList = () => {
-  const { user, loading, refreshUser } = useAuth();
+  const { user, loading: userLoading, refreshUser } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
+
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
 
   useEffect(() => {
-    if (loading) return;
+    if (userLoading) return;
     loadTransactions();
-  }, [user, loading]);
-
-  if (loading) {
-    return <LoadingCoin label="Loading transaction..." />;
-  }
+  }, [user, userLoading]);
 
   async function loadTransactions() {
     if (!user) {
@@ -47,7 +45,8 @@ const TransactionList = () => {
 
       const txList = Object.values(stored);
       txList.sort(
-        (a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+        (a, b) =>
+          new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
       );
       setTransactions(txList);
       return;
@@ -62,7 +61,10 @@ const TransactionList = () => {
       const data: Transaction[] = await response.json();
 
       //sort by date
-      const sortedData = data.sort((a,b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime() )
+      const sortedData = data.sort(
+        (a, b) =>
+          new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+      );
 
       setTransactions(sortedData);
     } catch (error) {
@@ -75,38 +77,41 @@ const TransactionList = () => {
     setShowModal(true);
   };
 
-const handleDelete = async (id: string) => {
-  if (!window.confirm(`Are you sure you want to delete this transaction?`)) {
-    return;
-  }
-
-  if (!user) {
-    localStorage.removeItem(id);
-    alert("Transaction deleted (local storage)");
-    loadTransactions();
-    return;
-  }
-
-  try {
-    const res = await fetch(`/api/transactions/${id}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // ✅ crucial line
-    });
-
-    if (res.ok) {
-      alert("Transaction deleted successfully!");
-      await loadTransactions();
-    } else {
-      const error = await res.json();
-      alert(`Failed to delete: ${error.error}`);
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(`Are you sure you want to delete this transaction?`)) {
+      return;
     }
-  } catch (error) {
-    console.error("Error deleting transaction:", error);
-    alert("Error deleting transaction");
-  }
-};
 
+    setDeleteLoading(true);
+
+    if (!user) {
+      localStorage.removeItem(id);
+      alert("Transaction deleted (local storage)");
+      loadTransactions();
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/transactions/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ crucial line
+      });
+
+      if (res.ok) {
+        alert("Transaction deleted successfully!");
+        await loadTransactions();
+      } else {
+        const error = await res.json();
+        alert(`Failed to delete: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      alert("Error deleting transaction");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   const handleModalClose = () => {
     setShowModal(false);
@@ -123,6 +128,16 @@ const handleDelete = async (id: string) => {
     0
   );
   const remaining = 25000 - totalSpent;
+
+  if (userLoading || deleteLoading) {
+    return (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 font-mono font-light">
+        <div className="bg-white p-4 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-lg">
+          <LoadingCoin label="Loading transaction..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 relative overflow-hidden">

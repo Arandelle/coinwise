@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import CalculatorModal from "./Calculator";
 import CategoryModal from "./CategoryModal";
 import { getLucideIcon } from "./InsightsSidebar";
+import LoadingCoin from "../Loading";
 
 interface TransactionModalProps {
   editingTransaction: Transaction | null;
@@ -51,6 +52,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         amount: Math.abs(editingTransaction.amount),
         type: editingTransaction.type,
         date: editingTransaction.date,
+        category_details: {
+          name: editingTransaction.category_details?.name || "",
+          icon: editingTransaction.category_details?.icon || "",
+          type: editingTransaction.category_details?.type || "expense",
+          group_name: editingTransaction.category_details?.group_name || "",
+        },
       });
     }
   }, [editingTransaction]);
@@ -140,6 +147,16 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   };
 
   const Icon = getLucideIcon(formData.category_details?.icon);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-mono font-light">
+        <div className="bg-white p-4 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-lg">
+          <LoadingCoin />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -315,12 +332,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             setFormData({
               ...formData,
               category_id: category._id,
-              category_details : {
+              category_details: {
                 name: category.category_name,
                 icon: category.icon,
                 type: category.type,
-                group_name: category.category_group
-              }
+                group_name: category.category_group,
+              },
             });
             setShowCategory(false);
           }}
