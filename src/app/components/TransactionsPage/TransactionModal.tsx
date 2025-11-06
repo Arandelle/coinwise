@@ -291,6 +291,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                                 </span>
                               </>
                             )}
+                            <span className="text-xs text-teal-600 font-medium bg-teal-50 px-2 py-1 rounded">
+                              Recent
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -350,7 +353,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 </button>
               </div>
             </div>
-
+          {/*** Category */}
             <div
               onClick={() => setShowCategory(true)}
               className="flex flex-row items-center gap-4 cursor-pointer w-full"
@@ -462,6 +465,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             setShowCategory(false);
           }}
           onCancel={() => setShowCategory(false)}
+          categoryType={formData.type}
         />
       )}
     </>

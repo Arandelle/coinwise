@@ -14,10 +14,11 @@ interface GroupWithCategories {
 
 interface CategoryModalProps {
   onSelect: (category: Category) => void,
-  onCancel: () => void
+  onCancel: () => void,
+  categoryType: string
 }
 
-const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
+const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps) => {
   const [categories, setCategories] = useState<GroupWithCategories[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +118,7 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
             </div>
           ) : (
             <div className="space-y-6 p-4">
-              {filteredCategories.map((group, index) => (
+              {filteredCategories.filter(cat => cat.type === categoryType).map((group, index) => (
                 <div key={index}>
                   {/** Group title */}
                   <div className="flex items-center justify-center gap-2 mb-3">
@@ -144,7 +145,7 @@ const CategoryModal = ({onSelect,  onCancel} : CategoryModalProps) => {
                             })}
                             className="flex flex-col space-y-2 items-center justify-center p-4"
                           >
-                            <div className="bg-rose-500 p-1 text-white rounded-full">
+                            <div className={`${cat.type === "expense" ? "bg-rose-500" : "bg-emerald-500"}  p-1 text-white rounded-full`}>
                               <Icon size={25} />
                             </div>
                             <span className="text-xs font-light text-slate-500 capitalize">

@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 type CategoryGroup = {
   _id: string;
   group_name: string;
+  type: string
 };
 
 type CreateCategoryModalProps = {
@@ -180,7 +181,7 @@ export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCatego
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a group</option>
-              {categoryGroups.map((group) => (
+              {categoryGroups.filter(cat => cat.type === selectedType).map((group) => (
                 <option key={group._id} value={group._id}>
                   {group.group_name}
                 </option>
