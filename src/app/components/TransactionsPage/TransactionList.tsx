@@ -176,6 +176,7 @@ const TransactionList = () => {
 
       {showModal && (
         <TransactionModal
+          transactions={transactions}
           editingTransaction={editingTransaction}
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}

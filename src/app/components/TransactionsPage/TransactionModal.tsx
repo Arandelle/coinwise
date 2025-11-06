@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Calculator, Minus, Plus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "@/app/types/Transaction";
 import { User } from "@/app/types/Users";
@@ -12,6 +12,7 @@ import { getLucideIcon } from "./InsightsSidebar";
 import LoadingCoin from "../Loading";
 
 interface TransactionModalProps {
+  transactions: Transaction[];
   editingTransaction: Transaction | null;
   onClose: () => void;
   onSubmit: () => void;
@@ -19,6 +20,7 @@ interface TransactionModalProps {
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({
+  transactions,
   editingTransaction,
   onClose,
   onSubmit,
@@ -27,6 +29,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [showCalculator, sestShowCalculator] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState<Transaction>({
     name: "",
     category_id: "",
@@ -146,6 +149,78 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     });
   };
 
+  // GEt unique transaction name with their most recent data
+  const getTransactionTemplates = useMemo(() => {
+    const template = new Map<string, Transaction>();
+
+    // sort by the date
+    const sortedTransactions = [...transactions].sort(
+      (a, b) =>
+        new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+    );
+
+    // store the most recent transaction for each unique name
+    sortedTransactions.forEach((tx) => {
+      const name = tx.name.trim();
+
+      if (name && !template.has(name.toLowerCase())) {
+        template.set(name.toLowerCase(), tx);
+      }
+    });
+
+    return template;
+  }, [transactions]);
+
+  const allSuggestions = useMemo(() => {
+    const suggestions: Array<{
+      name: string;
+      data: Partial<Transaction>;
+    }> = [];
+
+    getTransactionTemplates.forEach((tx, key) => {
+      suggestions.push({
+        name: tx.name || "",
+        data: {
+          name: tx.name,
+          category_id: tx.category_id,
+          amount: tx.amount,
+          category_details: {
+            icon: tx.category_details?.icon || "",
+            group_name: tx.category_details?.group_name || "",
+            name: tx.category_details?.name || "",
+            type: tx.category_details?.type || "",
+          },
+          note: tx.note,
+          type: tx.type,
+        },
+      });
+    });
+
+    return suggestions;
+  }, [getTransactionTemplates]);
+
+  const filteredSuggestions = useMemo(() => {
+    if (!formData.name || formData.name.trim().length === 0) {
+      // show recent transactions names when input is empty
+      return allSuggestions.slice(0, 6);
+    }
+
+    const query = formData.name.toLowerCase().trim();
+
+    return allSuggestions
+      .filter((suggestion) => suggestion.name.toLowerCase().includes(query))
+      .slice(0, 6);
+  }, [formData.name, allSuggestions]);
+
+  const handleSuggestClick = (suggestion: (typeof allSuggestions)[0]) => {
+    setFormData({
+      ...formData,
+      ...suggestion.data,
+    });
+
+    setShowSuggestions(false);
+  };
+
   const Icon = getLucideIcon(formData.category_details?.icon);
 
   if (loading) {
@@ -179,12 +254,51 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 type="text"
                 placeholder="Transaction Name"
                 value={formData?.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, name: e.target.value });
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="w-full text-xl py-2 outline-0 text-slate-800 font-medium"
                 required
               />
+
+              {/* Suggestions Dropdown */}
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div className="absolute z-10 m-auto mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-72 overflow-y-auto">
+                  {filteredSuggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleSuggestClick(suggestion)}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 text-slate-700 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-800">
+                            {suggestion.name}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
+                            {suggestion.data.amount && (
+                              <>
+                                <span>•</span>
+                                <span>
+                                  ₱
+                                  {Math.abs(
+                                    suggestion.data.amount
+                                  ).toLocaleString()}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <DatePicker
                 selected={formData?.date}
                 onChange={(date) => setFormData({ ...formData, date: date })}
@@ -241,8 +355,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               onClick={() => setShowCategory(true)}
               className="flex flex-row items-center gap-4 cursor-pointer w-full"
             >
-              <div className="text-slate-900">
-                <Icon size={22} />
+              <div
+                className={`p-2 rounded-full text-white ${
+                  formData.category_details?.type === "expense"
+                    ? "bg-rose-500"
+                    : "bg-emerald-500"
+                }`}
+              >
+                <Icon size={18} />
               </div>
               <div className="flex flex-col">
                 <p className="text-sm">
