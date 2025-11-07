@@ -123,11 +123,15 @@ const TransactionList = () => {
     handleModalClose();
   };
 
-  const totalSpent = transactions.reduce(
-    (sum, tx) => sum + Math.abs(tx.amount),
-    0
-  );
-  const remaining = 25000 - totalSpent;
+  const totalSpent = transactions.reduce((total: number, tx) => {
+    if (tx.type === "expense") {
+      return total - Math.abs(tx.amount);
+    } else {
+      return total + Math.abs(tx.amount);
+    }
+  }, 0);
+
+  const remaining = 25000 + totalSpent;
 
   if (userLoading || deleteLoading) {
     return (
