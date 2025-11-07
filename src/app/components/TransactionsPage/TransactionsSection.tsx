@@ -35,13 +35,23 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
     return grouped;
   };
 
- const calculateBalance = (transaction: Transaction) => {
-  // Find all transactions up to and including this transaction's date
-  const totalSpent = transactions
-    .filter((tx) => new Date(tx.date as Date) <= new Date(transaction.date as Date))
-    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-  return 25000 - totalSpent;
-};
+  const calculateBalance = (transaction: Transaction) => {
+    // Find all transactions up to and including this transaction's date
+    const totalSpent = transactions
+      .filter(
+        (tx) => new Date(tx.date as Date) <= new Date(transaction.date as Date)
+      )
+      .reduce((total, tx) => {
+        if (tx.type === "expense") {
+          return total - Math.abs(tx.amount);
+        } else {
+          return total + Math.abs(tx.amount);
+        }
+      }, 0);
+
+    return 25000 - totalSpent;
+  };
+
   const groupedTransactions = groupTransactionsByDate();
 
   return (
@@ -86,15 +96,21 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
               No transactions yet. Click + to add one!
             </p>
           ) : (
-            Object.entries(groupedTransactions).map(([date, txs], idx) => (
-              <section key={idx} className="space-y-2">
+            Object.entries(groupedTransactions).map(([date, txs], idx) => {
+              const dailyTotal = txs.reduce((total, tx) => {
+                if (tx.type === "expense"){
+                  return total - Math.abs(tx.amount);
+                } else{
+                  return total + Math.abs(tx.amount);
+                }
+              }, 0);
+
+              return (
+                  <section key={idx} className="space-y-2">
                 <div className="flex flex-row items-center justify-between bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl p-3">
                   <p className="text-xs text-gray-600 font-medium">{date}</p>
-                  <p className="text-xs text-rose-600 font-semibold">
-                    ₱
-                    {txs
-                      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
-                      .toLocaleString()}
+                  <p className={`${dailyTotal > 0 ? "text-emerald-600" : "text-rose-600"} text-xs font-semibold`}>
+                    ₱ {dailyTotal.toLocaleString()}
                   </p>
                 </div>
 
@@ -110,7 +126,8 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                   );
                 })}
               </section>
-            ))
+              )
+            })
           )}
         </div>
       </div>
