@@ -12,6 +12,9 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   totalSpent,
   remaining,
 }) => {
+
+  const hasIncome = totalSpent > 0
+
   return (
     <div className="hidden lg:block lg:col-span-3 space-y-6">
       {/* Profile Card */}
@@ -32,15 +35,15 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
                 ₱25,000
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-rose-50 to-red-50 rounded-lg">
-              <span className="text-sm text-gray-600">Spent this month</span>
-              <span className="text-sm font-semibold text-rose-500">
+            <div className={`flex items-center justify-between p-3 bg-gradient-to-r ${hasIncome ? "from-emerald-50 to-teal-50" : "from-rose-50 to-red-50"}  rounded-lg`}>
+              <span className="text-sm text-gray-600">{hasIncome ? "Income" : "Spent"} this month</span>
+              <span className={`text-sm font-semibold ${hasIncome ? "text-emerald-600" : "text-rose-600"}`}>
                 ₱{totalSpent.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg">
+            <div className={`flex items-center justify-between p-3 bg-gradient-to-r ${remaining > 0 ? "from-emerald-50 to-teal-50" : "from-rose-50 to-red-50"} rounded-lg`}>
               <span className="text-sm text-gray-600">Remaining</span>
-              <span className="text-sm font-semibold text-emerald-600">
+              <span className={`text-sm font-semibold ${remaining > 0 ? "text-emerald-600" : "text-red-600"} `}>
                 ₱{remaining.toLocaleString()}
               </span>
             </div>
@@ -55,9 +58,9 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
           <h3 className="font-semibold text-lg text-gray-900">Forecast</h3>
         </div>
         <p className="text-sm text-gray-600 mb-2">
-          {`At your current rate, you'll spend:`}
+          {`At your current rate, ${hasIncome ? "you'll gain: " : "you'll spend: "}`}
         </p>
-        <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">
+        <p className={`text-2xl font-bold ${hasIncome ? "text-emerald-600" : "text-rose-600"}`}>
           ₱{Math.round(totalSpent * 1.5).toLocaleString()}
         </p>
         <p className="text-xs text-gray-500 mt-1">by end of month</p>
