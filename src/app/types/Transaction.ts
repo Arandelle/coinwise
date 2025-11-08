@@ -18,12 +18,5 @@ export interface Transaction {
   };
 }
 
-export interface Category {
-  _id: string,
-  category_name: string;
-  type: string,
-  icon: string;
-  color?: string;
-  category_group: string;
-
-}
+export type CreateTransaction = Omit<Transaction, "_id" | "category_details">;
+export type UpdateTransactionInput = Partial<Omit<Transaction, "_id" | "category_details">>
