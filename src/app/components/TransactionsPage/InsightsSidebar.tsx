@@ -1,19 +1,10 @@
 import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
-import * as LucideIcons from "lucide-react";
-import { type LucideIcon } from "lucide-react";
 import { Category } from "@/app/types/Transaction";
+import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
 interface InsightsSidebarProps {
   categories: Category[];
-}
-
-export function getLucideIcon(iconName: string | undefined) : LucideIcon {
-  const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
-  if (Icon){
-    return Icon as LucideIcon;
-  }
-  return LucideIcons.Ellipsis; // fallback icon
 }
 
 const InsightsSidebar: React.FC<InsightsSidebarProps> = ({

@@ -8,8 +8,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalculatorModal from "./Calculator";
 import CategoryModal from "./CategoryModal";
-import { getLucideIcon } from "./InsightsSidebar";
 import LoadingCoin from "../Loading";
+import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
 interface TransactionModalProps {
   transactions: Transaction[];

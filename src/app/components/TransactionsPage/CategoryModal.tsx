@@ -1,9 +1,10 @@
+import React, { useState } from "react";
 import { Category } from "@/app/types/Transaction";
 import {Plus, Search } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { getLucideIcon } from "./InsightsSidebar";
 import { CreateCategoryModal } from "./CreateCategoryModal";
 import { useCategories } from "@/app/hooks/useApi";
+import LoadingCoin from "../Loading";
+import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
 interface GroupWithCategories {
   _id?: string;
@@ -44,10 +45,8 @@ const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps)
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl p-8">
-          <div className="animate-pulse text-gray-600">
-            Loading categories...
-          </div>
+        <div className="bg-white rounded-2xl p-8 w-md">
+        <LoadingCoin label="Loading Categories"/>
         </div>
       </div>
     );
