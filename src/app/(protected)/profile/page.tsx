@@ -1,48 +1,33 @@
-"use client"
+"use client";
 
-import { MapPin, Mail, TrendingUp, Target, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import LoadingCoin from '@/app/components/Loading';
-import { useAuth } from '@/app/context/AuthContext';
-import { useEffect } from 'react';
+import { MapPin, Mail, TrendingUp, Target, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
+import LoadingCoin from "@/app/components/Loading";
+import { useEffect } from "react";
+import { useUser } from "@/app/hooks/useUser";
+import { useLogout } from "@/app/hooks/useLogout";
 
 export default function CoinWiseProfile() {
-  const {user, loading, refreshUser} = useAuth();
+  const { data: user, isLoading } = useUser();
+  const { logout } = useLogout();
   const router = useRouter();
 
-  const handleLogout = async () => {
-      await fetch('/api/auth/logout', {
-        method: "POST"
-      });
-
-  router.push("/login");
-  router.refresh();    
-  }
-
   useEffect(() => {
-    refreshUser();
-  })
+    if (!isLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
 
-  if (loading) {
-    return (
-      <LoadingCoin label='Loading profile...'/>
-    );
+  const handleLogout = async () => {
+    await logout();
   };
 
-  if (!user) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-gray-600 mb-4">Please log in to view your profile</p>
-        <button
-          onClick={() => router.push('/login')}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Go to Login
-        </button>
+  if (isLoading) {
+    return <LoadingCoin label="Loading profile..." />;
+  }
 
-        <button onClick={handleLogout}>logout</button>
-      </div>
-    );
+  if (!user) {
+   return null; 
   }
 
   return (
@@ -54,12 +39,16 @@ export default function CoinWiseProfile() {
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-4 left-4 text-white text-6xl">💰</div>
             <div className="absolute top-8 right-8 text-white text-4xl">📊</div>
-            <div className="absolute bottom-6 left-12 text-white text-3xl">💵</div>
-            <div className="absolute bottom-8 right-6 text-white text-5xl">💳</div>
+            <div className="absolute bottom-6 left-12 text-white text-3xl">
+              💵
+            </div>
+            <div className="absolute bottom-8 right-6 text-white text-5xl">
+              💳
+            </div>
           </div>
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-          
+
           {/* Budget Health Score Badge */}
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5">
             <Zap className="w-4 h-4 text-amber-500" />
@@ -79,11 +68,15 @@ export default function CoinWiseProfile() {
         {/* Profile Info */}
         <div className="pt-20 pb-6 px-6 text-center">
           <h1 className="text-2xl font-bold text-slate-800 mb-2">
-           <span className='capitalize'> {user ? user.username ?? "Fullaname not yet set" : ""}</span>
+            <span className="capitalize">
+              {" "}
+              {user ? user.username ?? "Fullaname not yet set" : ""}
+            </span>
           </h1>
-          <p className='pb-2 text-emerald-500 font-bold'>{user.email}</p>
+          <p className="pb-2 text-emerald-500 font-bold">{user?.email}</p>
           <p className="text-slate-600 text-sm leading-relaxed mb-4">
-            Smart spender | Savings enthusiast 💰<br />
+            Smart spender | Savings enthusiast 💰
+            <br />
             Building wealth through mindful spending
           </p>
 
@@ -91,10 +84,14 @@ export default function CoinWiseProfile() {
           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-3 mb-6">
             <div className="flex items-center justify-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-semibold text-emerald-700">AI INSIGHT</span>
+              <span className="text-xs font-semibold text-emerald-700">
+                AI INSIGHT
+              </span>
             </div>
             <p className="text-sm text-slate-700">
-              Your spending is <span className="font-semibold text-emerald-600">15% better</span> than last month!
+              Your spending is{" "}
+              <span className="font-semibold text-emerald-600">15% better</span>{" "}
+              than last month!
             </p>
           </div>
 
@@ -114,7 +111,9 @@ export default function CoinWiseProfile() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
             <div className="flex items-center justify-center gap-2 mb-1">
               <Target className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-semibold text-blue-700">CURRENT GOAL</span>
+              <span className="text-xs font-semibold text-blue-700">
+                CURRENT GOAL
+              </span>
             </div>
             <p className="text-sm font-medium text-slate-700">
               Saving for Emergency Fund
@@ -135,9 +134,10 @@ export default function CoinWiseProfile() {
 
           {/* Action Buttons */}
           <div className="flex gap-3 mt-6">
-            <button 
-            onClick={handleLogout}
-            className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer">
+            <button
+              onClick={handleLogout}
+              className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+            >
               Logout
             </button>
             <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-lg transition-colors duration-200">
