@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Category } from "@/app/types/Transaction";
 import {Plus, Search } from "lucide-react";
 import { CreateCategoryModal } from "./CreateCategoryModal";
-import { useCategories } from "@/app/hooks/useApi";
+import { useGroupWithCategories } from "@/app/hooks/useApi";
 import LoadingCoin from "../Loading";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
@@ -26,7 +26,7 @@ const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps)
   const [createCategory, setCreateCategory] = useState(false);
 
   // We will use react query hook instead of useState + useHooks + fetch
-  const {data: categories, isLoading, error, refetch} = useCategories();
+  const {data: categories, isLoading, error, refetch} = useGroupWithCategories();
 
 
   // called when new category is created

@@ -1,7 +1,7 @@
 import React from "react";
 import { Edit2, Trash2 } from "lucide-react";
 import { Transaction } from "@/app/types/Transaction";
-import { getLucideIcon } from "./InsightsSidebar";
+import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
 interface TransactionItemProps {
   transaction: Transaction;
