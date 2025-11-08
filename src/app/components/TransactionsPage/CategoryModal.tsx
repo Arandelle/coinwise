@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Category } from "@/app/types/Transaction";
+import { Category } from "@/app/types/Category";
 import {Plus, Search } from "lucide-react";
 import { CreateCategoryModal } from "./CreateCategoryModal";
 import { useGroupWithCategories } from "@/app/hooks/useApi";
 import LoadingCoin from "../Loading";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
-interface GroupWithCategories {
+export interface GroupWithCategories {
   _id?: string;
   group_name: string;
   type: string;
