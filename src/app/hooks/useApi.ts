@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Category, CreateCategory, UpdateCategoryInput } from "../types/Category";
+import { GroupWithCategories } from "../components/TransactionsPage/CategoryModal";
 
 // Helper : Generic fetch function
-async function apiFetch(url: string, options?: RequestInit) {
+async function apiFetch<T>(url: string, options?: RequestInit) : Promise<T> {
     const res = await fetch(url, options);
 
     if(!res.ok){
@@ -9,7 +11,7 @@ async function apiFetch(url: string, options?: RequestInit) {
         throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
     }
 
-    return res.json();
+    return res.json() as Promise<T>;
 }
 
 // ============================================
@@ -18,7 +20,7 @@ async function apiFetch(url: string, options?: RequestInit) {
 export function useGroupWithCategories() {
   return useQuery({
     queryKey: ['group-with-categories'],
-    queryFn: () => apiFetch('/api/group-with-categories'),
+    queryFn: () => apiFetch<GroupWithCategories[]>('/api/group-with-categories'),
     staleTime: 10 * 60 * 1000, // Categories rarely change, cache for 10 min
   });
 }
@@ -26,7 +28,7 @@ export function useGroupWithCategories() {
 export function useCategory(){
     return useQuery({
         queryKey: ['categories'],
-        queryFn: () => apiFetch('/api/categories'),
+        queryFn: () => apiFetch<Category[]>('/api/categories'),
         staleTime: 10 * 60 * 1000
     })
 }
@@ -36,7 +38,7 @@ export function useCreateCategory(){
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn : (newCategory : any) =>
+        mutationFn : (newCategory : CreateCategory) =>
             apiFetch('/api/categories', {
                 method: 'POST',
                 headers: {'Content-Type' : 'application/json'},
@@ -53,7 +55,7 @@ export function useUpdateCategory(){
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({id, updates}: {id: string, updates: any}) => 
+        mutationFn: ({id, updates}: {id: string, updates: UpdateCategoryInput}) => 
             apiFetch(`/api/category/${id}`,{
                 method: 'PUT',
                 headers: {'Content-Type' : 'applicaton/json'},
