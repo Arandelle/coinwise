@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useAuth } from "@/app/context/AuthContext";
 import LoadingCoin from "@/app/components/Loading";
@@ -24,53 +24,51 @@ const TransactionList = () => {
     refreshUser();
   }, [refreshUser]);
 
-  useEffect(() => {
-    if (userLoading) return;
-    loadTransactions();
-  }, [user, userLoading]);
-
-  async function loadTransactions() {
-    if (!user) {
-      const stored: Record<string, Transaction> = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith("transaction_")) {
-          try {
-            stored[key] = JSON.parse(localStorage.getItem(key) || "");
-          } catch (e) {
-            console.error("Error loading transaction:", e);
-          }
+ const loadTransactions = useCallback(async () => {
+  if (!user) {
+    const stored: Record<string, Transaction> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("transaction_")) {
+        try {
+          stored[key] = JSON.parse(localStorage.getItem(key) || "");
+        } catch (e) {
+          console.error("Error loading transaction:", e);
         }
       }
-
-      const txList = Object.values(stored);
-      txList.sort(
-        (a, b) =>
-          new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
-      );
-      setTransactions(txList);
-      return;
     }
 
-    try {
-      const response = await fetch("/api/transactions");
-      if (!response.ok) {
-        throw new Error("Error fetching transactions");
-      }
-
-      const data: Transaction[] = await response.json();
-
-      //sort by date
-      const sortedData = data.sort(
-        (a, b) =>
-          new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
-      );
-
-      setTransactions(sortedData);
-    } catch (error) {
-      console.error("Error loading user transactions", error);
-    }
+    const txList = Object.values(stored);
+    txList.sort(
+      (a, b) =>
+        new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+    );
+    setTransactions(txList);
+    return;
   }
+
+  try {
+    const response = await fetch("/api/transactions");
+    if (!response.ok) {
+      throw new Error("Error fetching transactions");
+    }
+
+    const data: Transaction[] = await response.json();
+    const sortedData = data.sort(
+      (a, b) =>
+        new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+    );
+
+    setTransactions(sortedData);
+  } catch (error) {
+    console.error("Error loading user transactions", error);
+  }
+}, [user]); // dependencies for useCallback
+
+useEffect(() => {
+  if (userLoading) return;
+  loadTransactions();
+}, [userLoading, loadTransactions]);
 
   const handleEdit = (tx: Transaction) => {
     setEditingTransaction(tx);
