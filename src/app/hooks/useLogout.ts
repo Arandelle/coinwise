@@ -7,10 +7,13 @@ export function useLogout() {
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", {
+      const response = await fetch("/api/auth/logout", {
         method: "POST",
       });
 
+       if (!response.ok) {
+        throw new Error('Logout failed');
+      }
       // clear all react query cache
       queryClient.clear();
 
@@ -19,12 +22,12 @@ export function useLogout() {
       sessionStorage.clear();
 
       // redirect to login
-      router.push("/");
+      router.push("/login");
     } catch (error) {
       console.error("Error logging out: ", error);
 
       queryClient.clear();
-      router.push("/");
+      router.push("/login");
     }
   };
 
