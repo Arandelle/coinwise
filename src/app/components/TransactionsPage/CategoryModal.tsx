@@ -3,6 +3,7 @@ import {Plus, Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { getLucideIcon } from "./InsightsSidebar";
 import { CreateCategoryModal } from "./CreateCategoryModal";
+import { useCategories } from "@/app/hooks/useApi";
 
 interface GroupWithCategories {
   _id?: string;
@@ -19,49 +20,28 @@ interface CategoryModalProps {
 }
 
 const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps) => {
-  const [categories, setCategories] = useState<GroupWithCategories[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  
   const [searchQuery, setSearchQuery] = useState<string>("");
-
   const [createCategory, setCreateCategory] = useState(false);
 
-   async function fetchCategories() {
-      try {
-        const res = await fetch("/api/category");
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-
-        const data: GroupWithCategories[] = await res.json();
-        setCategories(data);
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "An error occured!");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  // We will use react query hook instead of useState + useHooks + fetch
+  const {data: categories, isLoading, error, refetch} = useCategories();
 
 
-  // call or fetch the category to show the new created category
+  // called when new category is created
   const handleCategoryCreated = () => {
-    fetchCategories();
-  }
+    refetch();
+  };
 
   // Filter categories based on search
-  const filteredCategories = categories.map((group) => ({
+  const filteredCategories = categories?.map((group: GroupWithCategories) => ({
     ...group,
     categories: group.categories.filter((cat) =>
       cat.category_name.toLowerCase().includes(searchQuery.toLowerCase())
     ),
-  }));
+  })) || [];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8">
@@ -77,7 +57,7 @@ const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps)
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8">
-          <div className="text-red-600">Error: {error}</div>
+          <div className="text-red-600">Error: {error instanceof Error ? error.message : "Failed to load categories"}</div>
         </div>
       </div>
     );
@@ -118,7 +98,7 @@ const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps)
             </div>
           ) : (
             <div className="space-y-6 p-4">
-              {filteredCategories.filter(cat => cat.type === categoryType).map((group, index) => (
+              {filteredCategories.filter((cat : GroupWithCategories) => cat.type === categoryType).map((group: GroupWithCategories, index: number) => (
                 <div key={index}>
                   {/** Group title */}
                   <div className="flex items-center justify-center gap-2 mb-3">
