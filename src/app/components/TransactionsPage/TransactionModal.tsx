@@ -177,7 +177,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       data: Partial<Transaction>;
     }> = [];
 
-    getTransactionTemplates.forEach((tx, key) => {
+    getTransactionTemplates.forEach((tx) => {
       suggestions.push({
         name: tx.name || "",
         data: {

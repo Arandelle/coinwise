@@ -1,6 +1,6 @@
 import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
-import { Category } from "@/app/types/Transaction";
+import { Category } from "@/app/types/Category";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 
 interface InsightsSidebarProps {
