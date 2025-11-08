@@ -3,15 +3,59 @@ import { Category, CreateCategory, UpdateCategoryInput } from "../types/Category
 import { GroupWithCategories } from "../components/TransactionsPage/CategoryModal";
 
 // Helper : Generic fetch function
-async function apiFetch<T>(url: string, options?: RequestInit) : Promise<T> {
-    const res = await fetch(url, options);
+export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(url, options);
 
-    if(!res.ok){
-        const error = await res.text();
-        throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
+  console.log("🌐 API Fetch:", {
+    url,
+    method: options?.method || 'GET',
+    status: res.status,
+    ok: res.ok
+  });
+
+  if (!res.ok) {
+    let error;
+    try {
+      error = await res.json();
+    } catch {
+      error = await res.text();
     }
+    
+    console.error("❌ API Error:", {
+      url,
+      status: res.status,
+      error
+    });
 
-    return res.json() as Promise<T>;
+    throw new Error(
+      typeof error === 'object' ? JSON.stringify(error) : error || `HTTP ${res.status}: ${res.statusText}`
+    );
+  }
+
+  // Handle 204 No Content or empty responses
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    console.log("✅ Empty response (204)");
+    return {} as T;
+  }
+
+  // Check if response has JSON content
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await res.json();
+    console.log("✅ JSON Response:", data);
+    return data as T;
+  }
+
+  // Fallback: try to parse as JSON
+  try {
+    const data = await res.json();
+    console.log("✅ Response:", data);
+    return data as T;
+  } catch {
+    // If parsing fails, return empty object
+    console.log("⚠️ No JSON body, returning empty object");
+    return {} as T;
+  }
 }
 
 // ============================================
