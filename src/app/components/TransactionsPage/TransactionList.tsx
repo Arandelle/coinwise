@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { useAuth } from "@/app/context/AuthContext";
 import LoadingCoin from "@/app/components/Loading";
 import TransactionsSection from "@/app/components/TransactionsPage/TransactionsSection";
 import TransactionModal from "@/app/components/TransactionsPage/TransactionModal";
@@ -10,65 +9,17 @@ import { Transaction } from "@/app/types/Transaction";
 import { categories } from "@/app/components/TransactionsPage/constants";
 import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
 import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
+import { useTransactions } from "@/app/hooks/useTransactions";
+import { useUser } from "@/app/hooks/useUser";
+import { useDeleteTransaction } from "@/app/hooks/useTransactions";
 
 const TransactionList = () => {
-  const { user, loading: userLoading, refreshUser } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { data: user, isLoading: userLoading } = useUser();
+  const { data: transactions, isLoading, refetch } = useTransactions();
+  const deleteMutation = useDeleteTransaction();
+  
   const [showModal, setShowModal] = useState(false);
-  const [editingTransaction, setEditingTransaction] =
-    useState<Transaction | null>(null);
-
-  const [deleteLoading, setDeleteLoading] = useState(false);
-
-  useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
-
- const loadTransactions = useCallback(async () => {
-  if (!user) {
-    const stored: Record<string, Transaction> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith("transaction_")) {
-        try {
-          stored[key] = JSON.parse(localStorage.getItem(key) || "");
-        } catch (e) {
-          console.error("Error loading transaction:", e);
-        }
-      }
-    }
-
-    const txList = Object.values(stored);
-    txList.sort(
-      (a, b) =>
-        new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
-    );
-    setTransactions(txList);
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/transactions");
-    if (!response.ok) {
-      throw new Error("Error fetching transactions");
-    }
-
-    const data: Transaction[] = await response.json();
-    const sortedData = data.sort(
-      (a, b) =>
-        new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
-    );
-
-    setTransactions(sortedData);
-  } catch (error) {
-    console.error("Error loading user transactions", error);
-  }
-}, [user]); // dependencies for useCallback
-
-useEffect(() => {
-  if (userLoading) return;
-  loadTransactions();
-}, [userLoading, loadTransactions]);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const handleEdit = (tx: Transaction) => {
     setEditingTransaction(tx);
@@ -80,34 +31,20 @@ useEffect(() => {
       return;
     }
 
-    setDeleteLoading(true);
-
+    // Guest user - delete from localStorage
     if (!user) {
       localStorage.removeItem(id);
       alert("Transaction deleted (local storage)");
-      loadTransactions();
+      refetch();
       return;
     }
 
+    // Logged-in user - use mutation
     try {
-      const res = await fetch(`/api/transactions/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ crucial line
-      });
-
-      if (res.ok) {
-        alert("Transaction deleted successfully!");
-        await loadTransactions();
-      } else {
-        const error = await res.json();
-        alert(`Failed to delete: ${error.error}`);
-      }
+      await deleteMutation.mutateAsync(id);
+      alert("Transaction deleted successfully!");
     } catch (error) {
-      console.error("Error deleting transaction:", error);
       alert("Error deleting transaction");
-    } finally {
-      setDeleteLoading(false);
     }
   };
 
@@ -117,11 +54,11 @@ useEffect(() => {
   };
 
   const handleModalSubmit = () => {
-    loadTransactions();
+    refetch();
     handleModalClose();
   };
 
-  const totalSpent = transactions.reduce((total: number, tx) => {
+  const totalSpent = transactions?.reduce((total: number, tx) => {
     if (tx.type === "expense") {
       return total - Math.abs(tx.amount);
     } else {
@@ -129,9 +66,9 @@ useEffect(() => {
     }
   }, 0);
 
-  const remaining = 25000 + totalSpent;
+  const remaining = 25000 + (totalSpent ?? 0);
 
-  if (userLoading || deleteLoading) {
+  if (userLoading || isLoading || deleteMutation.isPending) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 font-mono font-light">
         <div className="bg-white p-4 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-lg">
@@ -160,13 +97,13 @@ useEffect(() => {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <ProfileSidebar
-            user={user}
-            totalSpent={totalSpent}
+            user={user || null}
+            totalSpent={totalSpent ?? 0}
             remaining={remaining}
           />
 
           <TransactionsSection
-            transactions={transactions}
+            transactions={transactions ?? []}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onAddClick={() => setShowModal(true)}
@@ -178,11 +115,11 @@ useEffect(() => {
 
       {showModal && (
         <TransactionModal
-          transactions={transactions}
+          transactions={transactions || []}
           editingTransaction={editingTransaction}
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}
-          user={user}
+          user={user || null}
         />
       )}
     </div>
