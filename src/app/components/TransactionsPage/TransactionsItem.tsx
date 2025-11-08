@@ -16,12 +16,20 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   onEdit,
   onDelete,
 }) => {
-  // const Icon = iconMap[transaction.icon];
-
   const handleClick = () => {
     if (window.innerWidth < 768) {
       onEdit(transaction);
     }
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering parent onClick
+    onEdit(transaction);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering parent onClick
+    onDelete(transaction._id ?? "");
   };
 
   const Icon = getLucideIcon(transaction.category_details?.icon);
@@ -29,7 +37,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   return (
     <div
       onClick={handleClick}
-      className="flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all group"
+      className="flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all group cursor-pointer md:cursor-default"
     >
       <div
         className={`p-1 ${
@@ -57,7 +65,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
                   : "text-green-600"
               }`}
             >
-              {transaction.type === "expense" ? "-" : "+"}${transaction.amount}
+              {transaction.type === "expense" ? "-" : "+"}₱{transaction.amount.toLocaleString()}
             </p>
             <p className="text-xs text-gray-500">
               Balance: ₱{balance.toLocaleString()}
@@ -65,14 +73,16 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
           </div>
           <div className="hidden md:flex gap-1 transition-opacity">
             <button
-              onClick={() => onEdit(transaction)}
+              onClick={handleEditClick}
               className="p-1.5 hover:bg-teal-100 rounded-lg transition-colors"
+              aria-label="Edit transaction"
             >
               <Edit2 size={14} className="text-teal-600" />
             </button>
             <button
-              onClick={() => onDelete(transaction._id!)}
+              onClick={handleDeleteClick}
               className="p-1.5 hover:bg-rose-100 rounded-lg transition-colors"
+              aria-label="Delete transaction"
             >
               <Trash2 size={14} className="text-rose-600" />
             </button>
