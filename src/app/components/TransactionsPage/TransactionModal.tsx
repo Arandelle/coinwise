@@ -459,7 +459,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 name: category.category_name,
                 icon: category.icon,
                 type: category.type,
-                group_name: category.category_group,
+                group_name: category.category_group || "",
               },
             });
             setShowCategory(false);
