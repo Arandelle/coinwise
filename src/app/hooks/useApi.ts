@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Category, CreateCategory, UpdateCategoryInput } from "../types/Category";
+import { Category, CategoryGroup, UpdateCategoryInput } from "../types/Category";
 import { GroupWithCategories } from "../components/TransactionsPage/CategoryModal";
 
 // Helper : Generic fetch function
@@ -77,12 +77,21 @@ export function useCategory(){
     })
 }
 
+export function useCategoryGroups(){
+  return useQuery({
+    queryKey: ["category_group"],
+    queryFn: () => apiFetch<CategoryGroup[]>('/api/category-groups'),
+    staleTime: 10 * 60 *1000
+  })
+}
+
+
 export function useCreateCategory(){
 
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn : (newCategory : CreateCategory) =>
+        mutationFn : (newCategory : Omit<Category , "_id">) =>
             apiFetch('/api/categories', {
                 method: 'POST',
                 headers: {'Content-Type' : 'application/json'},
