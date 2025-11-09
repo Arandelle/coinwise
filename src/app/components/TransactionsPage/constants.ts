@@ -1,11 +1,11 @@
 import * as LucideIcons from "lucide-react";
 
 export const categories = [
-  { _id: "101", category_name: "Dining out", type: "expense", icon: "Utensils", color: "bg-rose-500", category_group: "Family" },
-  { _id: "102", category_name: "Shopping", type: "expense", icon: "ShoppingBag", color: "bg-purple-500", category_group: "Personal" },
-  { _id: "103", category_name: "Transportation", type: "expense", icon: "Car", color: "bg-yellow-500", category_group: "Travel" },
-  { _id: "104", category_name: "Utilities", type: "expense", icon: "Home", color: "bg-blue-500", category_group: "Household" },
-  { _id: "105", category_name: "Entertainment", type: "expense", icon: "Zap", color: "bg-pink-500", category_group: "Leisure" },
+  { _id: "101", category_name: "Dining out", type: "expense", icon: "Utensils", color: "bg-rose-500",group_id: "10202", category_group: "Family" },
+  { _id: "102", category_name: "Shopping", type: "expense", icon: "ShoppingBag", color: "bg-purple-500", group_id: "10202",category_group: "Personal" },
+  { _id: "103", category_name: "Transportation", type: "expense", icon: "Car", color: "bg-yellow-500", group_id: "10202",category_group: "Travel" },
+  { _id: "104", category_name: "Utilities", type: "expense", icon: "Home", color: "bg-blue-500", group_id: "10202",category_group: "Household" },
+  { _id: "105", category_name: "Entertainment", type: "expense", icon: "Zap", color: "bg-pink-500", group_id: "10202",category_group: "Leisure" },
   // { id: "106", name: "Groceries", type: "expense", icon: "ShoppingCart", color: "bg-green-500", category_group: "Family" },
   // { id: "107", name: "Healthcare", type: "expense", icon: "Heart", color: "bg-red-500", category_group: "Personal" },
   // { id: "108", name: "Education", type: "expense", icon: "BookOpen", color: "bg-indigo-500", category_group: "Personal Development" },
