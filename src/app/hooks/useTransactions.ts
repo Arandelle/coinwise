@@ -1,5 +1,3 @@
-// hooks/useApi.ts
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Transaction } from "../types/Transaction";
 import { useUser } from "./useUser";
@@ -71,7 +69,43 @@ export function useTransactions() {
   };
 }
 
-// transactions
+// ================ MUTATIONS =========================
+
+// Create Transactions (for logged in users)
+export function useCreateTransaction(){
+
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn : (newTransaction : Transaction) =>
+            apiFetch('/api/transactions', {
+                method: 'POST',
+                headers: {'Content-Type' : 'application/json'},
+                body: JSON.stringify(newTransaction)
+            }),
+        onSuccess: () => {
+            // invalidate and refetch categories
+            queryClient.invalidateQueries({queryKey: ['transactions']});
+        }
+    });
+}
+
+export function useUpdateTransactions(){
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({id, data}: {id: string, data: Omit<Transaction, '_id' | 'category_details'>}) => 
+            apiFetch(`/api/transactions/${id}`,{
+                method: 'PUT',
+                headers: {'Content-Type' : 'applicaton/json'},
+                body: JSON.stringify(data)
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['transactions']});
+        },
+    });
+}
+
 export function useDeleteTransaction() {
   const queryClient = useQueryClient();
 
