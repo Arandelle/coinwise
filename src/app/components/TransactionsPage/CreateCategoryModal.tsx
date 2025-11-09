@@ -1,14 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { categoryIcons } from "@/app/components/TransactionsPage/constants";
 import { X } from "lucide-react";
-
-type CategoryGroup = {
-  _id: string;
-  group_name: string;
-  type: string
-};
+import { useCategoryGroups, useCreateCategory } from "@/app/hooks/useApi";
+import { Category } from "@/app/types/Category";
 
 type CreateCategoryModalProps = {
   isOpen: boolean;
@@ -16,87 +12,70 @@ type CreateCategoryModalProps = {
   onSuccess?: () => void;
 };
 
-export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCategoryModalProps) {
-  const [categoryName, setCategoryName] = useState("");
-  const [selectedIcon, setSelectedIcon] = useState("");
-  const [selectedType, setSelectedType] = useState<"income" | "expense">("expense");
-  const [selectedGroup, setSelectedGroup] = useState("");
-  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export function CreateCategoryModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreateCategoryModalProps) {
+  // use react
+  const { data: categoryGroups, isLoading: isLoadingGroups } =
+    useCategoryGroups();
+  const createCategoryMutation = useCreateCategory();
+  const [categoryDetails, setCategoryDetails] = useState<Category>({
+    _id: "",
+    category_name: "",
+    type: "expense",
+    icon: "",
+    group_id: "",
+  });
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchCategoryGroups();
-    }
-  }, [isOpen]);
-
-  const fetchCategoryGroups = async () => {
-    try {
-      const res = await fetch("/api/category-groups");
-      if (!res.ok) throw new Error("Failed to fetch category groups");
-      const data = await res.json();
-      setCategoryGroups(data);
-    } catch (err) {
-      console.error("Error fetching category groups:", err);
-      setError("Failed to load category groups");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
-    if (!categoryName.trim()) {
+    if (!categoryDetails.category_name.trim()) {
       setError("Category name is required");
       return;
     }
 
-    if (!selectedIcon) {
+    if (!categoryDetails.icon) {
       setError("Please select an icon");
       return;
     }
 
-    if (!selectedGroup) {
+    if (!categoryDetails.group_id) {
       setError("Please select a category group");
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/categories", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    createCategoryMutation.mutate(
+      {
+        group_id: categoryDetails.group_id,
+        category_name: categoryDetails.category_name,
+        type: categoryDetails.type,
+        icon: categoryDetails.icon,
+      },
+      {
+        onSuccess: () => {
+          // Reset Form
+          setCategoryDetails({
+            _id: "",
+            category_name: "",
+            type: "expense",
+            icon: "",
+            group_id: "",
+          });
+          onSuccess?.();
+          onClose();
         },
-        body: JSON.stringify({
-          group_id: selectedGroup,
-          category_name: categoryName,
-          type: selectedType,
-          icon: selectedIcon,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create category");
+        onError: (err) => {
+          console.error("Error creating category:", err);
+          setError(
+            err instanceof Error ? err.message : "Failed to create category"
+          );
+        },
       }
-
-      // Reset form
-      setCategoryName("");
-      setSelectedIcon("");
-      setSelectedType("expense");
-      setSelectedGroup("");
-      
-      onSuccess?.();
-      onClose();
-    } catch (err) {
-      console.error("Error creating category:", err);
-      setError(err instanceof Error ? err.message : "Failed to create category");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
   if (!isOpen) return null;
@@ -127,14 +106,20 @@ export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCatego
 
           {/* Category Name */}
           <div>
-            <label htmlFor="categoryName" className="block text-sm font-medium mb-1">
+            <label
+              htmlFor="categoryName"
+              className="block text-sm font-medium mb-1"
+            >
               Category Name
             </label>
             <input
               id="categoryName"
               type="text"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
+              value={categoryDetails.category_name}
+              onChange={(e) => setCategoryDetails({
+                ...categoryDetails,
+                category_name: e.target.value
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter category name"
             />
@@ -146,9 +131,12 @@ export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCatego
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setSelectedType("expense")}
+                onClick={() => setCategoryDetails({
+                  ...categoryDetails,
+                  type: "expense"
+                })}
                 className={`flex-1 py-2 px-4 rounded border transition ${
-                  selectedType === "expense"
+                  categoryDetails.type === "expense"
                     ? "bg-red-500 text-white border-red-600"
                     : "bg-white border-gray-300 hover:bg-gray-50"
                 }`}
@@ -157,9 +145,12 @@ export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCatego
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedType("income")}
+                onClick={() => setCategoryDetails({
+                  ...categoryDetails,
+                  type: "income"
+                })}
                 className={`flex-1 py-2 px-4 rounded border transition ${
-                  selectedType === "income"
+                  categoryDetails.type === "income"
                     ? "bg-green-500 text-white border-green-600"
                     : "bg-white border-gray-300 hover:bg-gray-50"
                 }`}
@@ -171,35 +162,51 @@ export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCatego
 
           {/* Category Group */}
           <div>
-            <label htmlFor="categoryGroup" className="block text-sm font-medium mb-1">
+            <label
+              htmlFor="categoryGroup"
+              className="block text-sm font-medium mb-1"
+            >
               Category Group
             </label>
             <select
               id="categoryGroup"
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
+              value={categoryDetails.group_id}
+              onChange={(e) => setCategoryDetails({
+                ...categoryDetails,
+                group_id: e.target.value
+              })}
+              disabled={isLoadingGroups}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select a group</option>
-              {categoryGroups.filter(cat => cat.type === selectedType).map((group) => (
-                <option key={group._id} value={group._id}>
-                  {group.group_name}
-                </option>
-              ))}
+              <option value="">
+                {isLoadingGroups ? "Loading Groups" : "Select Group"}
+              </option>
+              {categoryGroups
+                ?.filter((cat) => cat.type === categoryDetails.type)
+                .map((group) => (
+                  <option key={group._id} value={group._id}>
+                    {group.group_name}
+                  </option>
+                ))}
             </select>
           </div>
 
           {/* Icon Selection */}
           <div>
-            <label className="block text-sm font-medium mb-2">Select Icon</label>
+            <label className="block text-sm font-medium mb-2">
+              Select Icon
+            </label>
             <div className="grid grid-cols-6 gap-2 p-3 border border-gray-300 rounded max-h-64 overflow-y-auto">
               {categoryIcons.map(({ name, icon: Icon }) => (
                 <button
                   key={name}
                   type="button"
-                  onClick={() => setSelectedIcon(name)}
+                  onClick={() => setCategoryDetails({
+                    ...categoryDetails,
+                    icon: name
+                  })}
                   className={`p-3 flex items-center justify-center rounded border transition hover:bg-gray-100 ${
-                    selectedIcon === name
+                    categoryDetails.icon === name
                       ? "bg-blue-500 text-white border-blue-600"
                       : "border-gray-300"
                   }`}
@@ -216,16 +223,18 @@ export function CreateCategoryModal({ isOpen, onClose, onSuccess }: CreateCatego
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition"
-              disabled={isLoading}
+              disabled={createCategoryMutation.isPending}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={createCategoryMutation.isPending}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Creating..." : "Create Category"}
+              {createCategoryMutation.isPending
+                ? "Creating..."
+                : "Create Category"}
             </button>
           </div>
         </form>
