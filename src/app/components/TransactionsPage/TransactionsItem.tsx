@@ -40,7 +40,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
       className="flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all group cursor-pointer md:cursor-default"
     >
       <div
-        className={`p-1 ${
+        className={`p-2 ${
           transaction.type === "expense" ? "bg-rose-500" : "bg-emerald-500"
         } rounded-full shadow-xl`}
       >
@@ -62,10 +62,10 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
               className={`font-semibold ${
                 transaction.type === "expense"
                   ? "text-rose-500"
-                  : "text-green-600"
+                  : "text-emerald-600"
               }`}
             >
-              {transaction.type === "expense" ? "-" : "+"}₱{transaction.amount.toLocaleString()}
+              ₱{transaction.type !== "expense" && "+"}{transaction.amount.toLocaleString()}
             </p>
             <p className="text-xs text-gray-500">
               Balance: ₱{balance.toLocaleString()}
