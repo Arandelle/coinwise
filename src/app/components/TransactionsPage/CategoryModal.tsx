@@ -89,7 +89,7 @@ const CategoryModal = ({onSelect,  onCancel, categoryType} : CategoryModalProps)
         </div>
 
         {/** Categories list - Scrollable */}
-        <div>
+        <div className="overflow-y-scroll">
           {filteredCategories.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               <Search size={48} className="mx-auto mb-3 opacity-30" />
