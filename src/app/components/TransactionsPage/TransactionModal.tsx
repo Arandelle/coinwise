@@ -10,6 +10,7 @@ import CalculatorModal from "./Calculator";
 import CategoryModal from "./CategoryModal";
 import LoadingCoin from "../Loading";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
+import { useUpsertTransaction } from "@/app/hooks/useTransactions";
 
 interface TransactionModalProps {
   transactions: Transaction[];
@@ -26,6 +27,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   onSubmit,
   user,
 }) => {
+  const upsertMutation = useUpsertTransaction();
   const [showCalculator, sestShowCalculator] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
@@ -65,80 +67,54 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   }, [editingTransaction]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    if (!user) {
-      const id: string = editingTransaction?._id || `transaction_${Date.now()}`;
-      const txData = {
-        id,
-        ...formData,
-        amount: -Math.abs(formData?.amount ? formData.amount : 0),
-      };
 
-      localStorage.setItem(id, JSON.stringify(txData));
-      onSubmit();
-      alert("Success not authenticated");
-      setLoading(false);
+    // Validation
+    if (!formData.name || !formData.category_id || !formData.amount) {
+      alert("Please fill in all required fields");
       return;
     }
-    if (!editingTransaction && user) {
-      try {
-        const { category_details, ...cleanData } = formData;
-        const res = await fetch("/api/transactions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(cleanData),
-        });
 
-        if (res.ok) {
-          setFormData({
-            name: "",
-            category_id: "",
-            amount: 0,
-            type: "expense",
-            date: null,
-          });
-          alert(`Successfully added new item`);
-          onSubmit();
-          onClose();
-          return;
-        }
-      } catch (error) {
-        console.error("Error adding new item", error);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      try {
-        const { category_details, ...cleanData } = formData;
-        const res = await fetch(
-          `/api/transactions/${editingTransaction!._id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(cleanData),
-          }
-        );
+    try {
+      // Prepare transaction data
+      const transactionData: Transaction = {
+        ...formData,
+        ...(editingTransaction?._id && {_id: editingTransaction._id}),
+        amount: formData.type === 'expense' 
+          ? -Math.abs(formData.amount || 0) 
+          : Math.abs(formData.amount || 0),
+      } as Transaction;
 
-        if (res.ok) {
-          setFormData({
-            name: "",
-            category_id: "",
-            amount: 0,
-            type: "expense",
-            date: null,
-          });
-          alert(`Successfully edited item`);
-          onSubmit();
-          onClose();
-          return;
-        }
-      } catch (error) {
-        console.error("Error adding new item", error);
-      } finally {
-        setLoading(false);
-      }
+      // Submit using unified mutation
+      await upsertMutation.mutateAsync({
+        transaction: transactionData,
+        isEditing: !!editingTransaction,
+      });
+
+      // Success handling
+      const message = editingTransaction 
+        ? "Transaction updated successfully!" 
+        : "Transaction added successfully!";
+      
+      alert(message);
+
+      // Reset form
+      setFormData({
+        name: "",
+        category_id: "",
+        amount: 0,
+        type: "expense",
+        date: null,
+      });
+
+      // Callbacks
+      onSubmit();
+      onClose();
+
+    } catch (error) {
+      console.error("Error submitting transaction:", error);
+      alert("Error saving transaction. Please try again.");
     }
   };
 
