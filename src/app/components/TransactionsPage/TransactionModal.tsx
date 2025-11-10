@@ -10,6 +10,7 @@ import CategoryModal from "./CategoryModal";
 import LoadingCoin from "../Loading";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 import { useUpsertTransaction } from "@/app/hooks/useTransactions";
+import { toast } from "sonner";
 
 interface TransactionModalProps {
   transactions: Transaction[];
@@ -68,7 +69,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
     // Validation
     if (!formData.name || !formData.category_id || !formData.amount) {
-      alert("Please fill in all required fields");
+      toast.warning("Please fill in all required fields");
       return;
     }
 
@@ -93,7 +94,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         ? "Transaction updated successfully!" 
         : "Transaction added successfully!";
       
-      alert(message);
+      toast.success(message);
 
       // Reset form
       setFormData({

@@ -12,6 +12,7 @@ import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
 import { useTransactions } from "@/app/hooks/useTransactions";
 import { useUser } from "@/app/hooks/useUser";
 import { useDeleteTransaction } from "@/app/hooks/useTransactions";
+import { toast } from "sonner";
 
 const TransactionList = () => {
   const { data: user, isLoading: userLoading } = useUser();
@@ -34,7 +35,7 @@ const TransactionList = () => {
     // Guest user - delete from localStorage
     if (!user) {
       localStorage.removeItem(id);
-      alert("Transaction deleted (local storage)");
+      toast.info("Transaction deleted (local storage)");
       refetch();
       return;
     }
@@ -42,10 +43,10 @@ const TransactionList = () => {
     // Logged-in user - use mutation
     try {
       await deleteMutation.mutateAsync(id);
-      alert("Transaction deleted successfully!");
+      toast.info("Transaction deleted successfully!");
     } catch (error) {
       console.error("Error deleting transaction", error)
-      alert("Error deleting transaction");
+      toast.info("Error deleting transaction");
     }
   };
 
