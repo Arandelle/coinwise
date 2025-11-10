@@ -165,9 +165,12 @@ export default function CoinWiseLanding() {
               >
                 Pricing
               </a>
-              <button className="w-full px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg">
+              <Link
+                href={"/login"}
+                className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+              >
                 Login
-              </button>
+              </Link>
             </div>
           </div>
         )}
