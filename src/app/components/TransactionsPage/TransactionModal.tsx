@@ -77,10 +77,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       // Prepare transaction data
       const transactionData: Transaction = {
         ...formData,
-        ...(editingTransaction?._id && {_id: editingTransaction._id}),
-        amount: formData.type === 'expense' 
-          ? -Math.abs(formData.amount || 0) 
-          : Math.abs(formData.amount || 0),
+        ...(editingTransaction?._id && {_id: editingTransaction._id})
       } as Transaction;
 
       // Submit using unified mutation
