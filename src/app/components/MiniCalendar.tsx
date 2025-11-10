@@ -115,14 +115,23 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
           const incomes = dayEvents.filter((ev) => ev.color === "#10b981");
           const expenses = dayEvents.filter((ev) => ev.color === "#ef4444");
 
-          // Ensure we show at least one of each if both exist
-          const displayEvents =
-            incomes.length > 0 && expenses.length > 0
-              ? [
-                  ...incomes.slice(0, 2), // up to 2 income dots
-                  ...expenses.slice(0, 1), // at least 1 expense dot
-                ]
-              : dayEvents.slice(0, 3); // otherwise fallback to first 3
+          const displayEvents = (() => {
+            if(incomes.length > 0 && expenses.length > 0){
+
+              // Determin which group is larger
+              const incomeCount = incomes.length;
+              const expenseCount = expenses.length;
+
+              if (incomeCount >= expenseCount){
+                return [...incomes.slice(0, 2), ...expenses.slice(0, 1)];
+              } else{
+                return [...incomes.slice(0, 1), ...expenses.slice(0, 2)];
+              }
+            }
+
+            // Only one type of event -> max 3 dots
+            return dayEvents.slice(0,3);
+          })();
 
           return (
             <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
