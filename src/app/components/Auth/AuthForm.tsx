@@ -24,11 +24,7 @@ const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   };
 
   const handleBack = () => {
-    if (window.history.length > 1){
-      route.back();
-    } else {
-      route.push("/")
-    }
+      route.push("/");
   }
 
   return (
@@ -41,7 +37,7 @@ const AuthModal = ({ children }: Readonly<{ children: React.ReactNode }>) => {
 
         <div className="grid md:grid-cols-2 gap-0 bg-white md:rounded-3xl shadow-2xl md:overflow-hidden relative">
           {/**Left side - branding and features */}
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-500 p-12 text-white relative overflow-hidden md:flex flex-col justify-between">
+          <div className="hidden bg-gradient-to-br from-emerald-500 to-teal-500 p-12 text-white relative overflow-hidden md:flex flex-col justify-between">
             {/** Background decoration */}
             <div className="absolute inset-0 opacity-20">
               <div className="absolute top-10 right-2 md:right-10 text-6xl md:text-9xl">💰</div>
