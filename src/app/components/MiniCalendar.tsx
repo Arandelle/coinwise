@@ -123,7 +123,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
     : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="max-w-xs bg-white rounded-lg shadow-sm p-3">
+    <div className="max-w-md bg-white rounded-lg shadow-sm p-3">
       {/* header */}
       <div className="flex items-center justify-between mb-2">
         {showMonthYearHeader && (
