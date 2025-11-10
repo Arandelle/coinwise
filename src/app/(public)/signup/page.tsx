@@ -1,5 +1,5 @@
-import AuthModal from "@/app/components/Auth/AuthForm";
-import SignupForm from "@/app/components/Auth/SignupForm";
+import AuthModal from "@/app/components/AuthPages/AuthForm";
+import SignupForm from "@/app/components/AuthPages/SignupForm";
 import React from "react";
 
 const page = () => {
