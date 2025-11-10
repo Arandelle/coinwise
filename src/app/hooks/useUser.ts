@@ -1,5 +1,4 @@
 // hooks/useUser.ts
-import { useState, useEffect } from 'react';
 import { User } from '../types/Users';
 import { useQuery } from '@tanstack/react-query';
 

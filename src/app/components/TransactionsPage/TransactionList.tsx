@@ -44,6 +44,7 @@ const TransactionList = () => {
       await deleteMutation.mutateAsync(id);
       alert("Transaction deleted successfully!");
     } catch (error) {
+      console.error("Error deleting transaction", error)
       alert("Error deleting transaction");
     }
   };
@@ -119,7 +120,6 @@ const TransactionList = () => {
           editingTransaction={editingTransaction}
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}
-          user={user || null}
         />
       )}
     </div>

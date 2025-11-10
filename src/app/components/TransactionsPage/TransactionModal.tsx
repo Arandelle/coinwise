@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Calculator, Minus, Plus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "@/app/types/Transaction";
-import { User } from "@/app/types/Users";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalculatorModal from "./Calculator";
@@ -17,7 +16,6 @@ interface TransactionModalProps {
   editingTransaction: Transaction | null;
   onClose: () => void;
   onSubmit: () => void;
-  user: User | null;
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -25,11 +23,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   editingTransaction,
   onClose,
   onSubmit,
-  user,
 }) => {
   const upsertMutation = useUpsertTransaction();
   const [showCalculator, sestShowCalculator] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState<Transaction>({
@@ -199,7 +195,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const Icon = getLucideIcon(formData.category_details?.icon);
 
-  if (loading) {
+  if (upsertMutation.isPending) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 font-mono font-light">
         <div className="bg-white p-4 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-lg">
@@ -402,7 +398,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={upsertMutation.isPending}
                 className="bg-emerald-600 text-white p-4 rounded-md font-bold cursor-pointer hover:shadow-lg transition-all"
               >
                 <SaveIcon size={20} />

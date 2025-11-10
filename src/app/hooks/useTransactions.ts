@@ -269,7 +269,7 @@ export function useUpsertTransaction() {
       const { _id, category_details, ...cleanData } = transaction;
       const transactionId = _id;
 
-      console.log(JSON.stringify(cleanData));
+      console.log(JSON.stringify(category_details));
       
       if (isEditing && transactionId) {
         return await updateMutation.mutateAsync({
