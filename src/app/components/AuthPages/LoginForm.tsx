@@ -120,6 +120,7 @@ export default function LoginModal({loading = false, setLoading = () => {}} : Fo
           <input
             type="email"
             name="email"
+            id="email"
             value={loginData.email}
             placeholder="example@gmail.com"
             className="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
@@ -139,6 +140,7 @@ export default function LoginModal({loading = false, setLoading = () => {}} : Fo
           <input
             type={`${viewPass ? "text" : "password"}`}
             name="password"
+            id="password"
             value={loginData.password}
             placeholder={`${viewPass ? "Enter your password" : "••••••••"}`}
             className="w-full px-11 py-3 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors"
@@ -167,6 +169,7 @@ export default function LoginModal({loading = false, setLoading = () => {}} : Fo
             <input
               type="checkbox"
               name="remember-me"
+              id="remember-me"
               className="w-4 h-4 accent-emerald-500 cursor-pointer"
             />
             <span className="text-sm text-slate-600">Remember me</span>
