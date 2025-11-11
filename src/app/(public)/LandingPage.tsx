@@ -80,12 +80,18 @@ export default function CoinWiseLanding() {
     { value: "85%", label: "Average Savings Increase" },
   ];
 
+  const navButtons = [
+    {href: "features", name: "Features"},
+    {href: "how-it-works", name: "How It Works"},
+    {href: "pricing", name: "Pricing"}
+  ]
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <AIChatWidget />
       <nav
-        className={`fixed w-full p-4 z-50 transition-all duration-300 ${
+        className={`fixed w-full p-0 md:p-4 z-50 transition-all duration-300 ${
           scrollY > 50 ? "bg-white shadow-md" : "bg-transparent"
         }`}
       >
@@ -104,24 +110,13 @@ export default function CoinWiseLanding() {
             </div>
 
             <div className="hidden md:flex items-center gap-8">
-              <a
-                href="#features"
+               {navButtons.map((btn, index) => (
+                <a href={`#${btn.href}`} key={index}
                 className="text-slate-600 hover:text-emerald-600 transition-colors"
-              >
-                Features
-              </a>
-              <a
-                href="#how-it-works"
-                className="text-slate-600 hover:text-emerald-600 transition-colors"
-              >
-                How It Works
-              </a>
-              <a
-                href="#pricing"
-                className="text-slate-600 hover:text-emerald-600 transition-colors"
-              >
-                Pricing
-              </a>
+                >
+                  {btn.name}
+                </a>
+              ))}
               <Link
                 href={"/login"}
                 className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
@@ -145,26 +140,16 @@ export default function CoinWiseLanding() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t">
+          <div className="md:hidden h-svh bg-gradient-to-br from-emerald-50 to-teal-500">
             <div className="px-4 py-4 space-y-3">
-              <a
-                href="#features"
+              {navButtons.map((btn, index) => (
+                <a href={`#${btn.href}`} key={index}
+                onClick={() => setMobileMenuOpen(false)}
                 className="block text-slate-600 hover:text-emerald-600"
-              >
-                Features
-              </a>
-              <a
-                href="#how-it-works"
-                className="block text-slate-600 hover:text-emerald-600"
-              >
-                How It Works
-              </a>
-              <a
-                href="#pricing"
-                className="block text-slate-600 hover:text-emerald-600"
-              >
-                Pricing
-              </a>
+                >
+                  {btn.name}
+                </a>
+              ))}
               <Link
                 href={"/login"}
                 className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
@@ -412,7 +397,7 @@ export default function CoinWiseLanding() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 to-teal-600 relative overflow-hidden">
+      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 to-teal-600 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-10 text-9xl">💰</div>
           <div className="absolute bottom-10 left-10 text-8xl">🎯</div>
