@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import LoadingCoin from "@/app/components/Loading";
 import TransactionsSection from "@/app/components/TransactionsPage/TransactionsSection";
 import TransactionModal from "@/app/components/TransactionsPage/TransactionModal";
