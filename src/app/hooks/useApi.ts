@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Category, CategoryGroup, UpdateCategoryInput } from "../types/Category";
-import { GroupWithCategories } from "../components/TransactionsPage/CategoryModal";
+import { GroupWithCategories } from "../components/TransactionsPage/TransactionModals/CategoryModal";
 
 // Helper : Generic fetch function
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
