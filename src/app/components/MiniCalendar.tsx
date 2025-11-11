@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { useTransactions } from "../hooks/useTransactions";
+import {
+  useDeleteTransaction,
+  useTransactions,
+} from "../hooks/useTransactions";
 import { Transaction } from "../types/Transaction";
-import Image from "next/image";
 import BackgroundLayout from "./ReusableComponent/BackgroundLayout";
+import TransactionsSection from "./TransactionsPage/TransactionsSection";
+import { toast } from "sonner";
+import TransactionModal from "./TransactionsPage/TransactionModal";
+import { useUser } from "../hooks/useUser";
 
 // 🧩 Each event (e.g., transaction)
 export type CalendarEvent = {
@@ -183,8 +189,14 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
 };
 
 export default function CoinWiseCalendar() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const { data: transactions } = useTransactions();
+  const { data: user, refetch } = useUser();
+  const deleteMutation = useDeleteTransaction();
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showModal, setShowModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
   // Convert transactions to calendar events
   const calendarEvents: CalendarEvent[] | undefined = transactions?.map(
@@ -216,6 +228,34 @@ export default function CoinWiseCalendar() {
     selectedTransactions
       ?.filter((t) => t.type === "expense")
       .reduce((sum, t) => sum + t.amount, 0) ?? 0;
+
+  const handleEdit = (tx: Transaction) => {
+    setEditingTransaction(tx);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(`Are you sure you want to delete this transaction?`)) {
+      return;
+    }
+
+    // Guest user - delete from localStorage
+    if (!user) {
+      localStorage.removeItem(id);
+      toast.info("Transaction deleted (local storage)");
+      refetch();
+      return;
+    }
+
+    // Logged-in user - use mutation
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.info("Transaction deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting transaction", error);
+      toast.info("Error deleting transaction");
+    }
+  };
 
   return (
     <BackgroundLayout>
@@ -291,43 +331,20 @@ export default function CoinWiseCalendar() {
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {selectedTransactions?.map((t) => (
-                <div
-                  key={t._id}
-                  className={`p-3 rounded-lg border-l-4 ${
-                    t.type === "income"
-                      ? "bg-green-50 border-green-500"
-                      : "bg-rose-50 border-rose-500"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-800">
-                          {t.category_details?.name}
-                        </span>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
-                            t.type === "income"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-rose-100 text-rose-700"
-                          }`}
-                        >
-                          {t.type}
-                        </span>
-                      </div>
-                    </div>
-                    <div
-                      className={`text-lg font-bold ${
-                        t.type === "income" ? "text-green-600" : "text-rose-600"
-                      }`}
-                    >
-                      {t.type === "income" ? "+" : "-"}₱
-                      {t.amount.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <TransactionsSection
+                transactions={selectedTransactions ?? []}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onAddClick={() => setShowModal(true)}
+              />
+              {showModal && (
+                <TransactionModal
+                  transactions={transactions ?? []}
+                  editingTransaction={editingTransaction}
+                  onClose={() => setShowModal(false)}
+                  onSubmit={() => refetch()}
+                />
+              )}
             </div>
           )}
         </div>
