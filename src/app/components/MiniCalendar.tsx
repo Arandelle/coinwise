@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTransactions } from "../hooks/useTransactions";
 import { Transaction } from "../types/Transaction";
 import Image from "next/image";
+import BackgroundLayout from "./ReusableComponent/BackgroundLayout";
 
 // 🧩 Each event (e.g., transaction)
 export type CalendarEvent = {
@@ -116,21 +117,20 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
           const expenses = dayEvents.filter((ev) => ev.color === "#ef4444");
 
           const displayEvents = (() => {
-            if(incomes.length > 0 && expenses.length > 0){
-
+            if (incomes.length > 0 && expenses.length > 0) {
               // Determin which group is larger
               const incomeCount = incomes.length;
               const expenseCount = expenses.length;
 
-              if (incomeCount >= expenseCount){
+              if (incomeCount >= expenseCount) {
                 return [...incomes.slice(0, 2), ...expenses.slice(0, 1)];
-              } else{
+              } else {
                 return [...incomes.slice(0, 1), ...expenses.slice(0, 2)];
               }
             }
 
             // Only one type of event -> max 3 dots
-            return dayEvents.slice(0,3);
+            return dayEvents.slice(0, 3);
           })();
 
           return (
@@ -218,140 +218,120 @@ export default function CoinWiseCalendar() {
       .reduce((sum, t) => sum + t.amount, 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-20 left-10 text-8xl">📊</div>
-        <div className="absolute top-32 right-14 text-6xl">💰</div>
-        <div className="absolute bottom-44 right-20 text-7xl">✍</div>
-        <div className="absolute bottom-32 left-12 text-5xl">✨</div>
-        <Image
-          src={"/CoinwiseLogo_v7.png"}
-          alt="coinwise_logo"
-          width={300}
-          height={300}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        />
-      </div>
+    <BackgroundLayout>
+      <div className="grid md:grid-cols-2 gap-6 mx-auto max-w-4xl">
+        {/* Calendar */}
+        <div>
+          <MiniCalendar
+            value={selectedDate}
+            onChange={setSelectedDate}
+            events={calendarEvents}
+          />
 
-      <div className="max-w-4xl mx-auto py-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Calendar */}
-          <div>
-            <MiniCalendar
-              value={selectedDate}
-              onChange={setSelectedDate}
-              events={calendarEvents}
-            />
-
-            {/* Legend */}
-            <div className="mt-4 bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                Legend
-              </h3>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-                  <span className="text-gray-600">Income</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2 w-2 rounded-full bg-rose-500"></span>
-                  <span className="text-gray-600">Expense</span>
-                </div>
+          {/* Legend */}
+          <div className="mt-4 bg-white rounded-lg shadow-sm p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Legend</h3>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
+                <span className="text-gray-600">Income</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-2 w-2 rounded-full bg-rose-500"></span>
+                <span className="text-gray-600">Expense</span>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Transaction Details */}
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                {selectedDate.toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </h2>
+        {/* Transaction Details */}
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">
+              {selectedDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </h2>
 
-              {selectedTransactions && selectedTransactions.length > 0 && (
-                <div className="flex gap-4 mt-2 text-sm">
-                  {dayIncome > 0 && (
-                    <div className="text-emerald-600 font-medium">
-                      Income: ₱{dayIncome.toLocaleString()}
-                    </div>
-                  )}
-                  {dayExpense > 0 && (
-                    <div className="text-rose-600 font-medium">
-                      Expense: ₱{dayExpense.toLocaleString()}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {selectedTransactions && selectedTransactions.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <svg
-                  className="w-16 h-16 mx-auto mb-3 opacity-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <p className="text-sm">No transactions on this date</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {selectedTransactions?.map((t) => (
-                  <div
-                    key={t._id}
-                    className={`p-3 rounded-lg border-l-4 ${
-                      t.type === "income"
-                        ? "bg-green-50 border-green-500"
-                        : "bg-rose-50 border-rose-500"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-800">
-                            {t.category_details?.name}
-                          </span>
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full ${
-                              t.type === "income"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-rose-100 text-rose-700"
-                            }`}
-                          >
-                            {t.type}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className={`text-lg font-bold ${
-                          t.type === "income"
-                            ? "text-green-600"
-                            : "text-rose-600"
-                        }`}
-                      >
-                        {t.type === "income" ? "+" : "-"}₱
-                        {t.amount.toLocaleString()}
-                      </div>
-                    </div>
+            {selectedTransactions && selectedTransactions.length > 0 && (
+              <div className="flex gap-4 mt-2 text-sm">
+                {dayIncome > 0 && (
+                  <div className="text-emerald-600 font-medium">
+                    Income: ₱{dayIncome.toLocaleString()}
                   </div>
-                ))}
+                )}
+                {dayExpense > 0 && (
+                  <div className="text-rose-600 font-medium">
+                    Expense: ₱{dayExpense.toLocaleString()}
+                  </div>
+                )}
               </div>
             )}
           </div>
+
+          {selectedTransactions && selectedTransactions.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <svg
+                className="w-16 h-16 mx-auto mb-3 opacity-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p className="text-sm">No transactions on this date</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {selectedTransactions?.map((t) => (
+                <div
+                  key={t._id}
+                  className={`p-3 rounded-lg border-l-4 ${
+                    t.type === "income"
+                      ? "bg-green-50 border-green-500"
+                      : "bg-rose-50 border-rose-500"
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-800">
+                          {t.category_details?.name}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            t.type === "income"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-rose-100 text-rose-700"
+                          }`}
+                        >
+                          {t.type}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      className={`text-lg font-bold ${
+                        t.type === "income" ? "text-green-600" : "text-rose-600"
+                      }`}
+                    >
+                      {t.type === "income" ? "+" : "-"}₱
+                      {t.amount.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </BackgroundLayout>
   );
 }

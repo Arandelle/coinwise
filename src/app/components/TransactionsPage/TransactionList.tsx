@@ -13,14 +13,16 @@ import { useTransactions } from "@/app/hooks/useTransactions";
 import { useUser } from "@/app/hooks/useUser";
 import { useDeleteTransaction } from "@/app/hooks/useTransactions";
 import { toast } from "sonner";
+import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
 
 const TransactionList = () => {
   const { data: user, isLoading: userLoading } = useUser();
   const { data: transactions, isLoading, refetch } = useTransactions();
   const deleteMutation = useDeleteTransaction();
-  
+
   const [showModal, setShowModal] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
   const handleEdit = (tx: Transaction) => {
     setEditingTransaction(tx);
@@ -45,7 +47,7 @@ const TransactionList = () => {
       await deleteMutation.mutateAsync(id);
       toast.info("Transaction deleted successfully!");
     } catch (error) {
-      console.error("Error deleting transaction", error)
+      console.error("Error deleting transaction", error);
       toast.info("Error deleting transaction");
     }
   };
@@ -81,38 +83,22 @@ const TransactionList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-20 left-10 text-8xl">📊</div>
-        <div className="absolute top-32 right-14 text-6xl">💰</div>
-        <div className="absolute bottom-44 right-20 text-7xl">✍</div>
-        <div className="absolute bottom-32 left-12 text-5xl">✨</div>
-        <Image
-          src={"/CoinwiseLogo_v7.png"}
-          alt="coinwise_logo"
-          width={300}
-          height={300}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+    <BackgroundLayout>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <ProfileSidebar
+          user={user || null}
+          totalSpent={totalSpent ?? 0}
+          remaining={remaining}
         />
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <ProfileSidebar
-            user={user || null}
-            totalSpent={totalSpent ?? 0}
-            remaining={remaining}
-          />
+        <TransactionsSection
+          transactions={transactions ?? []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddClick={() => setShowModal(true)}
+        />
 
-          <TransactionsSection
-            transactions={transactions ?? []}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAddClick={() => setShowModal(true)}
-          />
-
-          <InsightsSidebar categories={categories} />
-        </div>
+        <InsightsSidebar categories={categories} />
       </div>
 
       {showModal && (
@@ -123,7 +109,7 @@ const TransactionList = () => {
           onSubmit={handleModalSubmit}
         />
       )}
-    </div>
+    </BackgroundLayout>
   );
 };
 
