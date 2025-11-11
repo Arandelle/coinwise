@@ -5,9 +5,9 @@ import {
 } from "../hooks/useTransactions";
 import { Transaction } from "../types/Transaction";
 import BackgroundLayout from "./ReusableComponent/BackgroundLayout";
-import TransactionsSection from "./TransactionsPage/TransactionsSection";
+import { TransactionsSection } from "./TransactionsPage/Transaction";
 import { toast } from "sonner";
-import TransactionModal from "./TransactionsPage/TransactionModal";
+import TransactionModal from "./TransactionsPage/TransactionModals/TransactionModal";
 import { useUser } from "../hooks/useUser";
 
 // 🧩 Each event (e.g., transaction)

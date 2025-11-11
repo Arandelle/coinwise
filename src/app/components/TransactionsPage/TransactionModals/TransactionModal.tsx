@@ -5,10 +5,10 @@ import { Calculator, Minus, Plus, SaveIcon, X } from "lucide-react";
 import { Transaction } from "@/app/types/Transaction";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import CalculatorModal from "./Calculator";
+import CalculatorModal from "../Calculator";
 import CategoryModal from "./CategoryModal";
-import LoadingCoin from "../Loading";
-import { getLucideIcon } from "../ReusableComponent/Lucidecon";
+import LoadingCoin from "../../Loading";
+import { getLucideIcon } from "../../ReusableComponent/Lucidecon";
 import { useUpsertTransaction } from "@/app/hooks/useTransactions";
 import { toast } from "sonner";
 

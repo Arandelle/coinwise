@@ -3,8 +3,8 @@ import { Category } from "@/app/types/Category";
 import {Plus, Search } from "lucide-react";
 import { CreateCategoryModal } from "./CreateCategoryModal";
 import { useGroupWithCategories } from "@/app/hooks/useApi";
-import LoadingCoin from "../Loading";
-import { getLucideIcon } from "../ReusableComponent/Lucidecon";
+import LoadingCoin from "../../Loading";
+import { getLucideIcon } from "../../ReusableComponent/Lucidecon";
 
 export interface GroupWithCategories {
   _id?: string;

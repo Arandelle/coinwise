@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import LoadingCoin from "@/app/components/Loading";
-import TransactionsSection from "@/app/components/TransactionsPage/TransactionsSection";
-import TransactionModal from "@/app/components/TransactionsPage/TransactionModal";
+import { TransactionsSection } from "./Transaction";
+import TransactionModal from "./TransactionModals/TransactionModal";
 import { Transaction } from "@/app/types/Transaction";
 import { categories } from "@/app/components/TransactionsPage/constants";
 import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";

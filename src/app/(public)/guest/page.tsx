@@ -1,4 +1,4 @@
-import TransactionList from '@/app/components/TransactionsPage/TransactionList'
+import TransactionList from '@/app/components/TransactionsPage/TransactionParent'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
