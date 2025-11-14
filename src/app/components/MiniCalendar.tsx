@@ -36,10 +36,10 @@ const formatDate = (date: Date) => {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 };
-const parseDate = (str: string) => {
-  const [y, m, d] = str.split("-").map(Number);
-  return new Date(y, m - 1, d);
-};
+// const parseDate = (str: string) => {
+//   const [y, m, d] = str.split("-").map(Number);
+//   return new Date(y, m - 1, d);
+// };
 
 const MiniCalendar: React.FC<MiniCalendarProps> = ({
   value,

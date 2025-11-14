@@ -5,7 +5,6 @@ import LoadingCoin from "@/app/components/Loading";
 import { TransactionsSection } from "./Transaction";
 import TransactionModal from "./TransactionModals/TransactionModal";
 import { Transaction } from "@/app/types/Transaction";
-import { categories } from "@/app/components/TransactionsPage/constants";
 import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
 import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
 import { useTransactions } from "@/app/hooks/useTransactions";
