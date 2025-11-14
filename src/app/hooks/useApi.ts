@@ -85,6 +85,28 @@ export function useCategoryGroups(){
   })
 }
 
+interface TopCategory {
+  _id?: string;
+  usageCount?: number;
+  category : {
+    _id?: string,
+    group_id?: string,
+    category_name: string,
+    type: string,
+    icon: string,
+    created_at?: string,
+    user_id?: string
+  }
+}
+
+export function useTopCategories(){
+  return useQuery({
+    queryKey: ["top_categories"],
+    queryFn: () => apiFetch<TopCategory[]>('/api/top-categories'),
+    staleTime: 10 * 60 * 1000
+  })
+}
+
 
 export function useCreateCategory(){
 

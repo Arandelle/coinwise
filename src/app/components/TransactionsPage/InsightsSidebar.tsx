@@ -1,15 +1,11 @@
 import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
-import { Category } from "@/app/types/Category";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
+import { useTopCategories } from "@/app/hooks/useApi";
 
-interface InsightsSidebarProps {
-  categories: Category[];
-}
+const InsightsSidebar = () => {
+  const { data: top_categories} = useTopCategories();
 
-const InsightsSidebar: React.FC<InsightsSidebarProps> = ({
-  categories,
-}) => {
   return (
     <div className="lg:col-span-3 space-y-6">
       {/* AI Insights */}
@@ -75,22 +71,37 @@ const InsightsSidebar: React.FC<InsightsSidebarProps> = ({
         <h3 className="font-semibold text-lg text-gray-900 mb-4">
           Top Categories
         </h3>
-        <div className="space-y-3">
-          {categories.slice(0, 3).map((cat, idx) => {
-           const Icon = getLucideIcon(cat.icon)
-            return (
-              <div key={idx} className="flex items-center gap-3">
-                <div className={`p-2 ${cat.color} rounded-lg`}>
-                  <Icon size={16} className="text-white" />
+        
+        <div className="space-y-3">          
+          {top_categories && top_categories.length > 0 ? (
+            top_categories.map((cat, idx) => {
+              const Icon = getLucideIcon(cat.category.icon);
+
+              return (
+                <div key={idx} className="flex items-center gap-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      cat.category.type === "expense"
+                        ? "bg-rose-600"
+                        : "bg-emerald-600"
+                    }`}
+                  >
+                    <Icon size={16} className="text-white" />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">
+                      {cat.category.category_name}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    {cat.category_name}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <p className="text-center text-gray-500 italic mt-6">
+              {`You haven’t added any transactions yet.`}
+            </p>
+          )}
         </div>
       </div>
     </div>

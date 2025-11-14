@@ -97,7 +97,7 @@ const TransactionList = () => {
           onAddClick={() => setShowModal(true)}
         />
 
-        <InsightsSidebar categories={categories} />
+        <InsightsSidebar />
       </div>
 
       {showModal && (
