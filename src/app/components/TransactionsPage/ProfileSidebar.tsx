@@ -1,21 +1,21 @@
 import React from "react";
 import { User, TrendingUp } from "lucide-react";
 import { useWallet } from "@/app/hooks/useAccount";
+import { useUser } from "@/app/hooks/useUser";
 
 interface ProfileSidebarProps {
-  user: { username: string } | null;
   totalSpent: number;
-  remaining: number;
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
-  user,
   totalSpent,
-  remaining,
 }) => {
 
   const {data: account} = useWallet();
-  const hasIncome = totalSpent > 0
+  const {data: user} = useUser();
+  
+  const hasIncome = totalSpent > 0;
+  const remaining = (account?.[0]?.balance ?? 0) + (totalSpent ?? 0);
 
   return (
     <div className="hidden lg:block lg:col-span-3 space-y-6">

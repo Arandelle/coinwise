@@ -12,10 +12,8 @@ import { useUser } from "@/app/hooks/useUser";
 import { useDeleteTransaction } from "@/app/hooks/useTransactions";
 import { toast } from "sonner";
 import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
-import { useWallet } from "@/app/hooks/useAccount";
 
 const TransactionList = () => {
-  const {data: wallet} = useWallet();
   const { data: user, isLoading: userLoading } = useUser();
   const { data: transactions, isLoading, refetch } = useTransactions(); 
   const deleteMutation = useDeleteTransaction();
@@ -70,7 +68,6 @@ const TransactionList = () => {
     }
   }, 0);
 
-  const remaining = (wallet?.[0]?.balance ?? 0) + (totalSpent ?? 0);
 
   if (userLoading || isLoading || deleteMutation.isPending) {
     return (
@@ -86,9 +83,7 @@ const TransactionList = () => {
     <BackgroundLayout>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <ProfileSidebar
-          user={user || null}
           totalSpent={totalSpent ?? 0}
-          remaining={remaining}
         />
 
         <TransactionsSection
