@@ -12,8 +12,10 @@ import { useUser } from "@/app/hooks/useUser";
 import { useDeleteTransaction } from "@/app/hooks/useTransactions";
 import { toast } from "sonner";
 import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
+import { useWallet } from "@/app/hooks/useAccount";
 
 const TransactionList = () => {
+  const {data: wallet} = useWallet();
   const { data: user, isLoading: userLoading } = useUser();
   const { data: transactions, isLoading, refetch } = useTransactions(); 
   const deleteMutation = useDeleteTransaction();
@@ -68,7 +70,7 @@ const TransactionList = () => {
     }
   }, 0);
 
-  const remaining = 25000 + (totalSpent ?? 0);
+  const remaining = (wallet?.[0]?.balance ?? 0) + (totalSpent ?? 0);
 
   if (userLoading || isLoading || deleteMutation.isPending) {
     return (

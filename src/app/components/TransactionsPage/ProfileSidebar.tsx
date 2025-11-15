@@ -1,5 +1,6 @@
 import React from "react";
 import { User, TrendingUp } from "lucide-react";
+import { useWallet } from "@/app/hooks/useAccount";
 
 interface ProfileSidebarProps {
   user: { username: string } | null;
@@ -13,6 +14,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   remaining,
 }) => {
 
+  const {data: account} = useWallet();
   const hasIncome = totalSpent > 0
 
   return (
@@ -31,9 +33,13 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
           <div className="w-full space-y-3 mt-4">
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg">
               <span className="text-sm text-gray-600">Monthly Budget</span>
-              <span className="text-sm font-semibold text-gray-900">
-                ₱25,000
+   
+              <span className="text-sm font-semibold text-gray-900"
+              
+              >
+                {account?.[0]?.balance.toLocaleString() ?? 0}
               </span>
+
             </div>
             <div className={`flex items-center justify-between p-3 bg-gradient-to-r ${hasIncome ? "from-emerald-50 to-teal-50" : "from-rose-50 to-red-50"}  rounded-lg`}>
               <span className="text-sm text-gray-600">{hasIncome ? "Income" : "Spent"} this month</span>
