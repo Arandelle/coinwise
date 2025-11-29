@@ -2,11 +2,17 @@ import { Transaction } from "@/app/types/Transaction";
 import { getToken } from "@/lib/getToken";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const token = await getToken();
 
-    const res = await fetch(`${process.env.BACKEND_URL}/transactions/`, {
+    // Extract query parmeters from the request URL
+    const {searchParams} = new URL(request.url)
+
+    // Build query string from all params
+    const queryString = searchParams.toString();
+
+    const res = await fetch(`${process.env.BACKEND_URL}/transactions/?${queryString}`, {
       method: "GET",
       headers: { 
         "Authorization" : `Bearer ${token}`,

@@ -32,7 +32,7 @@ export async function POST(request: Request){
             maxAge: 60 * 60 * 24 // 1day
         });
 
-        return Response.json({message: "Login Successful!"});
+        return Response.json({message: `Login Successful!`}, {status: 200});
 
     }catch(error){
         console.error("Error in /api/auth/login route: ", error);
