@@ -1,7 +1,7 @@
 // hooks/useTransactions.ts
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Transaction } from "../types/Transaction";
+import { Transaction, TransactionFilters, TransactionsResponse } from "../types/Transaction";
 import { useUser } from "./useUser";
 import { apiFetch } from "./useApi";
 
@@ -28,45 +28,125 @@ const saveGuestTransactions = (transactions: Transaction[]) => {
 };
 
 // For guest users (localStorage)
-export function useGuestTransactions() {
-  return useQuery({
-    queryKey: ["transactions", "guest"],
-    queryFn: () => {
-      const txList = getGuestTransactions();
-      return txList.sort(
-        (a, b) =>
-          new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
+export function useGuestTransactions(filters?: TransactionFilters) {
+  return useQuery<TransactionsResponse>({
+    queryKey: ["transactions", "guest", filters],
+    queryFn: async () => {
+      // Get guest transactions from localStorage or wherever you store them
+      const guestTransactions = JSON.parse(
+        localStorage.getItem("guestTransactions") || "[]"
       );
+
+      // Apply filters manually if needed
+      let filtered = [...guestTransactions];
+
+      if (filters?.type) {
+        filtered = filtered.filter((t) => t.type === filters.type);
+      }
+
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filtered = filtered.filter(
+          (t) =>
+            t.name?.toLowerCase().includes(searchLower) ||
+            t.note?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      if (filters?.date_from) {
+        const fromDate = new Date(filters.date_from);
+        filtered = filtered.filter((t) => new Date(t.date) >= fromDate);
+      }
+
+      if (filters?.date_to) {
+        const toDate = new Date(filters.date_to);
+        filtered = filtered.filter((t) => new Date(t.date) <= toDate);
+      }
+
+      // Apply sorting
+      const sortField = filters?.sort_by || "date";
+      const sortOrder = filters?.order || "desc";
+      
+      filtered.sort((a, b) => {
+        let aVal, bVal;
+        
+        if (sortField === "date") {
+          aVal = new Date(a.date).getTime();
+          bVal = new Date(b.date).getTime();
+        } else if (sortField === "amount") {
+          aVal = a.amount;
+          bVal = b.amount;
+        } else if (sortField === "name") {
+          aVal = a.name || "";
+          bVal = b.name || "";
+        }
+        
+        if (sortOrder === "desc") {
+          return bVal > aVal ? 1 : -1;
+        } else {
+          return aVal > bVal ? 1 : -1;
+        }
+      });
+
+      // Apply pagination
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 20;
+      const skip = (page - 1) * limit;
+      const paginatedTransactions = filtered.slice(skip, skip + limit);
+
+      // Return in TransactionsResponse format
+      return {
+        transactions: paginatedTransactions,
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          total_pages: Math.ceil(filtered.length / limit),
+          has_next: page * limit < filtered.length,
+          has_prev: page > 1,
+        },
+      };
     },
-    staleTime: Infinity,
+    staleTime: 2 * 60 * 1000,
   });
 }
 
 // For logged-in users (API)
-export function useUserTransactions() {
+export function useUserTransactions(filters?: TransactionFilters) {
   return useQuery({
-    queryKey: ["transactions"],
+    queryKey: ["transactions", filters],
     queryFn: async () => {
-      const response = await fetch("/api/transactions");
+
+      // Build query params5
+      const params = new URLSearchParams();
+
+      if(filters){
+        Object.entries(filters).forEach(([key, value]) => {
+          if(value !== undefined && value !== null && value !== ""){
+            params.append(key, value.toString());
+          }
+        });
+      }
+
+      const response = await fetch(`/api/transactions?${params.toString()}`);
+
       if (!response.ok) {
         throw new Error("Error fetching transactions");
       }
 
-      const data: Transaction[] = await response.json();
-      return data.sort(
-        (a, b) =>
-          new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
-      );
+      const data: TransactionsResponse = await response.json();
+      return data;
+    
     },
     staleTime: 2 * 60 * 1000,
   });
 }
 
 // Wrapper hook that chooses the right one
-export function useTransactions() {
+export function useTransactions(filters?: TransactionFilters) {
   const { data: user } = useUser();
-  const guestQuery = useGuestTransactions();
-  const userQuery = useUserTransactions();
+  const guestQuery = useGuestTransactions(filters);
+  const userQuery = useUserTransactions(filters);
 
   if (!user) {
     return guestQuery;
