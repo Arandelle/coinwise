@@ -189,7 +189,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
 };
 
 export default function CoinWiseCalendar() {
-  const { data: transactions } = useTransactions();
+  const { data: transactionsData } = useTransactions();
   const { data: user, refetch } = useUser();
   const deleteMutation = useDeleteTransaction();
 
@@ -198,6 +198,7 @@ export default function CoinWiseCalendar() {
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
 
+  const transactions = transactionsData?.transactions ?? [];
   // Convert transactions to calendar events
   const calendarEvents: CalendarEvent[] | undefined = transactions?.map(
     (t) => ({
