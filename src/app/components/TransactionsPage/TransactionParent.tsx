@@ -27,8 +27,6 @@ const TransactionList = () => {
   const transactions = transactionsData?.transactions || [];
   const pagination = transactionsData?.pagination;
 
-
-
   const deleteMutation = useDeleteTransaction();
 
   const [showModal, setShowModal] = useState(false);
