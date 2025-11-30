@@ -18,7 +18,7 @@ const TransactionList = () => {
 
     const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,
-    limit: 10,
+    limit: 20,
     sort_by: "date",
     order: "desc"
   });
