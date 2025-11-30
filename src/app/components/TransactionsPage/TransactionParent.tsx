@@ -15,7 +15,10 @@ import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
 
 const TransactionList = () => {
   const { data: user, isLoading: userLoading } = useUser();
-  const { data: transactions, isLoading, refetch } = useTransactions(); 
+  const { data: transactionsData, isLoading, refetch } = useTransactions(); 
+
+  const transactions = transactionsData?.transactions || [];
+
   const deleteMutation = useDeleteTransaction();
 
   const [showModal, setShowModal] = useState(false);
