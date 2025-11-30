@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
-import { Transaction } from "@/app/types/Transaction";
+import { Transaction, TransactionFilters, TransactionsResponse } from "@/app/types/Transaction";
 import TransactionItem from "./TransactionsItem";
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
+  pagination?: TransactionsResponse['pagination'];
+  filters: TransactionFilters;
+  onFilterChange: (filters: TransactionFilters) => void; 
   onEdit: (tx: Transaction) => void;
   onDelete: (id: string) => void;
   onAddClick: () => void;
@@ -12,11 +15,21 @@ interface TransactionsSectionProps {
 
 const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   transactions,
+  pagination,
+  filters,
+  onFilterChange,
   onEdit,
   onDelete,
   onAddClick,
 }) => {
-  const [activeTab, setActiveTab] = useState("all");
+  
+  const handleFilterChange  = (newFilters: Partial<TransactionFilters>) => {
+    onFilterChange({
+      ...filters,
+      ...newFilters,
+      page: 1, // Reset to first page on filter change
+    });
+  }
 
   const groupTransactionsByDate = () => {
     const grouped: Record<string, Transaction[]> = {};
@@ -61,9 +74,9 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
         <div className="border-b px-4 flex items-center justify-between">
           <div className="flex gap-6">
             <button
-              onClick={() => setActiveTab("all")}
+              onClick={() => handleFilterChange({...filters, type: undefined})}
               className={`py-4 border-b-2 transition-colors ${
-                activeTab === "all"
+                !filters.type
                   ? "border-teal-600 text-teal-600 font-semibold"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
@@ -71,14 +84,24 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
               All Transactions
             </button>
             <button
-              onClick={() => setActiveTab("expenses")}
+              onClick={() => handleFilterChange({...filters, type: "expense"})}
               className={`py-4 border-b-2 transition-colors ${
-                activeTab === "expenses"
-                  ? "border-teal-600 text-teal-600 font-semibold"
+                filters.type === "expense"
+                  ? "border-rose-600 text-rose-600 font-semibold"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               Expenses
+            </button>
+            <button
+              onClick={() => handleFilterChange({...filters, type: "income"})}
+              className={`py-4 border-b-2 transition-colors ${
+                filters.type === "income"
+                  ? "border-teal-600 text-teal-600 font-semibold"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Income
             </button>
           </div>
           <button

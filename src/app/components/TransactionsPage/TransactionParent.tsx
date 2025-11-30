@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import LoadingCoin from "@/app/components/Loading";
 import { TransactionsSection } from "./Transaction";
 import TransactionModal from "./TransactionModals/TransactionModal";
-import { Transaction } from "@/app/types/Transaction";
+import { Transaction, TransactionFilters } from "@/app/types/Transaction";
 import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
 import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
 import { useTransactions } from "@/app/hooks/useTransactions";
@@ -15,9 +15,19 @@ import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
 
 const TransactionList = () => {
   const { data: user, isLoading: userLoading } = useUser();
-  const { data: transactionsData, isLoading, refetch } = useTransactions(); 
 
+    const [filters, setFilters] = useState<TransactionFilters>({
+    page: 1,
+    limit: 10,
+    sort_by: "date",
+    order: "desc"
+  });
+
+  const { data: transactionsData, isLoading, refetch } = useTransactions(filters); 
   const transactions = transactionsData?.transactions || [];
+  const pagination = transactionsData?.pagination;
+
+
 
   const deleteMutation = useDeleteTransaction();
 
@@ -91,6 +101,9 @@ const TransactionList = () => {
 
         <TransactionsSection
           transactions={transactions ?? []}
+          pagination={pagination}
+          filters={filters}
+          onFilterChange={setFilters}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onAddClick={() => setShowModal(true)}

@@ -3,7 +3,7 @@ import {
   useDeleteTransaction,
   useTransactions,
 } from "../hooks/useTransactions";
-import { Transaction } from "../types/Transaction";
+import { Transaction, TransactionFilters } from "../types/Transaction";
 import BackgroundLayout from "./ReusableComponent/BackgroundLayout";
 import { TransactionsSection } from "./TransactionsPage/Transaction";
 import { toast } from "sonner";
@@ -189,16 +189,24 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
 };
 
 export default function CoinWiseCalendar() {
-  const { data: transactionsData } = useTransactions();
   const { data: user, refetch } = useUser();
   const deleteMutation = useDeleteTransaction();
+  
+  const [filters, setFilters] = useState<TransactionFilters>({
+    page: 1,
+    limit: 10,
+    sort_by: "date",
+    order: "desc",
+  });
+  const { data: transactionsData } = useTransactions(filters);
+
+  const transactions = transactionsData?.transactions ?? [];
+  const pagination = transactionsData?.pagination;
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
-
-  const transactions = transactionsData?.transactions ?? [];
   // Convert transactions to calendar events
   const calendarEvents: CalendarEvent[] | undefined = transactions?.map(
     (t) => ({
@@ -334,6 +342,9 @@ export default function CoinWiseCalendar() {
             <div className="space-y-2 max-h-96 overflow-y-auto">
               <TransactionsSection
                 transactions={selectedTransactions ?? []}
+                pagination={pagination}
+                filters={filters}
+                onFilterChange={setFilters}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onAddClick={() => setShowModal(true)}
