@@ -116,6 +116,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     setFormData({
       ...formData,
       type: type,
+      category_details: {
+        ...formData.category_details!,
+        type: type,
+      },
     });
   };
 
