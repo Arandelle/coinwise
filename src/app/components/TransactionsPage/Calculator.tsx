@@ -75,7 +75,13 @@ const CalculatorModal = ({onClose, onSelect, initialValue = 0} : CalculatorProps
   }
 
   const handleUse = () => {
-    onSelect(parseFloat(display));
+    let finalValue = parseFloat(display);
+
+    if (operation && prevValue !== null){
+      finalValue = calculate(prevValue, finalValue, operation);
+    }
+
+    onSelect(finalValue);
     onClose();
   }
 
