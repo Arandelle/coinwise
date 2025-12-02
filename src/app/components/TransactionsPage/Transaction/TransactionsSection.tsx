@@ -6,6 +6,7 @@ import {
   TransactionsResponse,
 } from "@/app/types/Transaction";
 import TransactionItem from "./TransactionsItem";
+import { useWallet } from "@/app/hooks/useAccount";
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -26,6 +27,9 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   onDelete,
   onAddClick,
 }) => {
+
+  const {data: account} = useWallet();
+
   const handleFilterChange = (newFilters: Partial<TransactionFilters>) => {
     onFilterChange({
       ...filters,
@@ -64,7 +68,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
         }
       }, 0);
 
-    return 25000 - totalSpent;
+    return (account?.[0]?.balance ?? 0) + totalSpent;
   };
 
   const groupedTransactions = groupTransactionsByDate();
@@ -157,7 +161,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
             })
           )}
         </div>
-        {pagination && (total_pages ?? 0) > 1 && (
+        {pagination && (
           <div className="border-t px-4 py-3 flex items-center justify-between bg-white">
             {/** Left page info */}
             <div className="text-sm text-gray-600">
