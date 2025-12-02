@@ -162,55 +162,57 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
           )}
         </div>
         {pagination && (
-          <div className="border-t px-4 py-3 flex items-center justify-between bg-white">
-            {/** Left page info */}
-            <div className="text-sm text-gray-600">
-              {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {" "}
-              {total} transactions
-            </div>
-            {/** Pagination buttons */}
-          <div className="flex items-center gap-2">
-              <button
-                className="cursor-pointer px-3 py-1 rounded border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
-                onClick={() => handleFilterChange({ ...filters, page: page - 1 })}
-                disabled={!has_prev}
-              >
-                Prev
-              </button>
-  
-              {Array.from({ length: Math.min(5, total_pages) }).map((_, i) => {
-                // Calculate the first page to show
-                let start = page - 2;
-                if (start < 1) start = 1;
-                if (start > total_pages - 4) start = Math.max(1, total_pages - 4);
-  
-                const pageNum = start + i;
-                if (pageNum > total_pages) return null;
-  
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handleFilterChange({ page: pageNum })}
-                    className={`mx-1 px-3 py-1 rounded-md text-sm ${
-                      filters.page === pageNum
-                        ? "bg-teal-500 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-  
+          <div className="border-t px-4 py-3 bg-white pagination-container">
+            <div className="pagination-wrapper">
+              {/** Left page info */}
+              <div className="text-sm text-gray-600 page-info">
+                {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {" "}
+                {total} transactions
+              </div>
+              {/** Pagination buttons */}
+            <div className="flex items-center gap-2 pagination-buttons">
                 <button
-                className="cursor-pointer px-3 py-1 rounded border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
-                onClick={() => handleFilterChange({ ...filters, page: page + 1 })}
-                disabled={!has_next}
-              >
-                Next
-              </button>
-  
-          </div>
+                  className="cursor-pointer px-3 py-1 rounded border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                  onClick={() => handleFilterChange({ ...filters, page: page - 1 })}
+                  disabled={!has_prev}
+                >
+                  Prev
+                </button>
+    
+                {Array.from({ length: Math.min(5, total_pages) }).map((_, i) => {
+                  // Calculate the first page to show
+                  let start = page - 2;
+                  if (start < 1) start = 1;
+                  if (start > total_pages - 4) start = Math.max(1, total_pages - 4);
+    
+                  const pageNum = start + i;
+                  if (pageNum > total_pages) return null;
+    
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handleFilterChange({ page: pageNum })}
+                      className={`mx-1 px-3 py-1 rounded-md text-sm ${
+                        filters.page === pageNum
+                          ? "bg-teal-500 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+    
+                  <button
+                  className="cursor-pointer px-3 py-1 rounded border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                  onClick={() => handleFilterChange({ ...filters, page: page + 1 })}
+                  disabled={!has_next}
+                >
+                  Next
+                </button>
+    
+            </div>
+            </div>
           </div>
         )}
       </div>

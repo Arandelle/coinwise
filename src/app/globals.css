@@ -24,3 +24,31 @@ body {
   /* color: var(--foreground); */
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.pagination-container {
+  container-type: inline-size;
+  container-name: pagination;
+}
+
+.pagination-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/** When container width is narrow, stack vertically */
+@container pagination (max-width: 400px){
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .page-info {
+    text-align: center;
+  }
+
+  .pagination-buttons {
+    justify-content: center;
+  }
+}
