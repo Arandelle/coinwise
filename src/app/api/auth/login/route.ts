@@ -29,7 +29,7 @@ export async function POST(request: Request){
             secure: process.env.NODE_ENV === "production",
             sameSite: 'strict',
             path: "/",
-            maxAge: 60 * 60 * 24 // 1day
+            maxAge: 60 * 60 * 24 * 30 // 30 days
         });
 
         return Response.json({message: `Login Successful!`}, {status: 200});
