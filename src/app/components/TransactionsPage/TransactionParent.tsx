@@ -13,8 +13,8 @@ import { useDeleteTransaction } from "@/app/hooks/useTransactions";
 import { toast } from "sonner";
 import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
 
-const TransactionList = () => {
-  const { data: user, isLoading: userLoading } = useUser();
+const TransactionList = ({guestMode = false} : {guestMode?: boolean}) => {
+  const { data: user, isLoading: userLoading } = useUser({guestMode});
 
     const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,

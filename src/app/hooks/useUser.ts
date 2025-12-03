@@ -1,6 +1,6 @@
 // hooks/useUser.ts
-import { User } from '../types/Users';
-import { useQuery } from '@tanstack/react-query';
+import { User } from "../types/Users";
+import { useQuery } from "@tanstack/react-query";
 
 // Old version
 
@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 //     try {
 //       setLoading(true);
 //       const response = await fetch('/api/auth/me');
-      
+
 //       if (!response.ok) {
 //         if (response.status === 401) {
 
@@ -23,7 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 //           if(logoutResponse.ok){
 //             window.location.href = "/login"
 //           }
-          
+
 //           setUser(null);
 //           return;
 //         }
@@ -52,24 +52,29 @@ import { useQuery } from '@tanstack/react-query';
 
 // new version as we use tanstack react-query
 
-export function useUser() {
+export function useUser(options?: { guestMode?: boolean }) {
   return useQuery({
-    queryKey: ['user'],
+    queryKey: ["user"],
     queryFn: async () => {
-      const response = await fetch('/api/auth/me');
-      
+      const response = await fetch("/api/auth/me");
+
       if (!response.ok) {
         if (response.status === 401) {
-          // User not authenticated
-          const logoutResponse = await fetch("/api/auth/logout", {
-            method: "POST"
-          });
-          if (logoutResponse.ok) {
-            window.location.href = "/login";
+
+          // only redirect if not in guest mode
+          if (!options?.guestMode) {
+            // User not authenticated
+            const logoutResponse = await fetch("/api/auth/logout", {
+              method: "POST",
+            });
+            if (logoutResponse.ok) {
+              window.location.href = "/login";
+            }
           }
+
           return null;
         }
-        throw new Error('Failed to fetch user');
+        throw new Error("Failed to fetch user");
       }
 
       const data: User = await response.json();

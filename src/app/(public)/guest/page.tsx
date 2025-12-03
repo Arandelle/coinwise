@@ -35,7 +35,7 @@ const page = () => {
             </div>
           </div>
         </div>
-        <TransactionList />
+        <TransactionList guestMode={true} />
     </>
   )
 }
