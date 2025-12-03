@@ -16,7 +16,6 @@ interface TransactionsSectionProps {
   onEdit: (tx: Transaction) => void;
   onDelete: (id: string) => void;
   onAddClick: () => void;
-  disablePagination?: boolean; // New prop to disable pagination for calendar
 }
 
 const TransactionsSection: React.FC<TransactionsSectionProps> = ({
@@ -27,7 +26,6 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   onEdit,
   onDelete,
   onAddClick,
-  disablePagination = false,
 }) => {
   const { data: account } = useWallet();
 
@@ -210,7 +208,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
             })
           )}
         </div>
-        {!disablePagination && activePagination && (
+        {activePagination && (
           <div className="border-t px-4 py-3 bg-white pagination-container">
             <div className="pagination-wrapper">
               {/** Left page info */}
