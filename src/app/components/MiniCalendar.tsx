@@ -194,7 +194,6 @@ export default function CoinWiseCalendar() {
   
   const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,
-    limit: 10,
     sort_by: "date",
     order: "desc",
   });
@@ -342,9 +341,6 @@ export default function CoinWiseCalendar() {
             <div className="space-y-2 max-h-96 overflow-y-auto">
               <TransactionsSection
                 transactions={selectedTransactions ?? []}
-                pagination={pagination}
-                filters={filters}
-                onFilterChange={setFilters}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onAddClick={() => setShowModal(true)}
