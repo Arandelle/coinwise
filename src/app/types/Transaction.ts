@@ -37,7 +37,7 @@ export interface TransactionsResponse {
 
 export interface TransactionFilters {
   page?: number;
-  limit?: number;
+  limit?: number | null;
   type?: "income" | "expense";
   category_id?: string;
   date_from?: string;
