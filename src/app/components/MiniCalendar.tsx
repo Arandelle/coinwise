@@ -3,7 +3,7 @@ import {
   useDeleteTransaction,
   useTransactions,
 } from "../hooks/useTransactions";
-import { Transaction, TransactionFilters } from "../types/Transaction";
+import { Transaction } from "../types/Transaction";
 import BackgroundLayout from "./ReusableComponent/BackgroundLayout";
 import { TransactionsSection } from "./TransactionsPage/Transaction";
 import { toast } from "sonner";
@@ -192,16 +192,13 @@ export default function CoinWiseCalendar() {
   const { data: user, refetch } = useUser();
   const deleteMutation = useDeleteTransaction();
   
-  const [filters, setFilters] = useState<TransactionFilters>({
+  const { data: transactionsData } = useTransactions({
     page: 1,
     sort_by: "date",
     order: "desc",
   });
-  const { data: transactionsData } = useTransactions(filters);
 
   const transactions = transactionsData?.transactions ?? [];
-  const pagination = transactionsData?.pagination;
-
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] =
@@ -267,7 +264,7 @@ export default function CoinWiseCalendar() {
 
   return (
     <BackgroundLayout>
-      <div className="grid md:grid-cols-2 gap-6 mx-auto max-w-4xl">
+      <div className="grid px-4 md:px-0 md:grid-cols-2 gap-6 mx-auto max-w-4xl">
         {/* Calendar */}
         <div>
           <MiniCalendar
@@ -338,7 +335,7 @@ export default function CoinWiseCalendar() {
               <p className="text-sm">No transactions on this date</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="space-y-2 max-h-screen overflow-y-auto">
               <TransactionsSection
                 transactions={selectedTransactions ?? []}
                 onEdit={handleEdit}

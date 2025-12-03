@@ -35,7 +35,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   const [internalFilters, setInternalFilters] = useState<TransactionFilters>({
     page: 1,
     type: undefined,
-    limit: 2, // Default items per page
+    limit: 20, // Default items per page
   });
 
   // Use external filters if provided, otherwise use internal
@@ -138,7 +138,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   } = activePagination || {};
 
   return (
-    <div className="lg:col-span-6">
+    <div className="lg:col-span-6 order-1 md:order-2">
       <div className="bg-white rounded-xl shadow-md">
         {/* Tabs and Add Button */}
         <div className="border-b px-4 flex items-center justify-between">

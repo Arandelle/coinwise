@@ -18,7 +18,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   const remaining = (account?.[0]?.balance ?? 0) + (totalSpent ?? 0);
 
   return (
-    <div className="hidden lg:block lg:col-span-3 space-y-6">
+    <div className="lg:block lg:col-span-3 space-y-6 order-2 md:order-1">
       {/* Profile Card */}
       <div className="bg-white rounded-xl p-6 shadow-md sticky">
         <div className="flex flex-col items-center">

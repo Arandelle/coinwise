@@ -92,7 +92,7 @@ const TransactionList = () => {
 
   return (
     <BackgroundLayout>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid px-4 grid-cols-1 lg:grid-cols-12 gap-6">
         <ProfileSidebar
           totalSpent={totalSpent ?? 0}
         />

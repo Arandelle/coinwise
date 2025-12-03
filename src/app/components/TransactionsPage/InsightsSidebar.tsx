@@ -7,7 +7,7 @@ const InsightsSidebar = () => {
   const { data: top_categories} = useTopCategories();
 
   return (
-    <div className="lg:col-span-3 space-y-6">
+    <div className="lg:col-span-3 space-y-6 order-3">
       {/* AI Insights */}
       <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-500 rounded-xl p-6 shadow-md text-white">
         <div className="flex items-center gap-2 mb-4">
