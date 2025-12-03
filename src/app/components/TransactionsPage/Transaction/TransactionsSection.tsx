@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import {
   Transaction,
@@ -11,35 +11,84 @@ import { useWallet } from "@/app/hooks/useAccount";
 interface TransactionsSectionProps {
   transactions: Transaction[];
   pagination?: TransactionsResponse["pagination"];
-  filters: TransactionFilters;
-  onFilterChange: (filters: TransactionFilters) => void;
+  filters?: TransactionFilters; // Make optional
+  onFilterChange?: (filters: TransactionFilters) => void; // Make optional
   onEdit: (tx: Transaction) => void;
   onDelete: (id: string) => void;
   onAddClick: () => void;
+  disablePagination?: boolean; // New prop to disable pagination for calendar
 }
 
 const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   transactions,
   pagination,
-  filters,
-  onFilterChange,
+  filters: externalFilters,
+  onFilterChange: externalOnFilterChange,
   onEdit,
   onDelete,
   onAddClick,
+  disablePagination = false,
 }) => {
+  const { data: account } = useWallet();
 
-  const {data: account} = useWallet();
+  // Internal filter state (only used when external filters are not provided)
+  const [internalFilters, setInternalFilters] = useState<TransactionFilters>({
+    page: 1,
+    type: undefined,
+    limit: 2, // Default items per page
+  });
+
+  // Use external filters if provided, otherwise use internal
+  const filters = externalFilters || internalFilters;
+  const setFilters = externalOnFilterChange || setInternalFilters;
 
   const handleFilterChange = (newFilters: Partial<TransactionFilters>) => {
-    onFilterChange({
+    setFilters({
       ...filters,
       ...newFilters,
     });
   };
 
+  // Filter transactions based on type (for calendar view without API filtering)
+  const filteredTransactions = filters.type
+    ? transactions.filter((tx) => tx.type === filters.type)
+    : transactions;
+
+  // Client-side pagination when no external pagination is provided
+  const clientPagination = !pagination
+    ? (() => {
+        const limit = filters.limit || 10;
+        const page = filters.page || 1;
+        const total = filteredTransactions.length;
+        const total_pages = Math.ceil(total / limit);
+
+        return {
+          page,
+          limit,
+          total,
+          total_pages,
+          has_next: page < total_pages,
+          has_prev: page > 1,
+        };
+      })()
+    : null;
+
+  // Paginate filtered transactions for client-side pagination
+  const paginatedTransactions =
+    !pagination && clientPagination
+      ? (() => {
+          const startIndex = (clientPagination.page - 1) * clientPagination.limit;
+          const endIndex = startIndex + clientPagination.limit;
+          return filteredTransactions.slice(startIndex, endIndex);
+        })()
+      : filteredTransactions;
+
+  // Use either server-side or client-side pagination
+  const activePagination = pagination || clientPagination;
+
   const groupTransactionsByDate = () => {
     const grouped: Record<string, Transaction[]> = {};
-    transactions.forEach((tx) => {
+    paginatedTransactions.forEach((tx) => {
       const dateKey = new Date(tx.date as Date).toLocaleDateString("en-US", {
         weekday: "short",
         day: "numeric",
@@ -74,9 +123,9 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   const groupedTransactions = groupTransactionsByDate();
 
   const tabButtons = [
-    { label: "All Transactions", data: {type: undefined, page: 1} },
-    { label: "Expenses", data: {type: "expense", page: 1} },
-    { label: "Income", data: {type: "income", page: 1} },
+    { label: "All Transactions", data: { type: undefined, page: 1 } },
+    { label: "Expenses", data: { type: "expense", page: 1 } },
+    { label: "Income", data: { type: "income", page: 1 } },
   ] as const;
 
   const {
@@ -86,7 +135,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
     limit = 1,
     total_pages = 1,
     total = 0,
-  } = pagination || {};
+  } = activePagination || {};
 
   return (
     <div className="lg:col-span-6">
@@ -161,33 +210,36 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
             })
           )}
         </div>
-        {pagination && (
+        {!disablePagination && activePagination && (
           <div className="border-t px-4 py-3 bg-white pagination-container">
             <div className="pagination-wrapper">
               {/** Left page info */}
               <div className="text-sm text-gray-600 page-info">
-                {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {" "}
+                {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of{" "}
                 {total} transactions
               </div>
               {/** Pagination buttons */}
-            <div className="flex items-center gap-2 pagination-buttons">
+              <div className="flex items-center gap-2 pagination-buttons">
                 <button
                   className="cursor-pointer px-3 py-1 rounded border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
-                  onClick={() => handleFilterChange({ ...filters, page: page - 1 })}
+                  onClick={() =>
+                    handleFilterChange({ ...filters, page: page - 1 })
+                  }
                   disabled={!has_prev}
                 >
                   Prev
                 </button>
-    
+
                 {Array.from({ length: Math.min(5, total_pages) }).map((_, i) => {
                   // Calculate the first page to show
                   let start = page - 2;
                   if (start < 1) start = 1;
-                  if (start > total_pages - 4) start = Math.max(1, total_pages - 4);
-    
+                  if (start > total_pages - 4)
+                    start = Math.max(1, total_pages - 4);
+
                   const pageNum = start + i;
                   if (pageNum > total_pages) return null;
-    
+
                   return (
                     <button
                       key={pageNum}
@@ -202,16 +254,17 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                     </button>
                   );
                 })}
-    
-                  <button
+
+                <button
                   className="cursor-pointer px-3 py-1 rounded border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
-                  onClick={() => handleFilterChange({ ...filters, page: page + 1 })}
+                  onClick={() =>
+                    handleFilterChange({ ...filters, page: page + 1 })
+                  }
                   disabled={!has_next}
                 >
                   Next
                 </button>
-    
-            </div>
+              </div>
             </div>
           </div>
         )}
