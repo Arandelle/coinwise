@@ -18,7 +18,6 @@ export function useLogout() {
       queryClient.clear();
 
       // optional : clear local or session storage
-      localStorage.clear();
       sessionStorage.clear();
 
       // redirect to login
