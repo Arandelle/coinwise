@@ -9,6 +9,7 @@ import { TransactionsSection } from "./TransactionsPage/Transaction";
 import { toast } from "sonner";
 import TransactionModal from "./TransactionsPage/TransactionModals/TransactionModal";
 import { useUser } from "../hooks/useUser";
+import LoadingCoin from "./Loading";
 
 // 🧩 Each event (e.g., transaction)
 export type CalendarEvent = {
@@ -192,7 +193,7 @@ export default function CoinWiseCalendar() {
   const { data: user, refetch } = useUser();
   const deleteMutation = useDeleteTransaction();
   
-  const { data: transactionsData } = useTransactions({
+  const { data: transactionsData, isLoading: isLoadingTransactions } = useTransactions({
     page: 1,
     sort_by: "date",
     order: "desc",
@@ -261,6 +262,12 @@ export default function CoinWiseCalendar() {
       toast.info("Error deleting transaction");
     }
   };
+
+  if (isLoadingTransactions) {
+    return (
+      <LoadingCoin label="Fetching Data..."/>
+    );
+  }
 
   return (
     <BackgroundLayout>
