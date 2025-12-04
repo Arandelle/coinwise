@@ -33,10 +33,7 @@ export function useGuestTransactions(filters?: TransactionFilters) {
     queryKey: ["transactions", "guest", filters],
     queryFn: async () => {
       // Get guest transactions from localStorage or wherever you store them
-      const guestTransactions = JSON.parse(
-        localStorage.getItem("guestTransactions") || "[]"
-      );
-
+      const guestTransactions = getGuestTransactions();
       // Apply filters manually if needed
       let filtered = [...guestTransactions];
 
@@ -55,12 +52,12 @@ export function useGuestTransactions(filters?: TransactionFilters) {
 
       if (filters?.date_from) {
         const fromDate = new Date(filters.date_from);
-        filtered = filtered.filter((t) => new Date(t.date) >= fromDate);
+        filtered = filtered.filter((t) => new Date(t.date ?? 0) >= fromDate);
       }
 
       if (filters?.date_to) {
         const toDate = new Date(filters.date_to);
-        filtered = filtered.filter((t) => new Date(t.date) <= toDate);
+        filtered = filtered.filter((t) => new Date(t.date ?? 0) <= toDate);
       }
 
       // Apply sorting
@@ -71,8 +68,8 @@ export function useGuestTransactions(filters?: TransactionFilters) {
         let aVal, bVal;
         
         if (sortField === "date") {
-          aVal = new Date(a.date).getTime();
-          bVal = new Date(b.date).getTime();
+          aVal = new Date(a.date ?? 0).getTime();
+          bVal = new Date(b.date ?? 0).getTime();
         } else if (sortField === "amount") {
           aVal = a.amount;
           bVal = b.amount;
@@ -82,9 +79,9 @@ export function useGuestTransactions(filters?: TransactionFilters) {
         }
         
         if (sortOrder === "desc") {
-          return bVal > aVal ? 1 : -1;
+          return (bVal ?? 0) > (aVal ?? 0) ? 1 : -1;
         } else {
-          return aVal > bVal ? 1 : -1;
+          return (aVal ?? 0) > (bVal ?? 0) ? 1 : -1;
         }
       });
 
