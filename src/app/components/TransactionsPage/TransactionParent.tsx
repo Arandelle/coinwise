@@ -11,7 +11,7 @@ import { useTransactions, useUniversalDeleteTransaction } from "@/app/hooks/useT
 import { toast } from "sonner";
 import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
 
-const TransactionList = () => {
+const TransactionList = ({guestMode = false} : {guestMode?: boolean}) => {
 
     const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,
@@ -20,7 +20,7 @@ const TransactionList = () => {
     order: "desc"
   });
 
-  const { data: transactionsData, isLoading : transactionsLoading, refetch } = useTransactions(filters); 
+  const { data: transactionsData, isLoading : transactionsLoading, refetch } = useTransactions(filters, guestMode); 
   const transactions = transactionsData?.transactions || [];
   const pagination = transactionsData?.pagination;
 

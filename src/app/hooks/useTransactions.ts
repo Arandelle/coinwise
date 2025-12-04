@@ -140,8 +140,8 @@ export function useUserTransactions(filters?: TransactionFilters) {
 }
 
 // Wrapper hook that chooses the right one
-export function useTransactions(filters?: TransactionFilters) {
-  const { data: user } = useUser();
+export function useTransactions(filters?: TransactionFilters, guestMode?: boolean) {
+  const { data: user } = useUser(guestMode ? { guestMode: true } : undefined);
   const guestQuery = useGuestTransactions(filters);
   const userQuery = useUserTransactions(filters);
 
