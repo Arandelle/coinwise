@@ -77,7 +77,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       // Prepare transaction data
       const transactionData: Transaction = {
         ...formData,
-        ...(editingTransaction?._id && {_id: editingTransaction._id})
+        // Generate ID for new transactions (guest mode needs it)
+         _id: editingTransaction?._id || `guest_tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       } as Transaction;
 
       // Submit using unified mutation
