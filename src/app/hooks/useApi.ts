@@ -7,6 +7,7 @@ import {
 import { GroupWithCategories } from "../components/TransactionsPage/TransactionModals/CategoryModal";
 import { useUser } from "./useUser";
 import { useCreateGuestCategory, useGuestCategories } from "./useGuestCategories";
+import { useGuestCategoryGroups } from "./useGuestCategoryGroups";
 
 // Helper : Generic fetch function
 export async function apiFetch<T>(
@@ -101,12 +102,21 @@ export function useCategory() {
   });
 }
 
-export function useCategoryGroups() {
-  return useQuery({
+export function useCategoryGroups(){
+  const { data: user } = useUser();
+  const guestQuery = useGuestCategoryGroups();
+  const apiQuery = useQuery({
     queryKey: ["category_group"],
-    queryFn: () => apiFetch<CategoryGroup[]>("/api/category-groups"),
+    queryFn: () => apiFetch<CategoryGroup[]>('/api/category-groups'),
     staleTime: 10 * 60 * 1000,
+    enabled: !!user,
   });
+
+  if (!user) {
+    return guestQuery;
+  }
+
+  return apiQuery;
 }
 
 interface TopCategory {
