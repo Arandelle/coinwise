@@ -1,29 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { GroupWithCategories } from '../components/TransactionsPage/TransactionModals/CategoryModal';
-import { Category } from '../types/Category';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GroupWithCategories } from "../components/TransactionsPage/TransactionModals/CategoryModal";
+import { Category } from "../types/Category";
 
-const GUEST_CATEGORIES_KEY = 'guest_categories';
-
-// Helper functions
-const getGuestCategories = (): GroupWithCategories[] => {
-  try {
-    const stored = localStorage.getItem(GUEST_CATEGORIES_KEY);
-    if (stored) return JSON.parse(stored);
-    
-    return getDefaultGuestCategories();
-  } catch (e) {
-    console.error("Error loading guest categories:", e);
-    return getDefaultGuestCategories();
-  }
-};
-
-const saveGuestCategories = (categories: GroupWithCategories[]) => {
-  try {
-    localStorage.setItem(GUEST_CATEGORIES_KEY, JSON.stringify(categories));
-  } catch (e) {
-    console.error("Error saving guest categories:", e);
-  }
-};
+const GUEST_CATEGORIES_KEY = "guest_categories";
 
 function getDefaultGuestCategories(): GroupWithCategories[] {
   return [
@@ -278,28 +257,49 @@ function getDefaultGuestCategories(): GroupWithCategories[] {
   ];
 }
 
-// Query hook
+const getGuestCategories = (): GroupWithCategories[] => {
+  try {
+    const stored = localStorage.getItem(GUEST_CATEGORIES_KEY);
+    if (stored) return JSON.parse(stored);
+
+    // Return default categories for first-time guest user
+    return getDefaultGuestCategories();
+  } catch (error) {
+    console.error("Error loading guest categories", error);
+    return getDefaultGuestCategories();
+  }
+};
+
+const saveGuestCategories = (categories: GroupWithCategories[]) => {
+  try {
+    localStorage.setItem(GUEST_CATEGORIES_KEY, JSON.stringify(categories));
+  } catch (e) {
+    console.error("Error saving guest categories", e);
+  }
+};
+
+// query hook
 export function useGuestCategories() {
   return useQuery({
-    queryKey: ['guest-categories'],
+    queryKey: ["guest_categories"],
     queryFn: () => getGuestCategories(),
     staleTime: Infinity,
   });
 }
 
-// Create category mutation - NOW WITH GROUP SUPPORT
+// Mutation hook for creating categories
 export function useCreateGuestCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newCategory: Omit<Category, '_id' | 'created_at'> & { group_id: string }) => {
+    mutationFn: async (newCategory: Omit<Category, "_id" | "create_at"> & {group_id: string}) => {
       const categories = getGuestCategories();
 
-      // Find the group by group_id
+      // Find the group with group_id
       const group = categories.find(g => g._id === newCategory.group_id);
 
-      if (!group) {
-        throw new Error('Group not found');
+      if(!group) {
+        throw new Error("Group not found")
       }
 
       // Create new category
@@ -309,18 +309,19 @@ export function useCreateGuestCategory() {
         icon: newCategory.icon,
         type: newCategory.type,
         group_id: newCategory.group_id,
-        
       };
 
       // Add category to the group
       group.categories.push(category);
-      
+
       saveGuestCategories(categories);
-      
+
       return category;
     },
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guest-categories'] });
-    },
+        queryClient.invalidateQueries({queryKey: ['guest_categories']});
+    }
+
   });
 }

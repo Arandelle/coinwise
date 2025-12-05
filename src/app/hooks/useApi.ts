@@ -6,7 +6,10 @@ import {
 } from "../types/Category";
 import { GroupWithCategories } from "../components/TransactionsPage/TransactionModals/CategoryModal";
 import { useUser } from "./useUser";
-import { useCreateGuestCategory, useGuestCategories } from "./useGuestCategories";
+import {
+  useCreateGuestCategory,
+  useGuestCategories,
+} from "./useGuestCategories";
 import { useGuestCategoryGroups } from "./useGuestCategoryGroups";
 
 // Helper : Generic fetch function
@@ -74,7 +77,6 @@ export async function apiFetch<T>(
 // CATEGORIES
 // ============================================
 export function useGroupWithCategories() {
-
   const { data: user } = useUser();
   const guestQuery = useGuestCategories();
 
@@ -87,11 +89,11 @@ export function useGroupWithCategories() {
   });
 
   // Return guest data if no user, otherwise return API data
-  if(!user){
-    return guestQuery
+  if (!user) {
+    return guestQuery;
   }
 
-  return apiQuery
+  return apiQuery;
 }
 
 export function useCategory() {
@@ -102,16 +104,16 @@ export function useCategory() {
   });
 }
 
-export function useCategoryGroups(){
+export function useCategoryGroups() {
+  
   const { data: user } = useUser();
   const guestQuery = useGuestCategoryGroups();
   const apiQuery = useQuery({
     queryKey: ["category_group"],
-    queryFn: () => apiFetch<CategoryGroup[]>('/api/category-groups'),
+    queryFn: () => apiFetch<CategoryGroup[]>("/api/category-groups"),
     staleTime: 10 * 60 * 1000,
     enabled: !!user,
   });
-
   if (!user) {
     return guestQuery;
   }
@@ -142,7 +144,7 @@ export function useTopCategories() {
 }
 
 export function useCreateCategory() {
-  const {data: user} = useUser();
+  const { data: user } = useUser();
   const queryClient = useQueryClient();
   const guestMutation = useCreateGuestCategory();
 
@@ -156,17 +158,17 @@ export function useCreateCategory() {
     onSuccess: () => {
       // invalidate and refetch categories
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      queryClient.invalidateQueries({ queryKey: ['group-with-categories']});
+      queryClient.invalidateQueries({ queryKey: ["group-with-categories"] });
     },
-  })
+  });
 
   return useMutation({
     mutationFn: async (newCategory: Omit<Category, "_id">) => {
-      if(!user){
-        return await guestMutation.mutateAsync(newCategory)
+      if (!user) {
+        return await guestMutation.mutateAsync(newCategory);
       }
-      return await apiMutation.mutateAsync(newCategory)
-    }
+      return await apiMutation.mutateAsync(newCategory);
+    },
   });
 }
 
