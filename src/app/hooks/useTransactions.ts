@@ -194,6 +194,7 @@ export function useCreateTransaction() {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["top_categories"] });
+      queryClient.invalidateQueries({ queryKey: ["summary"] });
     },
   });
 }
@@ -238,6 +239,7 @@ export function useUpdateTransaction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["top_categories"] });
+      queryClient.invalidateQueries({ queryKey: ["summary"] });
     },
   });
 }
@@ -272,6 +274,7 @@ export function useDeleteTransaction() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["top_categories"] });
+      queryClient.invalidateQueries({ queryKey: ["summary"] });
     },
   });
 }
