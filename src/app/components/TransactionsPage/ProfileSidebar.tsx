@@ -2,6 +2,7 @@ import React from "react";
 import { User, TrendingUp } from "lucide-react";
 import { useWallet } from "@/app/hooks/useAccount";
 import { useUser } from "@/app/hooks/useUser";
+import { useSummary } from "@/app/hooks/useSummary";
 
 interface ProfileSidebarProps {
   totalSpent: number;
@@ -13,6 +14,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 
   const {data: account} = useWallet();
   const {data: user} = useUser();
+  const {data: summary} = useSummary()
   
   const hasIncome = totalSpent > 0;
   const remaining = (account?.[0]?.balance ?? 0) + (totalSpent ?? 0);
@@ -32,25 +34,25 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 
           <div className="w-full space-y-3 mt-4">
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg">
-              <span className="text-sm text-gray-600">Monthly Budget</span>
+              <span className="text-sm text-gray-600">Cash In-Flow</span>
    
               <span className="text-sm font-semibold text-gray-900"
               
               >
-                {account?.[0]?.balance.toLocaleString() ?? 0}
+                {summary?.total_income ?? 0}
               </span>
 
             </div>
             <div className={`flex items-center justify-between p-3 bg-gradient-to-r ${hasIncome ? "from-emerald-50 to-teal-50" : "from-rose-50 to-red-50"}  rounded-lg`}>
-              <span className="text-sm text-gray-600">{hasIncome ? "Income" : "Spent"} this month</span>
-              <span className={`text-sm font-semibold ${hasIncome ? "text-emerald-600" : "text-rose-600"}`}>
-                ₱{totalSpent.toLocaleString()}
+              <span className="text-sm text-gray-600">Cash Out-Flow</span>
+              <span className={`text-sm font-semibold text-rose-600`}>
+                ₱{summary?.total_expense ?? 0}
               </span>
             </div>
             <div className={`flex items-center justify-between p-3 bg-gradient-to-r ${remaining > 0 ? "from-emerald-50 to-teal-50" : "from-rose-50 to-red-50"} rounded-lg`}>
-              <span className="text-sm text-gray-600">Remaining</span>
-              <span className={`text-sm font-semibold ${remaining > 0 ? "text-emerald-600" : "text-red-600"} `}>
-                ₱{remaining.toLocaleString()}
+              <span className="text-sm text-gray-600">Cash Flow</span>
+              <span className={`text-sm font-semibold ${(summary?.cash_flow ?? 0 )> 0 ? "text-emerald-600" : "text-red-600"} `}>
+                ₱{summary?.cash_flow?.toLocaleString()}
               </span>
             </div>
           </div>
