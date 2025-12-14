@@ -2,7 +2,7 @@ import React from "react";
 import { User, TrendingUp } from "lucide-react";
 import { useWallet } from "@/app/hooks/useAccount";
 import { useUser } from "@/app/hooks/useUser";
-import { useSummary } from "@/app/hooks/useSummary";
+import { useSummary, useTransactionSummary } from "@/app/hooks/useSummary";
 
 interface ProfileSidebarProps {
   totalSpent: number;
@@ -14,7 +14,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 
   const {data: account} = useWallet();
   const {data: user} = useUser();
-  const {data: summary} = useSummary()
+  const {data: summary} = useTransactionSummary(!user, undefined);
   
   const hasIncome = totalSpent > 0;
   const remaining = (account?.[0]?.balance ?? 0) + (totalSpent ?? 0);
@@ -43,7 +43,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
               </span>
 
             </div>
-            <div className={`flex items-center justify-between p-3 bg-gradient-to-r ${hasIncome ? "from-emerald-50 to-teal-50" : "from-rose-50 to-red-50"}  rounded-lg`}>
+            <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-rose-50 to-red-50  rounded-lg`}>
               <span className="text-sm text-gray-600">Cash Out-Flow</span>
               <span className={`text-sm font-semibold text-rose-600`}>
                 ₱{summary?.total_expense ?? 0}
