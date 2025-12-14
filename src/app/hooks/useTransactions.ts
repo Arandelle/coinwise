@@ -8,7 +8,7 @@ import { apiFetch } from "./useApi";
 const GUEST_TRANSACTIONS_KEY = 'guest_transactions';
 
 // Helper functions for localStorage
-const getGuestTransactions = (): Transaction[] => {
+export const getGuestTransactions = (): Transaction[] => {
   try {
     const stored = localStorage.getItem(GUEST_TRANSACTIONS_KEY);
     if (!stored) return [];
@@ -305,6 +305,7 @@ export function useGuestTransactionMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", "guest"] });
+      queryClient.invalidateQueries({ queryKey: ["guest_summary"] });
     },
   });
 }
@@ -322,6 +323,7 @@ export function useDeleteGuestTransaction() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", "guest"] });
+      queryClient.invalidateQueries({ queryKey: ["guest_summary"] });
     },
   });
 }
