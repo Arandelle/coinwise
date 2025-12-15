@@ -271,9 +271,9 @@ export default function CoinWiseCalendar() {
 
   return (
     <BackgroundLayout>
-      <div className="grid px-4 md:px-0 md:grid-cols-5 gap-6 mx-auto max-w-4xl">
+      <div className="grid px-4 grid-cols-1 lg:grid-cols-5 gap-6 mx-auto max-w-4xl">
         {/* Calendar */}
-        <div className="col-span-2">
+        <div className="col-span-1 lg:col-span-2">
           <MiniCalendar
             value={selectedDate}
             onChange={setSelectedDate}
@@ -297,7 +297,7 @@ export default function CoinWiseCalendar() {
         </div>
 
         {/* Transaction Details */}
-        <div className="col-span-3 bg-white rounded-lg shadow-sm p-4">
+        <div className="col-span-1 lg:col-span-3 bg-white rounded-lg shadow-sm p-4">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-800">
               {selectedDate.toLocaleDateString("en-US", {
