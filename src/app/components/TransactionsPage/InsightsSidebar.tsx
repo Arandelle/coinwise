@@ -2,6 +2,7 @@ import React from "react";
 import { Brain, ChevronRight, Target } from "lucide-react";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 import { useTopCategories } from "@/app/hooks/useApi";
+import AIInsightsSimple from "../AIInsights";
 
 const InsightsSidebar = () => {
   const { data: top_categories} = useTopCategories();
@@ -9,20 +10,7 @@ const InsightsSidebar = () => {
   return (
     <div className="lg:col-span-3 space-y-6 order-3">
       {/* AI Insights */}
-      <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-500 rounded-xl p-6 shadow-md text-white">
-        <div className="flex items-center gap-2 mb-4">
-          <Brain size={24} />
-          <h3 className="font-semibold text-lg">AI Insights</h3>
-        </div>
-        <p className="text-sm text-emerald-50 mb-4">
-          Your spending pattern looks healthy! Keep tracking to maintain your
-          budget goals.
-        </p>
-        <button className="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
-          View detailed analysis
-          <ChevronRight size={16} />
-        </button>
-      </div>
+      <AIInsightsSimple />
 
       {/* Weekly Challenges */}
       <div className="bg-white rounded-xl p-6 shadow-md">
