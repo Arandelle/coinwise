@@ -1,8 +1,7 @@
-import React from "react";
-import { Brain, ChevronRight, Target } from "lucide-react";
+import { Target } from "lucide-react";
 import { getLucideIcon } from "../ReusableComponent/Lucidecon";
 import { useTopCategories } from "@/app/hooks/useApi";
-import AIInsightsSimple from "../AIInsights";
+import GenerateInsightButton from "@/app/(protected)/ai-insight/GenerateInsightButton";
 
 const InsightsSidebar = () => {
   const { data: top_categories} = useTopCategories();
@@ -10,7 +9,7 @@ const InsightsSidebar = () => {
   return (
     <div className="lg:col-span-3 space-y-6 order-3">
       {/* AI Insights */}
-      <AIInsightsSimple />
+      <GenerateInsightButton />
 
       {/* Weekly Challenges */}
       <div className="bg-white rounded-xl p-6 shadow-md">
