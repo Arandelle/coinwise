@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { categoryIcons } from "@/app/components/TransactionsPage/constants";
+import { categoryIcons } from "../constants";
 import { X } from "lucide-react";
 import { useCategoryGroups, useCreateCategory } from "@/app/hooks/useApi";
 import { Category } from "@/app/types/Category";

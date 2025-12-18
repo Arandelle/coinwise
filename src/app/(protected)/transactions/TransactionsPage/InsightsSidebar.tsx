@@ -1,5 +1,5 @@
 import { Target } from "lucide-react";
-import { getLucideIcon } from "../ReusableComponent/Lucidecon";
+import { getLucideIcon } from "@/app/components/ReusableComponent/Lucidecon";
 import { useTopCategories } from "@/app/hooks/useApi";
 import GenerateInsightButton from "@/app/(protected)/ai-insight/GenerateInsightButton";
 

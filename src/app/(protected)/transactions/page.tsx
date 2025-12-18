@@ -1,5 +1,4 @@
-import TransactionList from '@/app/components/TransactionsPage/TransactionParent'
-import React from 'react'
+import TransactionList from './TransactionsPage/TransactionParent'
 
 const page = () => {
   return (

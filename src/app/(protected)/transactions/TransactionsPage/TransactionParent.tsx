@@ -5,11 +5,11 @@ import LoadingCoin from "@/app/components/Loading";
 import { TransactionsSection } from "./Transaction";
 import TransactionModal from "./TransactionModals/TransactionModal";
 import { Transaction, TransactionFilters } from "@/app/types/Transaction";
-import ProfileSidebar from "@/app/components/TransactionsPage/ProfileSidebar";
-import InsightsSidebar from "@/app/components/TransactionsPage/InsightsSidebar";
+import ProfileSidebar from "./ProfileSidebar";
+import InsightsSidebar from "./InsightsSidebar";
 import { useTransactions, useUniversalDeleteTransaction } from "@/app/hooks/useTransactions";
 import { toast } from "sonner";
-import BackgroundLayout from "../ReusableComponent/BackgroundLayout";
+import BackgroundLayout from "@/app/components/ReusableComponent/BackgroundLayout";
 
 const TransactionList = ({guestMode = false} : {guestMode?: boolean}) => {
 

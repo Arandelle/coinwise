@@ -5,9 +5,9 @@ import {
 } from "../hooks/useTransactions";
 import { Transaction } from "../types/Transaction";
 import BackgroundLayout from "./ReusableComponent/BackgroundLayout";
-import { TransactionsSection } from "./TransactionsPage/Transaction";
+import { TransactionsSection } from "../(protected)/transactions/TransactionsPage/Transaction";
 import { toast } from "sonner";
-import TransactionModal from "./TransactionsPage/TransactionModals/TransactionModal";
+import TransactionModal from "../(protected)/transactions/TransactionsPage/TransactionModals/TransactionModal";
 import { useUser } from "../hooks/useUser";
 import LoadingCoin from "./Loading";
 
