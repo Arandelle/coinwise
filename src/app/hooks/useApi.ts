@@ -4,7 +4,7 @@ import {
   CategoryGroup,
   UpdateCategoryInput,
 } from "../types/Category";
-import { GroupWithCategories } from "../components/TransactionsPage/TransactionModals/CategoryModal";
+import { GroupWithCategories } from "../types/Category";
 import { useUser } from "./useUser";
 import {
   useCreateGuestCategory,

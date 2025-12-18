@@ -1,7 +1,6 @@
-import TransactionList from '@/app/components/TransactionsPage/TransactionParent'
+import TransactionList from '@/app/(protected)/transactions/TransactionsPage/TransactionParent'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
 
 const page = () => {
   return (

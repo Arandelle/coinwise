@@ -15,5 +15,14 @@ export type CategoryGroup = {
   type: string
 };
 
+
+export interface GroupWithCategories {
+  _id?: string;
+  group_name: string;
+  type: string;
+  created_at: string;
+  categories: Category[];
+}
+
 export type CreateCategory = Omit<Category, "_id">;
 export type UpdateCategoryInput = Partial<Omit<Category, "_id">>

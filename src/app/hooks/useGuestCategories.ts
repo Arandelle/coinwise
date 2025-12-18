@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GroupWithCategories } from "../components/TransactionsPage/TransactionModals/CategoryModal";
+import { GroupWithCategories } from "../types/Category";
 import { Category } from "../types/Category";
 
 const GUEST_CATEGORIES_KEY = "guest_categories";

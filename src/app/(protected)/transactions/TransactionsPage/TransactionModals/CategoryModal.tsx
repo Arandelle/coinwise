@@ -5,14 +5,7 @@ import { CreateCategoryModal } from "./CreateCategoryModal";
 import { useGroupWithCategories } from "@/app/hooks/useApi";
 import LoadingCoin from "@/app/components/Loading";
 import { getLucideIcon } from "@/app/components/ReusableComponent/Lucidecon";
-
-export interface GroupWithCategories {
-  _id?: string;
-  group_name: string;
-  type: string;
-  created_at: string;
-  categories: Category[];
-}
+import { GroupWithCategories } from "@/app/types/Category";
 
 interface CategoryModalProps {
   onSelect: (category: Category) => void,
