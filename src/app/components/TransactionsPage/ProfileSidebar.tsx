@@ -24,7 +24,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
       {/* Profile Card */}
       <div className="bg-white rounded-xl p-6 shadow-md sticky">
         <div className="flex flex-col items-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mb-4">
             <User className="text-white" size={32} />
           </div>
           <h3 className="font-semibold text-lg text-gray-900">
