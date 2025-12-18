@@ -1,11 +1,21 @@
 // pages/ai-insights/page.tsx
 "use client"
 import AIInsightsSimple from '@/app/(protected)/ai-insight/AiInsight'
-import { useAIInsights } from '@/app/hooks/useAiInsights'
+import { useAIInsights, useGenerateInsights } from '@/app/hooks/useAiInsights'
 import Loading from '@/app/loading'
 
 const AIInsightsPage = () => {
-  const { data, isLoading } = useAIInsights(true)
+  const { data, isLoading } = useAIInsights(true);
+ const {
+    mutate: generateInsights,
+    data: responseData,
+    isPending,
+    error,
+  } = useGenerateInsights();
+
+  const handleGenerate = () =>{
+    generateInsights({})
+  }
 
   if (isLoading) {
     return <Loading />
@@ -43,8 +53,8 @@ const AIInsightsPage = () => {
   return (
     <AIInsightsSimple 
       insights={insights}
-      handleGenerate={() => {/* optional refresh handler */}}
-      isPending={false}
+      handleGenerate={handleGenerate}
+      isPending={isPending}
     />
   )
 }
