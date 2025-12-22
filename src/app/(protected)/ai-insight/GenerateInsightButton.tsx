@@ -2,11 +2,11 @@
 "use client";
 import {
   AlertCircle,
-  Sparkles,
   ChevronRight,
   Loader2,
   Clock,
   Database,
+  Sparkle,
 } from "lucide-react";
 import { useAIInsights, useGenerateInsights } from "@/app/hooks/useAiInsights";
 import { useRouter } from "next/navigation";
@@ -38,7 +38,7 @@ export default function GenerateInsightButton({
     data: cachedInsights,
     isLoading: isLoadingCache,
     error: cacheError,
-  } = useAIInsights(true);
+  } = useAIInsights(false);
 
   const handleGenerate = () => {
     // Call with optional params (undefined values will use backend defaults - current month)
@@ -224,10 +224,10 @@ export default function GenerateInsightButton({
     );
   }
 
-  // Detailed view
-  return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 border border-purple-100 shadow-sm transition-all hover:shadow-md">
-      <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-xl p-6 shadow-sm border border-slate-200/60">
+  if (!cachedInsights) {
+    // Detailed view
+    return (
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <Image
             src="/CoinwiseLogo_v7.png"
@@ -245,12 +245,12 @@ export default function GenerateInsightButton({
         </p>
         <button
           onClick={handleGenerate}
-          className="text-sm font-medium bg-white text-slate-700 px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-slate-50 hover:gap-3 transition-all cursor-pointer border border-slate-200 shadow-sm hover:shadow"
+          className="text-sm font-medium bg-white text-slate-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-slate-50 hover:gap-3 hover:font-bold transition-all cursor-pointer shadow-sm hover:shadow w-full"
         >
+          <Sparkle size={16} />
           Generate Insights
-          <ChevronRight size={16} className="text-slate-500" />
         </button>
       </div>
-    </div>
-  );
+    );
+  }
 }
