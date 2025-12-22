@@ -1,6 +1,32 @@
 import { AIPrompt } from "@/app/types/AIPrompt";
 import { getToken } from "@/lib/getToken";
 
+
+export async function GET(){
+    try{
+        const token = await getToken();
+
+        const response = await fetch(`${process.env.BACKEND_URL}/ai/conversation-history`, {
+            method: "GET",
+            headers: {
+                "Content-Type" : "application/json",
+                "Authorization" : `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok){
+            const errorText = await response.json();
+            return new Response(errorText || "Error fetching conversation history", {status: response.status});
+        }
+
+        const data = await response.json();
+        return Response.json(data);
+
+    }catch(error){
+        return Response.json("Server Error", {status: 500})
+    }
+}
+
 export async function POST(req: Request){
     try{
 
