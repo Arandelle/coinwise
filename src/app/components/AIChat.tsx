@@ -6,6 +6,7 @@ import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAiChat, useSendChat } from "../hooks/useAiChat";
 
 // Simple markdown parser for bold, italic, and line breaks
 // const parseMarkdown = (text: string) => {
@@ -82,6 +83,9 @@ const AIChatWidget = () => {
   const RESET_INTERVAL = 60 * 60 * 1000; // 60 minutes in ms
   const MESSAGES_PER_PAGE = 10;
   const MAX_MESSAGE_LENGTH = 300;
+
+  const {data: conversationData, isLoading: isConversationLoading} = useAiChat();
+  const sendChatMutation = useSendChat();
 
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -214,6 +218,20 @@ const AIChatWidget = () => {
     messageRef.current?.scrollIntoView({ behavior });
   };
 
+  useEffect(() => {
+    if (conversationData && conversationData.history) {
+      const formattedMessages: Message[] = conversationData.history.map((msg) => ({
+        role: msg.role === "model" ? "assistant" : msg.role,
+        content: msg.content,
+        time: new Date(msg.timestamp).toLocaleString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }));
+      setMessages(formattedMessages);
+    }
+  }, [conversationData])
+
   // Load messages once when component mounts
   useEffect(() => {
     const storedMessages = localStorage.getItem("guest_chat");
@@ -341,11 +359,13 @@ const AIChatWidget = () => {
     incrementData();
 
     try {
-      const aiResponseText = await callAIAPI(currentInput);
+      const aiResponseText = await sendChatMutation.mutateAsync({
+        prompt: currentInput
+      })
 
       const aiMessage: Message = {
         role: "assistant",
-        content: aiResponseText,
+        content: aiResponseText.reply,
         time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -556,7 +576,7 @@ const AIChatWidget = () => {
             className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
           >
             {/* Loading indicator */}
-            {isLoadingMore && (
+            {(isLoadingMore || isConversationLoading) && (
               <div className="flex justify-center mb-4">
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
                   <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
