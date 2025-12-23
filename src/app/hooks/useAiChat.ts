@@ -9,9 +9,16 @@ interface AiChatResponse {
 interface SendChatPayload {
     prompt: string
 }
+interface ConversationHistory {
+    history: Array<{
+        role: "user" | "model" | "assistant";
+        content: string;
+        timestamp: string
+    }>
+}
 
 export function useAiChat(){
-    return useQuery({
+    return useQuery<ConversationHistory>({
         queryKey: ["ai_chat"],
         queryFn: async () => apiFetch("/api/chat-ai"),
         staleTime: 10 * 60 * 1000
@@ -31,6 +38,23 @@ export function useSendChat(){
         }),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["ai_chat"]});
+        },
+        onError: (error) => {
+            console.error("Error sending AI chat message:", error);
+        }
+    })
+}
+
+// Clear conversation history
+export function useClearAiChat(){
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => apiFetch("/api/chat-ai", {
+            method: "DELETE",
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ai_chat"]})
         }
     })
 }
