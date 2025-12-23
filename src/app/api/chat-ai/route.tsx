@@ -56,3 +56,28 @@ export async function POST(req: Request){
         return Response.json("Server Error", {status: 500})
     }
 } 
+
+
+export async function DELETE(){
+    try {
+        const token = await getToken();
+
+        const response = await fetch(`${process.env.BACKEND_URL}/ai/clear-conversation`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type" : "application/json",
+                "Authorization" : `Bearer ${token}`
+            }
+        });
+
+        if(!response.ok){
+            const errorText = await response.text()
+            return new Response(errorText || "Error clearing conversation history", {status: response.status});
+        }
+        
+        return new Response(null, {status: 204});
+
+    }catch(error){
+        return Response.json("Server Error", {status: 500})
+    }
+}
