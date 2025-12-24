@@ -23,7 +23,7 @@ import { useAiChat, useSendChat } from "../hooks/useAiChat";
 // };
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "model";
   content: string;
   time: string;
 }
@@ -219,15 +219,22 @@ const AIChatWidget = () => {
   };
 
   useEffect(() => {
-    if (conversationData && conversationData.history) {
-      const formattedMessages: Message[] = conversationData.history.map((msg) => ({
-        role: msg.role === "model" ? "assistant" : msg.role,
-        content: msg.content,
-        time: new Date(msg.timestamp).toLocaleString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      }));
+    if (conversationData?.pages) {
+      const formattedMessages: Message[] = [];
+
+      conversationData.pages.forEach(page => {
+        page?.history.forEach((msg) => {
+          formattedMessages.push({
+            role: msg.role,
+            content: msg.content,
+            time: new Date(msg.timestamp).toLocaleString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          })
+        })
+      })
+
       setMessages(formattedMessages);
     }
   }, [conversationData])
