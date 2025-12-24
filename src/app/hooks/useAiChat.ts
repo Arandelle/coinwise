@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "./useApi";
+import { useUser } from "./useUser";
 
 interface AiChatResponse {
     reply: string;
@@ -14,16 +15,36 @@ interface ConversationHistory {
         role: "user" | "model" | "assistant";
         content: string;
         timestamp: string
-    }>
+    }>;
+    count: number,
+    total: number,
+    has_more: boolean,
+    page: number,
+    total_pages: number,
+    skip?: number, // number of skip used
+    limit?: number // limit per page
 }
 
-export function useAiChat(){
-    return useQuery<ConversationHistory>({
+export function useAiChat() {
+    return useInfiniteQuery<ConversationHistory>({
         queryKey: ["ai_chat"],
-        queryFn: async () => apiFetch("/api/chat-ai"),
-        staleTime: 10 * 60 * 1000
-    })
+        queryFn: async ({ pageParam = 0 }) => {
+            const limit = 20;
+            const skip = pageParam as number;
+            return apiFetch(`/api/chat-ai?limit=${limit}&skip=${skip}`);
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            if (!lastPage.has_more) return undefined;
+            // Calculate total messages loaded so far
+            const totalLoaded = allPages.reduce((sum, page) => sum + page.count, 0);
+            return totalLoaded;
+        },
+        staleTime: 5 * 60 * 1000,
+        retry: false,
+    });
 }
+
 
 export function useSendChat(){
     const queryClient = useQueryClient();
