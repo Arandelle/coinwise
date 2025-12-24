@@ -2,11 +2,17 @@ import { AIPrompt } from "@/app/types/AIPrompt";
 import { getToken } from "@/lib/getToken";
 
 
-export async function GET(){
+export async function GET(request: Request){
     try{
         const token = await getToken();
 
-        const response = await fetch(`${process.env.BACKEND_URL}/ai/conversation-history`, {
+        // Extract query params
+        const {searchParams} = new URL(request.url);
+
+        // Build query string
+        const queryString = searchParams.toString();
+
+        const response = await fetch(`${process.env.BACKEND_URL}/ai/conversation-history?${queryString}`, {
             method: "GET",
             headers: {
                 "Content-Type" : "application/json",
@@ -72,7 +78,7 @@ export async function DELETE(){
 
         if(!response.ok){
             const errorText = await response.text()
-            return new Response(errorText || "Error clearing conversation history", {status: response.status});
+            return Response.json({error: errorText || "Error clearing conversation"}, {status: response.status});
         }
         
         return new Response(null, {status: 204});
