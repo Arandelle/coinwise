@@ -6,24 +6,10 @@ import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useAiChat, useSendChat } from "../hooks/useAiChat";
-
-// Simple markdown parser for bold, italic, and line breaks
-// const parseMarkdown = (text: string) => {
-//   // Replace **bold** with <strong>
-//   let parsed = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-//   // Replace *italic* with <em>
-//   parsed = parsed.replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-//   // Replace bullet points • with proper formatting
-//   parsed = parsed.replace(/^• /gm, "• ");
-
-//   return parsed;
-// };
+import { useAiChatInfinite, useSendChat } from "../hooks/useAiChat";
 
 interface Message {
-  role: "user" | "assistant" | "model";
+  role: "user" | "assistant";
   content: string;
   time: string;
 }
@@ -33,66 +19,41 @@ interface UsageData {
   resetTime: number;
 }
 
-  // All available quick questions
-  const allQuickQuestions = [
-    // Budgeting
-    { text: "How do I create a budget?", icon: "💰", category: "budgeting" },
-    { text: "What's the 50/30/20 rule?", icon: "📊", category: "budgeting" },
-    {
-      text: "How to track monthly expenses?",
-      icon: "📝",
-      category: "tracking",
-    },
-    { text: "Tips for saving money", icon: "🤑", category: "saving" },
-
-    // Savings
-    {
-      text: "Best way to save for emergencies?",
-      icon: "🚨",
-      category: "saving",
-    },
-    { text: "How much should I save monthly?", icon: "💵", category: "saving" },
-    { text: "Where to keep emergency funds?", icon: "🏦", category: "saving" },
-    { text: "How to build a savings habit?", icon: "🎯", category: "saving" },
-
-    // Expenses
-    { text: "How to reduce daily expenses?", icon: "✂️", category: "expenses" },
-    { text: "What are needs vs wants?", icon: "🤔", category: "expenses" },
-    { text: "Track grocery spending tips", icon: "🛒", category: "expenses" },
-    {
-      text: "How to cut subscription costs?",
-      icon: "📱",
-      category: "expenses",
-    },
-
-    // Planning
-    { text: "How to set financial goals?", icon: "🎯", category: "planning" },
-    { text: "Plan for big purchases", icon: "🏠", category: "planning" },
-    { text: "Retirement savings tips", icon: "👴", category: "planning" },
-    { text: "Debt payment strategies", icon: "💳", category: "planning" },
-
-    // Filipino-specific
-    { text: "Paano mag-ipon ng pera?", icon: "🛒", category: "filipino" },
-    { text: "Budget tips for Pinoys", icon: "🔗", category: "filipino" },
-    { text: "Save money habang may utang", icon: "💡", category: "filipino" },
-    { text: "Emergency fund sa Pilipinas", icon: "✍", category: "filipino" },
-  ];
+const allQuickQuestions = [
+  { text: "How do I create a budget?", icon: "💰", category: "budgeting" },
+  { text: "What's the 50/30/20 rule?", icon: "📊", category: "budgeting" },
+  { text: "How to track monthly expenses?", icon: "📝", category: "tracking" },
+  { text: "Tips for saving money", icon: "🤑", category: "saving" },
+  { text: "Best way to save for emergencies?", icon: "🚨", category: "saving" },
+  { text: "How much should I save monthly?", icon: "💵", category: "saving" },
+  { text: "Where to keep emergency funds?", icon: "🏦", category: "saving" },
+  { text: "How to build a savings habit?", icon: "🎯", category: "saving" },
+  { text: "How to reduce daily expenses?", icon: "✂️", category: "expenses" },
+  { text: "What are needs vs wants?", icon: "🤔", category: "expenses" },
+  { text: "Track grocery spending tips", icon: "🛒", category: "expenses" },
+  { text: "How to cut subscription costs?", icon: "📱", category: "expenses" },
+  { text: "How to set financial goals?", icon: "🎯", category: "planning" },
+  { text: "Plan for big purchases", icon: "🏠", category: "planning" },
+  { text: "Retirement savings tips", icon: "👴", category: "planning" },
+  { text: "Debt payment strategies", icon: "💳", category: "planning" },
+  { text: "Paano mag-ipon ng pera?", icon: "🛒", category: "filipino" },
+  { text: "Budget tips for Pinoys", icon: "🔗", category: "filipino" },
+  { text: "Save money habang may utang", icon: "💡", category: "filipino" },
+  { text: "Emergency fund sa Pilipinas", icon: "✍", category: "filipino" },
+];
 
 const AIChatWidget = () => {
   const GUEST_MESSAGE_LIMIT = 10;
-  const RESET_INTERVAL = 60 * 60 * 1000; // 60 minutes in ms
-  const MESSAGES_PER_PAGE = 10;
+  const RESET_INTERVAL = 60 * 60 * 1000;
   const MAX_MESSAGE_LENGTH = 300;
 
-  const {data: conversationData, isLoading: isConversationLoading} = useAiChat();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useAiChatInfinite();
   const sendChatMutation = useSendChat();
 
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [visibleCount, setVisibleCount] = useState(MESSAGES_PER_PAGE);
   const [userInput, setUserInput] = useState("");
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [, setUsageCount] = useState<number>(0);
   const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
@@ -101,59 +62,12 @@ const AIChatWidget = () => {
 
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [showQuickQuestions, setShowQuickQuestions] = useState(true);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
-  const isUserScrollingRef = useRef(false);
-  const lastMessageCountRef = useRef(0);
-
-  const visibleMessages = messages.slice(-visibleCount);
-  const hasMoreMessages = messages.length > visibleCount;
-
-  const handleScroll = () => {
-    if (!scrollRef.current || isLoadingMore || !hasMoreMessages) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-
-    // Track if user is manually scrolling
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-    isUserScrollingRef.current = !isNearBottom;
-
-    // If scrolled near top (within 100px), load more
-    if (scrollTop < 100) {
-      loadMoreMessages();
-    }
-  };
-
-  const loadMoreMessages = () => {
-    if (isLoadingMore || !hasMoreMessages) return;
-
-    setIsLoadingMore(true);
-
-    // Get current scroll position before loading
-    const currentScrollTop = scrollRef.current?.scrollTop || 0;
-    const currentScrollHeight = scrollRef.current?.scrollHeight || 0;
-
-    setTimeout(() => {
-      setVisibleCount((prev) =>
-        Math.min(prev + MESSAGES_PER_PAGE, messages.length)
-      );
-
-      // Wait for DOM to update, then maintain scroll position
-      setTimeout(() => {
-        if (scrollRef.current) {
-          const newScrollHeight = scrollRef.current.scrollHeight;
-          const heightDifference = newScrollHeight - currentScrollHeight;
-
-          // Keep user at the same visual position
-          scrollRef.current.scrollTop = currentScrollTop + heightDifference;
-        }
-        setIsLoadingMore(false);
-      }, 0);
-    }, 300);
-  };
+  const isFirstLoad = useRef(true);
+  const shouldScrollToBottom = useRef(false);
 
   const getUsageData = useCallback((): UsageData => {
     const stored = localStorage.getItem("guest_usage");
@@ -161,20 +75,16 @@ const AIChatWidget = () => {
 
     if (stored) {
       const data: UsageData = JSON.parse(stored);
-
       if (now >= data.resetTime) {
-        // reset usage
         const newData: UsageData = {
           count: 0,
           resetTime: now + RESET_INTERVAL,
         };
-
         localStorage.setItem("guest_usage", JSON.stringify(newData));
         return newData;
       }
       return data;
     } else {
-      // initialize new data
       const newData: UsageData = {
         count: 0,
         resetTime: now + RESET_INTERVAL,
@@ -197,7 +107,6 @@ const AIChatWidget = () => {
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  // update usage count
   const incrementData = () => {
     const currentData = getUsageData();
     const newData: UsageData = {
@@ -215,51 +124,65 @@ const AIChatWidget = () => {
   };
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    messageRef.current?.scrollIntoView({ behavior });
+    requestAnimationFrame(() => {
+      messageRef.current?.scrollIntoView({ behavior, block: "end" });
+    });
   };
 
+  // Convert infinite query data to messages - REVERSED ORDER (oldest first, newest last)
   useEffect(() => {
-    if (conversationData?.pages) {
-      const formattedMessages: Message[] = [];
-
-      conversationData.pages.forEach(page => {
-        page?.history.forEach((msg) => {
-          formattedMessages.push({
-            role: msg.role,
-            content: msg.content,
-            time: new Date(msg.timestamp).toLocaleString([], {
-              hour: "2-digit",
-              minute: "2-digit"
-            })
-          })
-        })
-      })
-
-      setMessages(formattedMessages);
-    }
-  }, [conversationData])
-
-  // Load messages once when component mounts
-  useEffect(() => {
-    const storedMessages = localStorage.getItem("guest_chat");
-    if (storedMessages) {
-      const parsed = JSON.parse(storedMessages);
-      setMessages(parsed);
-    } else {
-      setMessages([
-        {
-          role: "assistant",
-          content:
-            "Hi! I'm CoinWise AI, your personal finance agent. I can help you understand budgeting, savings strategies, and financial planning. What would you like to know?",
-          time: new Date().toLocaleString([], {
+    if (data?.pages) {
+      const allMessages: Message[] = [];
+      
+      // Pages come in order: [newest page, older page, oldest page]
+      // But we want to display: [oldest messages ... newest messages]
+      // So we reverse the pages array and flatten
+      const reversedPages = [...data.pages].reverse();
+      
+      reversedPages.forEach(page => {
+        const pageMessages = page.history.map((msg) => ({
+          role: msg.role === "model" ? "assistant" : msg.role,
+          content: msg.content,
+          time: new Date(msg.timestamp).toLocaleString([], {
             hour: "2-digit",
             minute: "2-digit",
           }),
-        },
-      ]);
-    }
+        }));
+        // Each page should also be reversed if backend sends newest first within page
+        allMessages.push(...pageMessages);
+      });
 
-    // Load and check usage
+      setMessages(allMessages);
+    }
+  }, [data]);
+
+  // Handle scroll to load more messages (when scrolling UP to top)
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current || isFetchingNextPage || !hasNextPage) return;
+
+    const { scrollTop } = scrollRef.current;
+
+    // If scrolled to top (within 50px), load MORE OLD messages
+    if (scrollTop < 50) {
+      // Save current scroll position
+      const previousScrollHeight = scrollRef.current.scrollHeight;
+      const previousScrollTop = scrollRef.current.scrollTop;
+      
+      fetchNextPage().then(() => {
+        // After new messages loaded, maintain scroll position
+        requestAnimationFrame(() => {
+          if (scrollRef.current) {
+            const newScrollHeight = scrollRef.current.scrollHeight;
+            const scrollDiff = newScrollHeight - previousScrollHeight;
+            scrollRef.current.scrollTop = previousScrollTop + scrollDiff;
+          }
+        });
+      });
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  // Initialize usage tracking
+  useEffect(() => {
     const usageData = getUsageData();
     setUsageCount(usageData.count);
     setResetTime(usageData.resetTime);
@@ -271,74 +194,45 @@ const AIChatWidget = () => {
     setIsInitialized(true);
   }, [getUsageData]);
 
-  // Scroll to bottom when chat opens
+  // Scroll to bottom on initial load and when chat opens
   useEffect(() => {
-    if (isOpen) {
-      scrollToBottom("auto");
+    if (isOpen && messages.length > 0 && isFirstLoad.current) {
+      setTimeout(() => {
+        scrollToBottom("auto");
+        isFirstLoad.current = false;
+      }, 100);
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length]);
 
-  // Save messages to localStorage whenever they change (after initial load)
+  // Scroll to bottom when new message is added (not when loading old messages)
   useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem("guest_chat", JSON.stringify(messages));
-    }
-  }, [messages, isInitialized]);
-
-  // Scroll to bottom when new message is added (not when loading more)
-  useEffect(() => {
-    if (messages.length > lastMessageCountRef.current && !isLoadingMore) {
+    if (shouldScrollToBottom.current) {
       scrollToBottom("smooth");
+      shouldScrollToBottom.current = false;
     }
-    lastMessageCountRef.current = messages.length;
-  }, [messages.length, isLoadingMore]);
+  }, [messages]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowTooltip(false), 10000);
     return () => clearTimeout(timer);
   }, []);
 
-  const callAIAPI = async (prompt: string): Promise<string> => {
-    try {
-      const response = await fetch("/api/chat-ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to get AI response");
-      }
-
-      const data = await response.json();
-
-      // Backend returns { "reply": "..." }
-      return data.reply || data.response || data.message || data;
-    } catch (error) {
-      console.error("AI API Error:", error);
-      throw error;
-    }
-  };
-
   const handleSendMessage = async () => {
     if (!userInput.trim() || isTyping || isGuestLimitReached) return;
 
-    // Check current usage
     const usageData = getUsageData();
     if (usageData.count >= GUEST_MESSAGE_LIMIT) {
       setIsGuestLimitReached(true);
       const limitMessage: Message = {
         role: "assistant",
-        content: `You've reached the free guest limit...`,
+        content: `You've reached the free guest limit. Please sign up or log in to continue chatting.`,
         time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
       };
       setMessages((prev) => [...prev, limitMessage]);
+      shouldScrollToBottom.current = true;
       return;
     }
 
@@ -352,11 +246,7 @@ const AIChatWidget = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-
-    // Expand visible count if needed to show new message
-    if (visibleCount < messages.length + 1) {
-      setVisibleCount(messages.length + 1);
-    }
+    shouldScrollToBottom.current = true;
 
     const currentInput = userInput;
     setUserInput("");
@@ -368,7 +258,7 @@ const AIChatWidget = () => {
     try {
       const aiResponseText = await sendChatMutation.mutateAsync({
         prompt: currentInput
-      })
+      });
 
       const aiMessage: Message = {
         role: "assistant",
@@ -380,25 +270,20 @@ const AIChatWidget = () => {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-
-      // Expand visible count for AI response too
-      if (visibleCount < messages.length + 2) {
-        setVisibleCount(messages.length + 2);
-      }
+      shouldScrollToBottom.current = true;
     } catch (error) {
-      setError(
-        `Sorry, I'm having trouble connecting right now. Please try again.${error}`
-      );
+      setError(`Sorry, I'm having trouble connecting right now. Please try again.`);
 
       const errorMessage: Message = {
         role: "assistant",
-        content: "I apologize, but I'm experiencing technical difficulties...",
+        content: "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
         time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
       };
       setMessages((prev) => [...prev, errorMessage]);
+      shouldScrollToBottom.current = true;
     } finally {
       setIsTyping(false);
     }
@@ -408,26 +293,15 @@ const AIChatWidget = () => {
     setUserInput(question);
   };
 
-  // const handleKeyPress = (e: React.KeyboardEvent) => {
-  //   if (e.key === "Enter" && !e.shiftKey) {
-  //     e.preventDefault();
-  //     handleSendMessage();
-  //   }
-  // };
-
   const [currentQuestions, setCurrentQuestions] = useState<
-    Array<{ text: string; icon: React.ReactNode }>
+    Array<{ text: string; icon: string; category: string }>
   >([]);
 
-  // Get random 4 questions based on current hour
   const getRotatedQuestions = useCallback(() => {
     const now = new Date();
     const currentHour = now.getMilliseconds();
-
-    // Use hour as seed for consistent questions within the hour
     const seed = currentHour;
 
-    // Shuffle array based on seed
     const shuffled = [...allQuickQuestions].sort((a, b) => {
       const hashA = (seed * 31 + a.text.length) % allQuickQuestions.length;
       const hashB = (seed * 31 + b.text.length) % allQuickQuestions.length;
@@ -437,18 +311,15 @@ const AIChatWidget = () => {
     return shuffled.slice(0, 4);
   }, []);
 
-  // Initialize and update questions every hour
   useEffect(() => {
     const updateQuestions = () => {
       setCurrentQuestions(getRotatedQuestions());
     };
-    // Set initial questions
     updateQuestions();
   }, [getRotatedQuestions]);
 
   return (
     <div className="fixed bottom-6 right-0 md:right-6 z-50">
-      {/* Chat button */}
       {!isOpen && (
         <button
           onClick={() => {
@@ -489,10 +360,8 @@ const AIChatWidget = () => {
         </button>
       )}
 
-      {/* Chat window */}
       {isOpen && (
         <div className="bg-white rounded-2xl shadow-2xl md:w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 place-self-center mx-4">
-          {/* Chat Header */}
           <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -517,7 +386,6 @@ const AIChatWidget = () => {
             </button>
           </div>
 
-          {/* Error banner */}
           {error && (
             <div className="bg-red-50 border-b border-red-200 px-4 py-2">
               <p className="text-xs text-red-600">{error}</p>
@@ -576,15 +444,30 @@ const AIChatWidget = () => {
             </div>
           )}
 
-          {/* Chat Body - Messages */}
           <div
             ref={scrollRef}
             onScroll={handleScroll}
             className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
           >
-            {/* Loading indicator */}
-            {(isLoadingMore || isConversationLoading) && (
+            {hasNextPage && !isFetchingNextPage && (
               <div className="flex justify-center mb-4">
+                <div className="px-4 py-2 bg-blue-100 rounded-lg text-xs text-blue-700 font-medium">
+                  ↑ Scroll up to load older messages
+                </div>
+              </div>
+            )}
+
+            {isFetchingNextPage && (
+              <div className="flex justify-center mb-4">
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
+                  <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  Loading older messages...
+                </div>
+              </div>
+            )}
+
+            {isLoading && messages.length === 0 && (
+              <div className="flex justify-center items-center h-full">
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
                   <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
                   Loading messages...
@@ -592,17 +475,7 @@ const AIChatWidget = () => {
               </div>
             )}
 
-            {/* Show message count */}
-            {hasMoreMessages && !isLoadingMore && (
-              <div className="flex justify-center mb-4">
-                <div className="px-4 py-2 bg-slate-100 rounded-lg text-xs text-slate-600">
-                  Showing {visibleCount} of {messages.length} messages • Scroll
-                  up to load more
-                </div>
-              </div>
-            )}
-
-            {visibleMessages.map((msg, index) => (
+            {messages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex ${
@@ -712,9 +585,7 @@ const AIChatWidget = () => {
             </div>
           )}
 
-          {/* Input */}
           <div className="p-4 space-y-2 bg-white border-t border-slate-200">
-            {/* Character counter */}
             {userInput.length > 0 && (
               <div
                 className={`text-xs ${
@@ -734,7 +605,6 @@ const AIChatWidget = () => {
                 value={userInput}
                 onChange={(e) => {
                   setUserInput(e.target.value);
-                  // Auto-resize
                   e.target.style.height = "auto";
                   e.target.style.height =
                     Math.min(e.target.scrollHeight, 150) + "px";
