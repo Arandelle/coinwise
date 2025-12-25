@@ -245,7 +245,7 @@ export default function GenerateInsightButton({
         </p>
         <button
           onClick={handleGenerate}
-          className="text-sm font-medium bg-white text-slate-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-slate-50 hover:gap-3 hover:font-bold transition-all cursor-pointer shadow-sm hover:shadow w-full"
+          className="text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:gap-3 hover:font-bold transition-all cursor-pointer shadow-sm hover:shadow w-full"
         >
           <Sparkle size={16} />
           Generate Insights
