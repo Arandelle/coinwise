@@ -165,7 +165,7 @@ const AIChatWidget = () => {
     // If scrolled to top (within 50px), load MORE OLD messages
     if (scrollTop < 50) {
       // Save current scroll position
-      const previousScrollHeight = scrollRef.current.scrollHeight;
+      const previousScrollHeight = scrollRef.current.scrollHeight - 20;
       const previousScrollTop = scrollRef.current.scrollTop;
       
       fetchNextPage().then(() => {
@@ -478,12 +478,12 @@ const AIChatWidget = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${
+                className={`flex pb-4 ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 overflow-x-auto ${
+                  className={`max-w-[95%] rounded-2xl px-4 py-3 overflow-x-auto ${
                     msg.role === "user"
                       ? "bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white rounded-br-none"
                       : "bg-white text-slate-800 rounded-bl-none shadow-md"
