@@ -1,6 +1,5 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { apiFetch } from "./useApi";
-import { useUser } from "./useUser";
 
 interface AiChatResponse {
     reply: string;
@@ -10,6 +9,7 @@ interface AiChatResponse {
 interface SendChatPayload {
     prompt: string
 }
+
 interface ConversationHistory {
     history: Array<{
         role: "user" | "model" | "assistant";
@@ -21,30 +21,36 @@ interface ConversationHistory {
     has_more: boolean,
     page: number,
     total_pages: number,
-    skip?: number, // number of skip used
-    limit?: number // limit per page
+    skip?: number,
+    limit?: number
 }
 
-export function useAiChat() {
+// New infinite query hook for pagination
+export function useAiChatInfinite(){
     return useInfiniteQuery<ConversationHistory>({
-        queryKey: ["ai_chat"],
+        queryKey: ["ai_chat_infinite"],
         queryFn: async ({ pageParam = 0 }) => {
-            const limit = 20;
-            const skip = pageParam as number;
-            return apiFetch(`/api/chat-ai?limit=${limit}&skip=${skip}`);
+            return apiFetch(`/api/chat-ai?skip=${pageParam}&limit=20`);
+        },
+        getNextPageParam: (lastPage) => {
+            if (lastPage.has_more) {
+                return (lastPage.skip || 0) + (lastPage.limit || 20);
+            }
+            return undefined;
         },
         initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages) => {
-            if (!lastPage.has_more) return undefined;
-            // Calculate total messages loaded so far
-            const totalLoaded = allPages.reduce((sum, page) => sum + page.count, 0);
-            return totalLoaded;
-        },
-        staleTime: 5 * 60 * 1000,
-        retry: false,
+        staleTime: 10 * 60 * 1000
     });
 }
 
+// Keep the original for backward compatibility if needed
+export function useAiChat(){
+    return useQuery<ConversationHistory>({
+        queryKey: ["ai_chat"],
+        queryFn: async () => apiFetch("/api/chat-ai?limit=20&skip=0"),
+        staleTime: 10 * 60 * 1000
+    })
+}
 
 export function useSendChat(){
     const queryClient = useQueryClient();
@@ -58,7 +64,9 @@ export function useSendChat(){
             body: JSON.stringify(payload)
         }),
         onSuccess: () => {
+            // Invalidate both query keys
             queryClient.invalidateQueries({queryKey: ["ai_chat"]});
+            queryClient.invalidateQueries({queryKey: ["ai_chat_infinite"]});
         },
         onError: (error) => {
             console.error("Error sending AI chat message:", error);
@@ -75,7 +83,8 @@ export function useClearAiChat(){
             method: "DELETE",
         }),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["ai_chat"]})
+            queryClient.invalidateQueries({ queryKey: ["ai_chat"]});
+            queryClient.invalidateQueries({ queryKey: ["ai_chat_infinite"]});
         }
     })
 }
