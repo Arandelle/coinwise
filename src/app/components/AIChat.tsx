@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Send, X } from "lucide-react";
 import Image from "next/image";
@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAiChatInfinite, useSendChat } from "../hooks/useAiChat";
+import { useUser } from "../hooks/useUser";
 
 interface Message {
   role: "user" | "assistant";
@@ -47,8 +48,10 @@ const AIChatWidget = () => {
   const RESET_INTERVAL = 60 * 60 * 1000;
   const MAX_MESSAGE_LENGTH = 300;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useAiChatInfinite();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useAiChatInfinite();
   const sendChatMutation = useSendChat();
+  const { data: user } = useUser();
 
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +60,6 @@ const AIChatWidget = () => {
 
   const [, setUsageCount] = useState<number>(0);
   const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [resetTime, setResetTime] = useState<number>(0);
 
   const [isTyping, setIsTyping] = useState(false);
@@ -133,13 +135,13 @@ const AIChatWidget = () => {
   useEffect(() => {
     if (data?.pages) {
       const allMessages: Message[] = [];
-      
+
       // Pages come in order: [newest page, older page, oldest page]
       // But we want to display: [oldest messages ... newest messages]
       // So we reverse the pages array and flatten
       const reversedPages = [...data.pages].reverse();
-      
-      reversedPages.forEach(page => {
+
+      reversedPages.forEach((page) => {
         const pageMessages = page.history.map((msg) => ({
           role: msg.role === "model" ? "assistant" : msg.role,
           content: msg.content,
@@ -167,7 +169,7 @@ const AIChatWidget = () => {
       // Save current scroll position
       const previousScrollHeight = scrollRef.current.scrollHeight - 20;
       const previousScrollTop = scrollRef.current.scrollTop;
-      
+
       fetchNextPage().then(() => {
         // After new messages loaded, maintain scroll position
         requestAnimationFrame(() => {
@@ -190,8 +192,6 @@ const AIChatWidget = () => {
     if (usageData.count >= GUEST_MESSAGE_LIMIT) {
       setIsGuestLimitReached(true);
     }
-
-    setIsInitialized(true);
   }, [getUsageData]);
 
   // Scroll to bottom on initial load and when chat opens
@@ -257,7 +257,7 @@ const AIChatWidget = () => {
 
     try {
       const aiResponseText = await sendChatMutation.mutateAsync({
-        prompt: currentInput
+        prompt: currentInput,
       });
 
       const aiMessage: Message = {
@@ -272,11 +272,14 @@ const AIChatWidget = () => {
       setMessages((prev) => [...prev, aiMessage]);
       shouldScrollToBottom.current = true;
     } catch (error) {
-      setError(`Sorry, I'm having trouble connecting right now. Please try again.`);
+      setError(
+        `Sorry, I'm having trouble connecting right now. Please try again.`
+      );
 
       const errorMessage: Message = {
         role: "assistant",
-        content: "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
+        content:
+          "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
         time: new Date().toLocaleString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -362,7 +365,7 @@ const AIChatWidget = () => {
 
       {isOpen && (
         <div className="bg-white rounded-2xl shadow-2xl md:w-96 h-[600px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 place-self-center mx-4">
-          <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white p-4 flex items-center justify-between">
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Image
@@ -478,14 +481,14 @@ const AIChatWidget = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex pb-4 ${
+                className={`flex ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 <div
-                  className={`max-w-[95%] rounded-2xl px-4 py-3 overflow-x-auto ${
+                  className={`max-w-[95%] text-sm rounded-2xl px-4 py-3 overflow-x-auto ${
                     msg.role === "user"
-                      ? "bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-300 text-white rounded-br-none"
+                      ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-br-none"
                       : "bg-white text-slate-800 rounded-bl-none shadow-md"
                   }`}
                 >
@@ -616,7 +619,7 @@ const AIChatWidget = () => {
                   }
                 }}
                 placeholder="Ask CoinWise AI."
-                className="w-full px-4 py-3 pr-24 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto"
+                className="w-full px-4 py-3 pr-24 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none overflow-y-auto"
                 style={{ minHeight: "52px", maxHeight: "200px" }}
                 rows={1}
                 maxLength={MAX_MESSAGE_LENGTH}
@@ -640,15 +643,17 @@ const AIChatWidget = () => {
                 <Send size={20} />
               </button>
             </div>
-            <p className="text-xs text-slate-400 mt-2 text-center">
-              Not authenticated •{" "}
-              <Link
-                href={"/login"}
-                className="text-emerald-500 hover:underline font-medium"
-              >
-                Login for full features
-              </Link>
-            </p>
+            {!user && (
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                Not authenticated •{" "}
+                <Link
+                  href={"/login"}
+                  className="text-emerald-500 hover:underline font-medium"
+                >
+                  Login for full features
+                </Link>
+              </p>
+            )}
           </div>
         </div>
       )}
