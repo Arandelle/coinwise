@@ -48,10 +48,12 @@ const AIChatWidget = () => {
   const RESET_INTERVAL = 60 * 60 * 1000;
   const MAX_MESSAGE_LENGTH = 300;
 
+  const { isAuthenticated } = useUser();
+  
+  // Pass isAuthenticated to the hook
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useAiChatInfinite();
+    useAiChatInfinite(isAuthenticated);
   const sendChatMutation = useSendChat();
-  const { data: user } = useUser();
 
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -72,6 +74,11 @@ const AIChatWidget = () => {
   const shouldScrollToBottom = useRef(false);
 
   const getUsageData = useCallback((): UsageData => {
+    if (isAuthenticated) {
+      // Authenticated users don't have limits
+      return { count: 0, resetTime: 0 };
+    }
+
     const stored = localStorage.getItem("guest_usage");
     const now = Date.now();
 
@@ -94,7 +101,7 @@ const AIChatWidget = () => {
       localStorage.setItem("guest_usage", JSON.stringify(newData));
       return newData;
     }
-  }, [RESET_INTERVAL]);
+  }, [RESET_INTERVAL, isAuthenticated]);
 
   const getTimeRemaining = () => {
     const now = Date.now();
@@ -110,6 +117,8 @@ const AIChatWidget = () => {
   };
 
   const incrementData = () => {
+    if (isAuthenticated) return; // No limit for authenticated users
+
     const currentData = getUsageData();
     const newData: UsageData = {
       count: currentData.count + 1,
@@ -133,7 +142,7 @@ const AIChatWidget = () => {
 
   // Convert infinite query data to messages - REVERSED ORDER (oldest first, newest last)
   useEffect(() => {
-    if (data?.pages) {
+    if (data?.pages && isAuthenticated) {
       const allMessages: Message[] = [];
 
       // Pages come in order: [newest page, older page, oldest page]
@@ -150,28 +159,31 @@ const AIChatWidget = () => {
             minute: "2-digit",
           }),
         }));
-        // Each page should also be reversed if backend sends newest first within page
         allMessages.push(...pageMessages);
       });
 
       setMessages(allMessages);
+    } else if (!isAuthenticated) {
+      // For guests, check localStorage for messages
+      const storedMessages = localStorage.getItem("guest_messages");
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages));
+      }
     }
-  }, [data]);
+  }, [data, isAuthenticated]);
 
   // Handle scroll to load more messages (when scrolling UP to top)
   const handleScroll = useCallback(() => {
-    if (!scrollRef.current || isFetchingNextPage || !hasNextPage) return;
+    if (!scrollRef.current || isFetchingNextPage || !hasNextPage || !isAuthenticated) return;
 
     const { scrollTop } = scrollRef.current;
 
     // If scrolled to top (within 50px), load MORE OLD messages
     if (scrollTop < 50) {
-      // Save current scroll position
       const previousScrollHeight = scrollRef.current.scrollHeight - 20;
       const previousScrollTop = scrollRef.current.scrollTop;
 
       fetchNextPage().then(() => {
-        // After new messages loaded, maintain scroll position
         requestAnimationFrame(() => {
           if (scrollRef.current) {
             const newScrollHeight = scrollRef.current.scrollHeight;
@@ -181,7 +193,7 @@ const AIChatWidget = () => {
         });
       });
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isAuthenticated]);
 
   // Initialize usage tracking
   useEffect(() => {
@@ -189,10 +201,10 @@ const AIChatWidget = () => {
     setUsageCount(usageData.count);
     setResetTime(usageData.resetTime);
 
-    if (usageData.count >= GUEST_MESSAGE_LIMIT) {
+    if (!isAuthenticated && usageData.count >= GUEST_MESSAGE_LIMIT) {
       setIsGuestLimitReached(true);
     }
-  }, [getUsageData]);
+  }, [getUsageData, isAuthenticated]);
 
   // Scroll to bottom on initial load and when chat opens
   useEffect(() => {
@@ -204,13 +216,20 @@ const AIChatWidget = () => {
     }
   }, [isOpen, messages.length]);
 
-  // Scroll to bottom when new message is added (not when loading old messages)
+  // Scroll to bottom when new message is added
   useEffect(() => {
     if (shouldScrollToBottom.current) {
       scrollToBottom("smooth");
       shouldScrollToBottom.current = false;
     }
   }, [messages]);
+
+  // Save guest messages to localStorage
+  useEffect(() => {
+    if (!isAuthenticated && messages.length > 0) {
+      localStorage.setItem("guest_messages", JSON.stringify(messages));
+    }
+  }, [messages, isAuthenticated]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowTooltip(false), 10000);
@@ -220,20 +239,23 @@ const AIChatWidget = () => {
   const handleSendMessage = async () => {
     if (!userInput.trim() || isTyping || isGuestLimitReached) return;
 
-    const usageData = getUsageData();
-    if (usageData.count >= GUEST_MESSAGE_LIMIT) {
-      setIsGuestLimitReached(true);
-      const limitMessage: Message = {
-        role: "assistant",
-        content: `You've reached the free guest limit. Please sign up or log in to continue chatting.`,
-        time: new Date().toLocaleString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages((prev) => [...prev, limitMessage]);
-      shouldScrollToBottom.current = true;
-      return;
+    // Check guest limit
+    if (!isAuthenticated) {
+      const usageData = getUsageData();
+      if (usageData.count >= GUEST_MESSAGE_LIMIT) {
+        setIsGuestLimitReached(true);
+        const limitMessage: Message = {
+          role: "assistant",
+          content: `You've reached the free guest limit. Please sign up or log in to continue chatting.`,
+          time: new Date().toLocaleString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+        setMessages((prev) => [...prev, limitMessage]);
+        shouldScrollToBottom.current = true;
+        return;
+      }
     }
 
     const userMessage: Message = {
@@ -395,7 +417,7 @@ const AIChatWidget = () => {
             </div>
           )}
 
-          {isGuestLimitReached && (
+          {isGuestLimitReached && !isAuthenticated && (
             <div className="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 shadow-sm">
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 mb-2">
@@ -452,7 +474,7 @@ const AIChatWidget = () => {
             onScroll={handleScroll}
             className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
           >
-            {hasNextPage && !isFetchingNextPage && (
+            {isAuthenticated && hasNextPage && !isFetchingNextPage && (
               <div className="flex justify-center mb-4">
                 <div className="px-4 py-2 bg-blue-100 rounded-lg text-xs text-blue-700 font-medium">
                   ↑ Scroll up to load older messages
@@ -469,7 +491,7 @@ const AIChatWidget = () => {
               </div>
             )}
 
-            {isLoading && messages.length === 0 && (
+            {isLoading && messages.length === 0 && isAuthenticated && (
               <div className="flex justify-center items-center h-full">
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-600">
                   <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
@@ -618,7 +640,7 @@ const AIChatWidget = () => {
                     handleSendMessage();
                   }
                 }}
-                placeholder="Ask CoinWise AI."
+                placeholder="Ask CoinWise AI..."
                 className="w-full px-4 py-3 pr-24 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none overflow-y-auto"
                 style={{ minHeight: "52px", maxHeight: "200px" }}
                 rows={1}
@@ -643,14 +665,14 @@ const AIChatWidget = () => {
                 <Send size={20} />
               </button>
             </div>
-            {!user && (
+            {!isAuthenticated && (
               <p className="text-xs text-slate-400 mt-2 text-center">
-                Not authenticated •{" "}
+                Guest mode •{" "}
                 <Link
                   href={"/login"}
                   className="text-emerald-500 hover:underline font-medium"
                 >
-                  Login for full features
+                  Login for unlimited messages
                 </Link>
               </p>
             )}
