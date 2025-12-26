@@ -159,7 +159,7 @@ const TransactionsSection: React.FC<TransactionsSectionProps> = ({
             onClick={onAddClick}
             className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-2 rounded-md hover:shadow-lg transition-shadow cursor-pointer"
           >
-            New<Plus size={16} />
+            <Plus size={16} />
           </button>
         </div>
 
