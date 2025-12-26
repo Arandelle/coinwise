@@ -21,5 +21,6 @@ export function useUser() {
     isAuthenticated: !!query.data,
     isLoading: query.isLoading,
     error: query.error,
+    refetch: query.refetch
   };
 }

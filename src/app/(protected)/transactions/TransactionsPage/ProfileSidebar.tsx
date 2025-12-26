@@ -13,8 +13,8 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 }) => {
 
   const {data: account} = useWallet();
-  const {data: user} = useUser();
-  const {data: summary} = useTransactionSummary(!user, undefined);
+  const {user} = useUser();
+  const {data: summary} = useTransactionSummary();
   
   const hasIncome = totalSpent > 0;
   const remaining = (account?.[0]?.balance ?? 0) + (totalSpent ?? 0);

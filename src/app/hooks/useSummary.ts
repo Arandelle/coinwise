@@ -166,12 +166,12 @@ export function useGuestSummary(filters?: Summary) {
 
 
 // Unified summary hook
-export function useTransactionSummary( guestMode?: boolean, filters?: Summary){
-    const {data: user} = useUser(guestMode ? { guestMode: true} : undefined);
+export function useTransactionSummary(filters?: Summary){
+    const {isAuthenticated} = useUser();
     const authQuery = useSummary(filters);
     const guestQuery = useGuestSummary(filters);
 
-    if (!user){
+    if (!isAuthenticated){
         return guestQuery;
     } 
 

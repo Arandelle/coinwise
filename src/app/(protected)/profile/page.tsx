@@ -9,7 +9,7 @@ import { useLogout } from "@/app/hooks/useLogout";
 import BackgroundLayout from "@/app/components/ReusableComponent/BackgroundLayout";
 
 export default function CoinWiseProfile() {
-  const { data: user, isLoading } = useUser();
+  const { user, isLoading } = useUser();
   const { logout } = useLogout();
   const router = useRouter();
 

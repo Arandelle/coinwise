@@ -190,7 +190,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
 };
 
 export default function CoinWiseCalendar() {
-  const { data: user, refetch } = useUser();
+  const { user, refetch } = useUser();
   const deleteMutation = useDeleteTransaction();
   
   const { data: transactionsData, isLoading: isLoadingTransactions } = useTransactions({
