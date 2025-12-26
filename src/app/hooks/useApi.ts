@@ -77,7 +77,7 @@ export async function apiFetch<T>(
 // CATEGORIES
 // ============================================
 export function useGroupWithCategories() {
-  const { data: user } = useUser();
+  const { isAuthenticated} = useUser();
   const guestQuery = useGuestCategories();
 
   const apiQuery = useQuery({
@@ -85,11 +85,11 @@ export function useGroupWithCategories() {
     queryFn: () =>
       apiFetch<GroupWithCategories[]>("/api/group-with-categories"),
     staleTime: 10 * 60 * 1000, // Categories rarely change, cache for 10 min
-    enabled: !!user, // only fetch when user is logged in
+    enabled: isAuthenticated, // only fetch when user is logged in
   });
 
   // Return guest data if no user, otherwise return API data
-  if (!user) {
+  if (!isAuthenticated) {
     return guestQuery;
   }
 
@@ -105,16 +105,16 @@ export function useCategory() {
 }
 
 export function useCategoryGroups() {
-  
-  const { data: user } = useUser();
+
+  const { isAuthenticated } = useUser();
   const guestQuery = useGuestCategoryGroups();
   const apiQuery = useQuery({
     queryKey: ["category_group"],
     queryFn: () => apiFetch<CategoryGroup[]>("/api/category-groups"),
     staleTime: 10 * 60 * 1000,
-    enabled: !!user,
+    enabled: isAuthenticated,
   });
-  if (!user) {
+  if (!isAuthenticated) {
     return guestQuery;
   }
 
@@ -144,7 +144,7 @@ export function useTopCategories() {
 }
 
 export function useCreateCategory() {
-  const { data: user } = useUser();
+  const { isAuthenticated } = useUser();
   const queryClient = useQueryClient();
   const guestMutation = useCreateGuestCategory();
 
@@ -164,7 +164,7 @@ export function useCreateCategory() {
 
   return useMutation({
     mutationFn: async (newCategory: Omit<Category, "_id">) => {
-      if (!user) {
+      if (!isAuthenticated) {
         return await guestMutation.mutateAsync(newCategory);
       }
       return await apiMutation.mutateAsync(newCategory);

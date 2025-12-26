@@ -141,11 +141,11 @@ export function useUserTransactions(filters?: TransactionFilters) {
 
 // Wrapper hook that chooses the right one
 export function useTransactions(filters?: TransactionFilters, guestMode?: boolean) {
-  const { data: user } = useUser(guestMode ? { guestMode: true } : undefined);
+  const { isAuthenticated } = useUser();
   const guestQuery = useGuestTransactions(filters);
   const userQuery = useUserTransactions(filters);
 
-  if (!user) {
+  if (!isAuthenticated) {
     return guestQuery;
   }
 
@@ -332,7 +332,7 @@ export function useDeleteGuestTransaction() {
 
 // Universal create/update that works for both guest and logged-in users
 export function useUpsertTransaction() {
-  const { data: user } = useUser();
+  const { isAuthenticated } = useUser();
   const createMutation = useCreateTransaction();
   const updateMutation = useUpdateTransaction();
   const guestMutation = useGuestTransactionMutation();
@@ -346,7 +346,7 @@ export function useUpsertTransaction() {
       isEditing: boolean;
     }) => {
       // Guest user
-      if (!user) {
+      if (!isAuthenticated) {
         return await guestMutation.mutateAsync(transaction);
       }
 
@@ -372,13 +372,13 @@ export function useUpsertTransaction() {
 
 // Universal delete that works for both guest and logged-in users
 export function useUniversalDeleteTransaction() {
-  const { data: user } = useUser();
+  const { isAuthenticated } = useUser();
   const deleteMutation = useDeleteTransaction();
   const deleteGuestMutation = useDeleteGuestTransaction();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      if (!user) {
+      if (!isAuthenticated) {
         return await deleteGuestMutation.mutateAsync(id);
       }
       return await deleteMutation.mutateAsync(id);
