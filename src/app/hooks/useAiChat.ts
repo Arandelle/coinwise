@@ -9,6 +9,7 @@ import { apiFetch } from "./useApi";
 interface AiChatResponse {
   reply: string;
   history_count: number;
+  is_guest?: boolean
 }
 
 interface SendChatPayload {
