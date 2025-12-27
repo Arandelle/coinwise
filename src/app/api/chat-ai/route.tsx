@@ -1,5 +1,5 @@
 import { AIPrompt } from "@/app/types/AIPrompt";
-import { getToken } from "@/lib/getToken";
+import { getToken, getTokenOptional } from "@/lib/getToken";
 
 
 export async function GET(request: Request){
@@ -38,13 +38,14 @@ export async function POST(req: Request){
 
         const body : AIPrompt = await req.json();
 
-        const token = await getToken();
+        const token = await getTokenOptional();
+        const authToken = token || "guest"
 
         const response = await fetch(`${process.env.BACKEND_URL}/ai/coinwise-ai`, {
             method: "POST",
             headers: {
                 "Content-Type" : "application/json",
-                "Authorization" : `Bearer ${token}`
+                "Authorization" : `Bearer ${authToken}`
             },
             body: JSON.stringify(body)
         });
