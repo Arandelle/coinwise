@@ -13,6 +13,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   time: string;
+  model_used?: string;
 }
 
 interface UsageData {
@@ -158,6 +159,7 @@ const AIChatWidget = () => {
             hour: "2-digit",
             minute: "2-digit",
           }),
+          model_used: msg.model_used,
         }));
         allMessages.push(...pageMessages);
       });
@@ -554,6 +556,7 @@ const AIChatWidget = () => {
                         : "text-slate-400"
                     }`}
                   >
+                    {msg.model_used && `${msg.model_used} • `}
                     {msg.time}
                   </p>
                 </div>
