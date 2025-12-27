@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 
+// for protected routes
 export async function getToken() {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
@@ -10,4 +11,12 @@ export async function getToken() {
   }
 
   return token;
+}
+
+// for optional routes (guest or authenticated)
+export async function getTokenOptional(){
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
+
+  return token || null;
 }
