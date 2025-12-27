@@ -21,6 +21,7 @@ interface ConversationHistory {
     role: "user" | "model" | "assistant";
     content: string;
     timestamp: string;
+    model_used?: string;
   }>;
   count: number;
   total: number;
