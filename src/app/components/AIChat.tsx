@@ -50,7 +50,7 @@ const AIChatWidget = () => {
   const MAX_MESSAGE_LENGTH = 300;
 
   const { isAuthenticated } = useUser();
-  
+
   // Pass isAuthenticated to the hook
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useAiChatInfinite(isAuthenticated);
@@ -176,7 +176,13 @@ const AIChatWidget = () => {
 
   // Handle scroll to load more messages (when scrolling UP to top)
   const handleScroll = useCallback(() => {
-    if (!scrollRef.current || isFetchingNextPage || !hasNextPage || !isAuthenticated) return;
+    if (
+      !scrollRef.current ||
+      isFetchingNextPage ||
+      !hasNextPage ||
+      !isAuthenticated
+    )
+      return;
 
     const { scrollTop } = scrollRef.current;
 
@@ -502,66 +508,94 @@ const AIChatWidget = () => {
               </div>
             )}
 
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {messages.length === 0 && !isLoading && (
+              <div className="flex flex-col justify-center items-center h-full text-center px-6">
+                <div className="flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-4">
+                  <Image
+                    src={"/CoinwiseLogo_v7.png"}
+                    alt="Coinwise AI Logo"
+                    width={48}
+                    height={48}
+                    className="opacity-70"
+                  />
+                </div>
+
+                <h2 className="text-slate-700 font-semibold text-lg mb-1">
+                  Hi there👋
+                </h2>
+                <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+                  Ask me anything about your finances — spending, savings, or
+                  insights.
+                </p>
+
+                <span className="mt-4 text-xs text-slate-400 animate-pulse">
+                  Start typing below
+                </span>
+              </div>
+            )}
+
+            {
+              messages.map((msg, index) => (
                 <div
-                  className={`max-w-[95%] text-sm rounded-2xl px-4 py-3 overflow-x-auto ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-br-none"
-                      : "bg-white text-slate-800 rounded-bl-none shadow-md"
+                  key={index}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      p: ({ children }) => (
-                        <p className="leading-tight mb-1">{children}</p>
-                      ),
-                      strong: ({ children }) => (
-                        <strong className="font-semibold text-gray-900">
-                          {children}
-                        </strong>
-                      ),
-                      em: ({ children }) => (
-                        <em className="italic text-gray-700">{children}</em>
-                      ),
-                      a: ({ href, children }) => (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline hover:text-blue-800"
-                        >
-                          {children}
-                        </a>
-                      ),
-                      ul: ({ children }) => (
-                        <ul className="list-disc list-inside pl-2 space-y-1 text-gray-700">
-                          {children}
-                        </ul>
-                      ),
-                    }}
-                  >
-                    {msg.content}
-                  </ReactMarkdown>
-                  <p
-                    className={`text-xs mt-1 ${
+                  <div
+                    className={`max-w-[95%] text-sm rounded-2xl px-4 py-3 overflow-x-auto ${
                       msg.role === "user"
-                        ? "text-emerald-100"
-                        : "text-slate-400"
+                        ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-br-none"
+                        : "bg-white text-slate-800 rounded-bl-none shadow-md"
                     }`}
                   >
-                    {msg.model_used && `${msg.model_used} • `}
-                    {msg.time}
-                  </p>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => (
+                          <p className="leading-tight mb-1">{children}</p>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-gray-900">
+                            {children}
+                          </strong>
+                        ),
+                        em: ({ children }) => (
+                          <em className="italic text-gray-700">{children}</em>
+                        ),
+                        a: ({ href, children }) => (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline hover:text-blue-800"
+                          >
+                            {children}
+                          </a>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc list-inside pl-2 space-y-1 text-gray-700">
+                            {children}
+                          </ul>
+                        ),
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                    <p
+                      className={`text-xs mt-1 ${
+                        msg.role === "user"
+                          ? "text-emerald-100"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {msg.model_used && `${msg.model_used} • `}
+                      {msg.time}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            }
 
             {isTyping && (
               <div className="flex justify-start">
@@ -581,6 +615,7 @@ const AIChatWidget = () => {
               </div>
             )}
 
+            {/** Placeholder for future content */}
             <div ref={messageRef} />
           </div>
 
