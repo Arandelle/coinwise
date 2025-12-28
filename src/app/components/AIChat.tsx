@@ -509,7 +509,7 @@ const AIChatWidget = () => {
             )}
 
             {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col justify-center items-center h-full text-center px-6">
+              <div className="flex flex-col justify-center items-center text-center p-6">
                 <div className="flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-4">
                   <Image
                     src={"/CoinwiseLogo_v7.png"}
